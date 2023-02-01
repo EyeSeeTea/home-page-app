@@ -9,12 +9,19 @@ export const LandingLayout: React.FC<LandingPageProps> = ({
     onGoBack,
     onSettings,
     onAbout,
+    onLogout,
     centerChildren,
 }) => {
     return (
         <LandingWrapper center={centerChildren}>
             <LandingBody className={className}>
-                <LandingHeader onGoHome={onGoHome} onGoBack={onGoBack} onSettings={onSettings} onAbout={onAbout} />
+                <LandingHeader
+                    onGoHome={onGoHome}
+                    onGoBack={onGoBack}
+                    onSettings={onSettings}
+                    onAbout={onAbout}
+                    onLogout={onLogout}
+                />
                 {children}
             </LandingBody>
         </LandingWrapper>

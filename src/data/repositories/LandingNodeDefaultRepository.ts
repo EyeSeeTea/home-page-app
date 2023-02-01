@@ -35,7 +35,7 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
                     id: generateUid(),
                     parent: "none",
                     type: "root" as const,
-                    icon: "/img/logo-eyeseetea.png",
+                    icon: "img/logo-eyeseetea.png",
                     order: undefined,
                     name: {
                         key: "root-name",

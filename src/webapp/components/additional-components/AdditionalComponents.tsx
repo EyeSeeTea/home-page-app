@@ -19,7 +19,7 @@ export const AdditionalComponents: React.FC<{
 
     return (
         <React.Fragment>
-            {isRoot && showAllActions ? (
+            {isRoot && showAllActions && pageActions.length !== 0 ? (
                 <LandingParagraph size={28} align={"left"}>
                     {i18n.t("Available actions:")}
                 </LandingParagraph>

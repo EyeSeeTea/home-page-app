@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-08-18T07:31:24.239Z\n"
-"PO-Revision-Date: 2022-08-18T07:31:24.239Z\n"
+"POT-Creation-Date: 2023-01-25T08:32:54.299Z\n"
+"PO-Revision-Date: 2023-01-25T08:32:54.299Z\n"
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""
@@ -182,6 +182,9 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
+msgid "Logout"
+msgstr ""
+
 msgid "Field name is mandatory"
 msgstr ""
 
@@ -270,8 +273,8 @@ msgid "Distributed under GNU GLPv3"
 msgstr ""
 
 msgid ""
-"DHIS2 Home page App is a DHIS2 application that aims to provide direct "
-"links to Dhis2 applications."
+"Home page App is a DHIS2 application that aims to provide direct links to "
+"DHIS2 applications."
 msgstr ""
 
 msgid ""

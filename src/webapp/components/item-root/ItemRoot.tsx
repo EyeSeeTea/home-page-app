@@ -1,7 +1,7 @@
 import React from "react";
 import { LandingNode } from "../../../domain/entities/LandingNode";
 import { useAppContext } from "../../contexts/app-context";
-import { LogoContainer } from "../item/Item";
+import { LogoContainer, MarkdownContents } from "../item/Item";
 import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
 import { LandingContent, LandingTitle } from "../landing-layout";
@@ -25,6 +25,7 @@ export const ItemRoot: React.FC<{
             </LandingTitle>
 
             <LandingContent>
+                {currentPage.content ? <MarkdownContents source={translate(currentPage.content)} /> : null}
                 <Cardboard rowSize={4} key={`group-${currentPage.id}`}>
                     {currentPage.children.map((item, idx) => {
                         return (

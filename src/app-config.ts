@@ -1,5 +1,5 @@
 export const appConfig: AppConfig = {
-    appKey: "dhis2-home-page-app",
+    appKey: "home-page-app",
     appearance: {
         showShareButton: true,
     },

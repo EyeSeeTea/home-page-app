@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { Item } from "../../components/item/Item";
 
 export const HomePage: React.FC = React.memo(() => {
-    const { hasSettingsAccess, landings, reload, isLoading } = useAppContext();
+    const { hasSettingsAccess, landings, reload, isLoading, launchAppBaseUrl } = useAppContext();
     const navigate = useNavigate();
 
     const [history, updateHistory] = useState<LandingNode[]>([]);
@@ -36,6 +36,10 @@ export const HomePage: React.FC = React.memo(() => {
         updateHistory([]);
     }, []);
 
+    const logout = useCallback(() => {
+        window.location.href = `${launchAppBaseUrl}/dhis-web-commons-security/logout.action`;
+    }, [launchAppBaseUrl]);
+
     const currentPage = useMemo<LandingNode | undefined>(() => {
         return history[0] ?? landings[0];
     }, [history, landings]);
@@ -58,6 +62,7 @@ export const HomePage: React.FC = React.memo(() => {
             onAbout={openAbout}
             onGoBack={!isRoot ? goBack : undefined}
             onGoHome={!isRoot ? goHome : undefined}
+            onLogout={logout}
             centerChildren={true}
         >
             <ContentWrapper>
