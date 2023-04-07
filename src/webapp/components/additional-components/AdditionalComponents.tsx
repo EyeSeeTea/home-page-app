@@ -17,21 +17,28 @@ export const AdditionalComponents: React.FC<{
 
     const pageActions = isRoot && showAllActions ? actions.map(({ id }) => id) : currentPage?.actions ?? [];
 
+    const rowSize = actions.length === 3 ? 3 : 4;
+
     return (
         <React.Fragment>
-            {isRoot && showAllActions ? (
+            {isRoot && showAllActions && pageActions.length !== 0 ? (
                 <LandingParagraph size={28} align={"left"}>
                     {i18n.t("Available actions:")}
                 </LandingParagraph>
             ) : null}
 
-            <Cardboard rowSize={4} key={`group-${currentPage.id}`}>
+            <Cardboard rowSize={rowSize} key={`group-${currentPage.id}`}>
                 {pageActions.map(actionId => {
                     const action = actions.find(({ id }) => id === actionId);
                     if (!action || !action.compatible) return null;
 
                     const handleClick = () => {
-                        window.location.href = `${launchAppBaseUrl}${action.dhisLaunchUrl}`;
+                        if (
+                            action.dhisLaunchUrl.indexOf("http://") === 0 ||
+                            action.dhisLaunchUrl.indexOf("https://") === 0
+                        )
+                            window.location.href = `${action.dhisLaunchUrl}`;
+                        else window.location.href = `${launchAppBaseUrl}${action.dhisLaunchUrl}`;
                     };
 
                     const name = translate(action.name);
@@ -43,6 +50,10 @@ export const AdditionalComponents: React.FC<{
                             onClick={handleClick}
                             disabled={action?.disabled}
                             icon={action?.icon ? <img src={action.icon} alt={`Icon for ${name}`} /> : undefined}
+                            iconLocation={action?.iconLocation}
+                            backgroundColor={action?.backgroundColor}
+                            fontColor={action?.fontColor}
+                            textAlignment={action?.textAlignment}
                         />
                     );
                 })}

@@ -11,7 +11,7 @@ const AppContext = React.createContext<AppContextState | null>(null);
 
 export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children, compositionRoot, locale }) => {
     const [actions, setActions] = useState<Action[]>([]);
-    const [landings, setLandings] = useState<LandingNode[]>([]);
+    const [landings, setLandings] = useState<LandingNode[] | undefined>();
     const [hasSettingsAccess, setHasSettingsAccess] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
 
@@ -90,7 +90,7 @@ export interface AppContextProviderProps {
 
 export interface AppContextState {
     actions: Action[];
-    landings: LandingNode[];
+    landings: LandingNode[] | undefined;
     compositionRoot: CompositionRoot;
     translate: TranslateMethod;
     reload: ReloadMethod;

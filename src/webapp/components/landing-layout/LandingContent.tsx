@@ -6,7 +6,11 @@ const LandingContentBase: React.FC<LandingContentProps> = ({ className, children
     const ref = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        if (ref.current) ref.current.scrollTop = 0;
+        if (ref.current)
+            window.scrollTo({
+                top: 0,
+                behavior: "auto",
+            });
     }, [children]);
 
     return (
@@ -19,14 +23,12 @@ const LandingContentBase: React.FC<LandingContentProps> = ({ className, children
 };
 
 export const LandingContent = styled(LandingContentBase)`
-    min-height: 100vh;
-    background-color: #276696;
     padding: 0px 15px;
 
     margin: 0;
     overflow-x: hidden;
-    overflow-y: scroll;
-    overflow-y: overlay;
+    // overflow-y: scroll;
+    // overflow-y: overlay;
     scrollbar-width: thin;
     scrollbar-color: #fff #6894b5;
 

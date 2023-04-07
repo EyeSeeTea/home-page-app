@@ -1,5 +1,5 @@
 import { ConfirmationDialog, ConfirmationDialogProps, useLoading, useSnackbar } from "@eyeseetea/d2-ui-components";
-import { FormGroup, Icon, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import { Button, FormGroup, Icon, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { NamedRef } from "../../../domain/entities/Ref";
@@ -13,10 +13,18 @@ import { useAppContext } from "../../contexts/app-context";
 import { DhisLayout } from "../../components/dhis-layout/DhisLayout";
 import { useNavigate } from "react-router-dom";
 import { useConfig } from "./useConfig";
+import TextFieldOnBlur from "../../components/form/TextFieldOnBlur";
 
 export const SettingsPage: React.FC = () => {
     const { actions, landings, reload, compositionRoot, isLoading, isAdmin } = useAppContext();
-    const { showAllActions, updateShowAllActions, settingsPermissions, updateSettingsPermissions } = useConfig();
+    const {
+        showAllActions,
+        updateShowAllActions,
+        settingsPermissions,
+        updateSettingsPermissions,
+        defaultApplication,
+        updateDefaultApplication,
+    } = useConfig();
 
     const navigate = useNavigate();
     const snackbar = useSnackbar();
@@ -24,6 +32,7 @@ export const SettingsPage: React.FC = () => {
 
     const [permissionsType, setPermissionsType] = useState<string | null>(null);
     const [danglingDocuments, setDanglingDocuments] = useState<NamedRef[]>([]);
+    const [application, setDefaultApplication] = useState<string>("");
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
     const backHome = useCallback(() => {
@@ -180,11 +189,33 @@ export const SettingsPage: React.FC = () => {
                             />
                         </ListItem>
                     )}
+
+                    {isAdmin && (
+                        <DefaultApplicationContainer>
+                            <h4>{i18n.t("Default application")}</h4>
+                            <DefaultApplicationForm>
+                                <TextFieldOnBlur
+                                    fullWidth={true}
+                                    label={i18n.t("DHIS2 application")}
+                                    value={defaultApplication}
+                                    onChange={event => setDefaultApplication(event.target.value)}
+                                    placeholder={"/dhis-web-dashboard/index.html"}
+                                />
+                                <Button
+                                    onClick={() => updateDefaultApplication(application)}
+                                    color="primary"
+                                    variant="contained"
+                                >
+                                    {i18n.t("Save")}
+                                </Button>
+                            </DefaultApplicationForm>
+                        </DefaultApplicationContainer>
+                    )}
                 </Group>
 
                 <Title>{i18n.t("Landing pages")}</Title>
 
-                <LandingPageListTable nodes={landings} isLoading={isLoading} />
+                <LandingPageListTable nodes={landings ?? []} isLoading={isLoading} />
 
                 <Title>{i18n.t("Actions")}</Title>
 
@@ -215,4 +246,14 @@ const Container = styled.div`
 
 const Header = styled(PageHeader)`
     margin-top: 1rem;
+`;
+
+const DefaultApplicationContainer = styled.div`
+    width: 35%;
+`;
+
+const DefaultApplicationForm = styled.div`
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
 `;

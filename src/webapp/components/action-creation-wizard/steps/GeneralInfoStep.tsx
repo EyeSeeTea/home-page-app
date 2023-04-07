@@ -11,11 +11,17 @@ import { imagesMimeType } from "../../../../utils/files";
 import { useAppContext } from "../../../contexts/app-context";
 import TextFieldOnBlur from "../../form/TextFieldOnBlur";
 import { ActionCreationWizardStepProps } from "./index";
+import { Button, Switch } from "@material-ui/core";
+import { ColorPicker } from "../../color-picker/ColorPicker";
 
 export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ action, onChange, isEdit }) => {
     const { compositionRoot } = useAppContext();
 
     const [errors, setErrors] = useState<Dictionary<string | undefined>>({});
+
+    const onChangeIconLocation = (event: React.ChangeEvent<HTMLInputElement>) => {
+        onChange(action => ({ ...action, iconLocation: event.target.checked ? "bottom" : "top" }));
+    };
 
     const onChangeField = useCallback(
         (field: keyof Action) => {
@@ -94,7 +100,7 @@ export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ actio
                 />
             </Row>
 
-            <Row style={{ marginBottom: 80 }}>
+            <Row style={{ marginBottom: 40 }}>
                 <h3>{i18n.t("Icon")}</h3>
 
                 <IconUpload>
@@ -106,6 +112,64 @@ export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ actio
 
                     <FileInput type="file" onChange={handleFileUpload} accept={imagesMimeType} />
                 </IconUpload>
+
+                <div>
+                    <Label>Icon Location</Label>
+                    <IconLocationSwitch>
+                        <p>Top</p>
+                        <Switch
+                            color="primary"
+                            checked={!action.iconLocation ? true : action.iconLocation === "bottom"}
+                            onChange={onChangeIconLocation}
+                            name="iconLocation"
+                        />
+                        <p>Bottom</p>
+                    </IconLocationSwitch>
+                </div>
+            </Row>
+
+            <Row>
+                <h3>{i18n.t("Style")}</h3>
+
+                <ColorSelectorContainer>
+                    <p>{i18n.t("Background Color")}</p>
+                    <ColorPicker
+                        color={action.backgroundColor}
+                        onChange={backgroundColor => onChange(action => ({ ...action, backgroundColor }))}
+                        width={34}
+                        height={36}
+                    />
+                </ColorSelectorContainer>
+
+                <ColorSelectorContainer>
+                    <p>{i18n.t("Font Color")}</p>
+                    <ColorPicker
+                        color={action.fontColor}
+                        onChange={fontColor => onChange(action => ({ ...action, fontColor: fontColor }))}
+                        width={34}
+                        height={36}
+                    />
+                </ColorSelectorContainer>
+
+                <TextAlignmentContainer>
+                    <p>Text Alignment</p>
+
+                    {["left", "center", "right"].map((alignment, i) => (
+                        <Button
+                            key={i}
+                            color={
+                                alignment === action.textAlignment || (!action.textAlignment && alignment === "left")
+                                    ? "primary"
+                                    : "default"
+                            }
+                            variant="contained"
+                            value={alignment}
+                            onClick={() => onChange(action => ({ ...action, textAlignment: alignment }))}
+                        >
+                            {alignment}
+                        </Button>
+                    ))}
+                </TextAlignmentContainer>
             </Row>
 
             <Row>
@@ -161,6 +225,30 @@ const FileInput = styled.input`
     outline: none;
 `;
 
+const Label = styled.p`
+    margin: 48px 0 0 0;
+    font-weight: 300;
+`;
+
+const IconLocationSwitch = styled.div`
+    display: flex;
+    align-items: center;
+`;
+
+const ColorSelectorContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 50%;
+`;
+
+const TextAlignmentContainer = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    width: 50%;
+    gap: 10px;
+`;
+
 const DHISVersionSelector = styled(MultipleDropdown)`
     width: 100%;
     margin-left: -10px;
@@ -181,4 +269,5 @@ const dhisVersions = [
     { value: "2.35", text: "2.35" },
     { value: "2.36", text: "2.36" },
     { value: "2.37", text: "2.37" },
+    { value: "2.38", text: "2.38" },
 ];

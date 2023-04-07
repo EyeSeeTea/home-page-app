@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-08-18T07:31:24.239Z\n"
-"PO-Revision-Date: 2022-08-18T07:31:24.239Z\n"
+"POT-Creation-Date: 2023-04-06T12:33:26.549Z\n"
+"PO-Revision-Date: 2023-04-06T12:33:26.549Z\n"
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""
@@ -39,6 +39,15 @@ msgid "Name *"
 msgstr ""
 
 msgid "Icon"
+msgstr ""
+
+msgid "Style"
+msgstr ""
+
+msgid "Background Color"
+msgstr ""
+
+msgid "Font Color"
 msgstr ""
 
 msgid "DHIS2 Compatibility"
@@ -182,6 +191,9 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
+msgid "Logout"
+msgstr ""
+
 msgid "Field name is mandatory"
 msgstr ""
 
@@ -203,7 +215,10 @@ msgstr ""
 msgid "Importing a new landing page"
 msgstr ""
 
-msgid "This action will overwrite the existing landing page. Are you sure?"
+msgid "This action might overwrite an existing landing page. Are you sure?"
+msgstr ""
+
+msgid "Importing landing page"
 msgstr ""
 
 msgid "Imported {{n}} landing pages"
@@ -225,6 +240,9 @@ msgid "Add category"
 msgstr ""
 
 msgid "Edit"
+msgstr ""
+
+msgid "Sharing settings"
 msgstr ""
 
 msgid "Delete"
@@ -251,6 +269,9 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
+msgid "Close"
+msgstr ""
+
 msgid "Edit markdown"
 msgstr ""
 
@@ -260,9 +281,6 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
-msgid "Close"
-msgstr ""
-
 msgid "About Home Page App"
 msgstr ""
 
@@ -270,8 +288,8 @@ msgid "Distributed under GNU GLPv3"
 msgstr ""
 
 msgid ""
-"DHIS2 Home page App is a DHIS2 application that aims to provide direct "
-"links to Dhis2 applications."
+"Home page App is a DHIS2 application that aims to provide direct links to "
+"DHIS2 applications."
 msgstr ""
 
 msgid ""
@@ -368,6 +386,12 @@ msgid "There are no unused documents to clean"
 msgstr ""
 
 msgid "There are {{total}} documents available to clean"
+msgstr ""
+
+msgid "Default application"
+msgstr ""
+
+msgid "DHIS2 application"
 msgstr ""
 
 msgid "Landing pages"

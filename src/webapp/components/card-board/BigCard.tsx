@@ -3,14 +3,36 @@ import styled from "styled-components";
 import { CardTitleIcon } from "./CardTitleIcon";
 import { CardProgress, CardProgressText } from "./CardProgress";
 
-const BaseCard: React.FC<BigCardProps> = ({ className, label, icon, progress, onClick, onContextMenu, disabled }) => {
+const BaseCard: React.FC<BigCardProps> = ({
+    className,
+    label,
+    icon,
+    iconLocation,
+    backgroundColor,
+    fontColor,
+    textAlignment,
+    progress,
+    onClick,
+    onContextMenu,
+    disabled,
+}) => {
     const normalizedProgress = normalizeProgress(progress);
 
     return (
-        <div className={className} onClick={disabled ? undefined : onClick} onContextMenu={onContextMenu}>
+        <div
+            style={{
+                backgroundColor: backgroundColor ?? "#6d98b8",
+                color: fontColor ?? "#fff",
+                textAlign: textAlignment ?? "left",
+            }}
+            className={className}
+            onClick={disabled ? undefined : onClick}
+            onContextMenu={onContextMenu}
+        >
             {progress && progress >= 100 ? <CardTitleIcon>done</CardTitleIcon> : null}
+            {icon && iconLocation === "top" ? <BigCardIcon>{icon}</BigCardIcon> : null}
             <BigCardTitle>{label}</BigCardTitle>
-            {icon ? <BigCardIcon>{icon}</BigCardIcon> : null}
+            {icon && (!iconLocation || iconLocation === "bottom") ? <BigCardIcon>{icon}</BigCardIcon> : null}
             {progress !== undefined ? <CardProgressText>{`${normalizedProgress}%`}</CardProgressText> : null}
             {progress !== undefined ? <CardProgress value={normalizedProgress} max="100"></CardProgress> : null}
         </div>
@@ -18,11 +40,9 @@ const BaseCard: React.FC<BigCardProps> = ({ className, label, icon, progress, on
 };
 
 export const BigCard = styled(BaseCard)`
-    background: #6d98b8;
     padding: 20px;
     border-radius: 8px;
     text-align: left;
-    color: #fff;
     margin: 10px 10px 10px;
     user-select: none;
     cursor: ${({ onClick, disabled }) => (onClick && !disabled ? "pointer" : "inherit")};
@@ -41,10 +61,13 @@ export interface BigCardProps {
     onContextMenu?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
     disabled?: boolean;
     icon?: ReactNode;
+    iconLocation?: string;
+    backgroundColor?: string;
+    fontColor?: string;
+    textAlignment?: any;
 }
 
 const BigCardTitle = styled.span`
-    color: #fff;
     min-height: 48px;
     font-size: 22px;
     font-size: 1.2vw;

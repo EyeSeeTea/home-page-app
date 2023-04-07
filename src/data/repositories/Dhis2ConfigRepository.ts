@@ -6,7 +6,7 @@ import { DataStoreStorageClient } from "../clients/storage/DataStoreStorageClien
 import { Namespaces } from "../clients/storage/Namespaces";
 import { StorageClient } from "../clients/storage/StorageClient";
 import { Instance } from "../entities/Instance";
-import { PersistedConfig } from "../entities/PersistedConfig";
+import { LandingPagePermission, PersistedConfig } from "../entities/PersistedConfig";
 import { getD2APiFromInstance, getMajorVersion } from "../../utils/d2-api";
 import { User } from "../../domain/entities/User";
 
@@ -60,6 +60,20 @@ export class Dhis2ConfigRepository implements ConfigRepository {
         return this.instance;
     }
 
+    public async getDefaultApplication(): Promise<string> {
+        const { defaultApplication = "" } = await this.getConfig();
+        return defaultApplication;
+    }
+
+    public async updateDefaultApplication(defaultApplication: string): Promise<void> {
+        const config = await this.getConfig();
+
+        await this.storageClient.saveObject<PersistedConfig>(Namespaces.CONFIG, {
+            ...config,
+            defaultApplication,
+        });
+    }
+
     public async getSettingsPermissions(): Promise<Permission> {
         const config = await this.getConfig();
         const { users = [], userGroups = [] } = config.settingsPermissions ?? {};
@@ -76,6 +90,38 @@ export class Dhis2ConfigRepository implements ConfigRepository {
                 users: update.users ?? users,
                 userGroups: update.userGroups ?? userGroups,
             },
+        });
+    }
+
+    public async getLandingPagePermissions(): Promise<LandingPagePermission[]> {
+        const config = await this.getConfig();
+        const landingPagesPermissions = config.landingPagePermissions ?? [];
+
+        return landingPagesPermissions;
+    }
+
+    public async updateLandingPagePermissions(update: Partial<LandingPagePermission>, id: string): Promise<void> {
+        const config = await this.getConfig();
+        const landingPagesPermissions = config.landingPagePermissions ?? [];
+
+        const { users = [], userGroups = [] } =
+            landingPagesPermissions.find(landingPage => landingPage.id === id) ?? {};
+
+        landingPagesPermissions.some(landing => landing.id === id)
+            ? Object.assign(landingPagesPermissions.find(landing => landing.id === id) ?? {}, {
+                  id,
+                  userGroups: update.userGroups ?? userGroups,
+                  users: update.users ?? users,
+              })
+            : landingPagesPermissions.push({
+                  id,
+                  userGroups: update.userGroups ?? userGroups,
+                  users: update.users ?? users,
+              });
+
+        await this.storageClient.saveObject<PersistedConfig>(Namespaces.CONFIG, {
+            ...config,
+            landingPagePermissions: landingPagesPermissions,
         });
     }
 

@@ -11,7 +11,7 @@ export const AboutPage = () => {
     const contents = [
         `# ${i18n.t("About Home Page App")}`,
         `#### ${i18n.t("Distributed under GNU GLPv3")}`,
-        i18n.t("DHIS2 Home page App is a DHIS2 application that aims to provide direct links to Dhis2 applications."),
+        i18n.t("Home page App is a DHIS2 application that aims to provide direct links to DHIS2 applications."),
         i18n.t(
             "This application has been entirely funded by the WHO Global Malaria Programme to support countries using DHIS2 in strengthening the collection and use of health data. The application has been designed by [Lushomo](https://lushomo.net) and developed by [EyeSeeTea SL](http://eyeseetea.com). The source code and release notes can be found at the [WHO GitHub repository](https://github.com/EyeSeeTea/home-page-app). If you wish to contribute to the development of Home Page App with new features, please contact [EyeSeeTea](mailto:hello@eyeseetea.com). To continue developing the tool in a coordinated manner please always contact also [WHO](mailto:integrated-data@who.int)",
             { nsSeparator: false }

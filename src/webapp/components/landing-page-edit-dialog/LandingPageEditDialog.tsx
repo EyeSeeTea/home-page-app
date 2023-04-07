@@ -4,7 +4,7 @@ import {
     MultipleDropdown,
     useSnackbar,
 } from "@eyeseetea/d2-ui-components";
-import { TextField } from "@material-ui/core";
+import { Switch, TextField } from "@material-ui/core";
 import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { generateUid } from "../../../data/utils/uid";
@@ -14,6 +14,7 @@ import { useAppContext } from "../../contexts/app-context";
 import { MarkdownEditor } from "../markdown-editor/MarkdownEditor";
 import { MarkdownViewer } from "../markdown-viewer/MarkdownViewer";
 import { LandingBody } from "../landing-layout";
+import { ColorPicker } from "../color-picker/ColorPicker";
 
 const buildDefaultNode = (type: LandingNodeType, parent: string, order: number) => {
     return {
@@ -21,12 +22,14 @@ const buildDefaultNode = (type: LandingNodeType, parent: string, order: number) 
         type,
         parent,
         icon: "",
+        iconLocation: "",
         order,
         name: { key: "", referenceValue: "", translations: {} },
         title: undefined,
         content: undefined,
         children: [],
         actions: [],
+        backgroundColor: "",
     };
 };
 
@@ -37,6 +40,7 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
     const snackbar = useSnackbar();
 
     const [value, setValue] = useState<LandingNode>(initialNode ?? buildDefaultNode(type, parent, order));
+    const [iconLocation, setIconLocation] = React.useState(value.iconLocation === "bottom" ?? false);
 
     const items = useMemo(
         () =>
@@ -74,6 +78,11 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
             }
         };
     }, []);
+
+    const onChangeIconLocation = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setIconLocation(event.target.checked);
+        setValue(value => ({ ...value, iconLocation: event.target.checked ? "bottom" : "top" }));
+    };
 
     const handleFileUpload = useCallback(
         (event: ChangeEvent<HTMLInputElement>) => {
@@ -128,7 +137,37 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
 
                     <FileInput type="file" onChange={handleFileUpload} />
                 </IconUpload>
+
+                <div>
+                    <Label>Icon Location</Label>
+                    <IconLocationSwitch>
+                        <p>Top</p>
+                        <Switch
+                            color="primary"
+                            checked={iconLocation}
+                            onChange={onChangeIconLocation}
+                            name="iconLocation"
+                        />
+                        <p>Bottom</p>
+                    </IconLocationSwitch>
+                </div>
             </Row>
+
+            {type === "root" && (
+                <Row>
+                    <h3>{i18n.t("Style")}</h3>
+
+                    <ColorSelectorContainer>
+                        <p>{i18n.t("Background Color")}</p>
+                        <ColorPicker
+                            color={value.backgroundColor}
+                            onChange={backgroundColor => setValue(landing => ({ ...landing, backgroundColor }))}
+                            width={34}
+                            height={36}
+                        />
+                    </ColorSelectorContainer>
+                </Row>
+            )}
 
             <Row>
                 <h3>{i18n.t("Actions")}</h3>
@@ -191,8 +230,25 @@ const IconUpload = styled.div`
     align-items: center;
 `;
 
+const Label = styled.p`
+    margin: 30px 0 0 0;
+    font-weight: 300;
+`;
+
+const IconLocationSwitch = styled.div`
+    display: flex;
+    align-items: center;
+`;
+
 const FileInput = styled.input`
     outline: none;
+`;
+
+const ColorSelectorContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 25%;
 `;
 
 const StyledLandingBody = styled(LandingBody)`

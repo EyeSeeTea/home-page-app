@@ -36,7 +36,7 @@ export const Item: React.FC<{
 };
 
 export const LogoContainer = styled.div`
-    margin-top: 15px;
+    margin-top: 20px;
 
     img {
         margin: 0 30px;

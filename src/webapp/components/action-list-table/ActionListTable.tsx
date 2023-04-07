@@ -215,17 +215,21 @@ export const ActionListTable: React.FC<ActionListTableProps> = props => {
                 name: "name",
                 text: "Name",
                 sortable: false,
-                getValue: item => (
-                    <div>
-                        {item.name}
-                        {!item.installed ? (
-                            <AlertIcon tooltip={i18n.t("App is not installed in this instance")} />
-                        ) : null}
-                        {!item.compatible ? (
-                            <AlertIcon tooltip={i18n.t("Action does not support this DHIS2 version")} />
-                        ) : null}
-                    </div>
-                ),
+                getValue: item => {
+                    const isAbsoluteUrl =
+                        item.dhisLaunchUrl.indexOf("http://") === 0 || item.dhisLaunchUrl.indexOf("https://") === 0;
+                    return (
+                        <div>
+                            {item.name}
+                            {!item.installed && !isAbsoluteUrl ? (
+                                <AlertIcon tooltip={i18n.t("App is not installed in this instance")} />
+                            ) : null}
+                            {!item.compatible && !isAbsoluteUrl ? (
+                                <AlertIcon tooltip={i18n.t("Action does not support this DHIS2 version")} />
+                            ) : null}
+                        </div>
+                    );
+                },
             },
             {
                 name: "id",
