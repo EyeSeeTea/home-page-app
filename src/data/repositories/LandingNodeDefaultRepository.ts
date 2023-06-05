@@ -27,7 +27,10 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
             const persisted =
                 (await this.storageClient.getObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES)) ?? [];
 
-            const roots = _.compact(persisted.map(model => model?.find(({ parent }) => parent === "none")));
+            const roots = _.every(persisted, persist => Array.isArray(persist))
+                ? _.compact(persisted.map(model => model?.find(({ parent }) => parent === "none")))
+                : [];
+
             const validations = roots.map(root =>
                 LandingNodeModel.decode(buildDomainLandingNode(root, _.flatten(persisted)))
             );
@@ -39,12 +42,13 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
             });
 
             if (persisted.length === 0 || roots.length === 0) {
-                const root = {
+                const root: PersistedLandingNode = {
                     id: generateUid(),
                     parent: "none",
                     type: "root" as const,
                     icon: "img/logo-eyeseetea.png",
                     iconLocation: "top",
+                    pageRendering: "multiple",
                     order: undefined,
                     name: {
                         key: "root-name",
@@ -61,7 +65,7 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
                     backgroundColor: "#276696",
                 };
 
-                await this.storageClient.saveObjectInCollection<PersistedLandingNode>(Namespaces.LANDING_PAGES, root);
+                await this.storageClient.saveObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES, [[root]]);
                 return [{ ...root, children: [] }];
             }
 
@@ -244,18 +248,16 @@ const updateLandingNode = (
     const rootItem = items.find(item => item.type === "root");
     const isItemSavedInDatastore = models.some(model => model.find(persisted => persisted.id === items[0]?.id));
 
-    if (isItemSavedInDatastore)
+    if (isItemSavedInDatastore) {
         return models.map(model => model.map(persisted => (persisted.id === items[0]?.id ? items[0] : persisted)));
-    else if (importNewNode) {
-        models.push(items);
-        return models;
+    } else if (importNewNode) {
+        return _.concat(models, [items]);
     } else {
-        const newLandingNode = models.map(model => {
-            const landingNode = model.find(model => model.id === rootItem?.parent);
-            if (landingNode) {
-                model.push(...items);
-                return model;
-            } else return model;
+        const newLandingNode = models.map(modelGroup => {
+            const landingNode = modelGroup.find(model => model.id === rootItem?.parent);
+            if (!landingNode) {
+                return [...modelGroup, ...items];
+            } else return modelGroup;
         });
 
         return newLandingNode;

@@ -1,5 +1,8 @@
+import _ from "lodash";
 import { Codec, GetSchemaType, Schema } from "../../utils/codec";
 import { TranslatableText, TranslatableTextModel } from "./TranslatableText";
+import { LandingPagePermission } from "./Permission";
+import { User } from "./User";
 
 export const LandingPageNodeTypeModel = Schema.oneOf([
     Schema.exact("root"),
@@ -8,7 +11,11 @@ export const LandingPageNodeTypeModel = Schema.oneOf([
     Schema.exact("category"),
 ]);
 
+export const LandingPageNodePageRenderingModel = Schema.oneOf([Schema.exact("single"), Schema.exact("multiple")]);
+
 export type LandingNodeType = GetSchemaType<typeof LandingPageNodeTypeModel>;
+
+export type LandingNodePageRendering = GetSchemaType<typeof LandingPageNodePageRenderingModel>;
 
 export interface LandingNode {
     id: string;
@@ -16,6 +23,7 @@ export interface LandingNode {
     type: LandingNodeType;
     icon: string;
     iconLocation: string;
+    pageRendering: LandingNodePageRendering;
     order: number | undefined;
     name: TranslatableText;
     title: TranslatableText | undefined;
@@ -31,6 +39,7 @@ export const LandingNodeModel: Codec<LandingNode> = Schema.object({
     type: LandingPageNodeTypeModel,
     icon: Schema.optionalSafe(Schema.string, ""),
     iconLocation: Schema.optionalSafe(Schema.string, ""),
+    pageRendering: LandingPageNodePageRenderingModel,
     order: Schema.optional(Schema.integer),
     name: TranslatableTextModel,
     title: Schema.optional(TranslatableTextModel),
@@ -50,4 +59,32 @@ export const buildOrderedLandingNodes = (nodes: LandingNode[]): OrderedLandingNo
         lastOrder: nodes.length - 1,
         children: buildOrderedLandingNodes(node.children),
     }));
+};
+
+export const updateLandingNodes = (
+    nodes: LandingNode[],
+    permissions: LandingPagePermission[],
+    user: User
+): LandingNode[] => {
+    return _(nodes)
+        .map(node => {
+            const pagePermission = permissions?.find(permission => permission.id === node.id);
+
+            const hasUserAccess = pagePermission?.users?.map(user => user.id).includes(user.id);
+            const hasUserGroupAccess =
+                _.intersection(
+                    pagePermission?.userGroups?.map(({ id }) => id),
+                    user.userGroups.map(({ id }) => id)
+                ).length > 0;
+            const hasPublicAccess = !pagePermission || pagePermission.publicAccess !== "--------";
+
+            if (!hasUserAccess && !hasUserGroupAccess && !hasPublicAccess) return null;
+
+            return {
+                ...node,
+                children: updateLandingNodes(node.children, permissions, user),
+            };
+        })
+        .compact()
+        .value();
 };

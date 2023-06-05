@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-04-06T12:33:26.549Z\n"
+"POT-Creation-Date: 2023-04-28T15:57:52.436Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -198,6 +198,24 @@ msgid "Field name is mandatory"
 msgstr ""
 
 msgid "Title"
+msgstr ""
+
+msgid "Icon Location"
+msgstr ""
+
+msgid "Top"
+msgstr ""
+
+msgid "Bottom"
+msgstr ""
+
+msgid "Page Rendering"
+msgstr ""
+
+msgid "Multiple Page"
+msgstr ""
+
+msgid "Single page"
 msgstr ""
 
 msgid "Actions"

@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import CircularProgress from "material-ui/CircularProgress";
 import styled from "styled-components";
-
-import { LandingNode } from "../../../domain/entities/LandingNode";
+import { LandingNode, updateLandingNodes } from "../../../domain/entities/LandingNode";
 import i18n from "../../../locales";
 import { LandingLayout, LandingContent } from "../../components/landing-layout";
 import { useAppContext } from "../../contexts/app-context";
@@ -11,24 +10,14 @@ import { Item } from "../../components/item/Item";
 import { useConfig } from "../settings/useConfig";
 import { Cardboard } from "../../components/card-board/Cardboard";
 import { BigCard } from "../../components/card-board/BigCard";
-import _ from "lodash";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, landings, reload, isLoading, launchAppBaseUrl, translate } = useAppContext();
     const { defaultApplication, landingPagePermissions, user } = useConfig();
 
     const userLandings = useMemo<LandingNode[] | undefined>(() => {
-        return landings && landingPagePermissions
-            ? _.compact(
-                  landingPagePermissions?.map(landingPagePermission =>
-                      landingPagePermission.users?.some(u => u.id === user?.id) ||
-                      landingPagePermission.userGroups?.some(
-                          ug => !!user?.userGroups.find(userGroup => userGroup.id === ug.id)
-                      )
-                          ? landings?.find(landing => landing.id === landingPagePermission.id)
-                          : undefined
-                  )
-              )
+        return landings && landingPagePermissions && user
+            ? updateLandingNodes(landings, landingPagePermissions, user)
             : undefined;
     }, [landingPagePermissions, landings, user]);
 

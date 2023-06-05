@@ -1,6 +1,5 @@
 import { Instance } from "../../data/entities/Instance";
-import { LandingPagePermission } from "../../data/entities/PersistedConfig";
-import { Permission } from "../entities/Permission";
+import { LandingPagePermission, Permission } from "../entities/Permission";
 import { User } from "../entities/User";
 
 export interface ConfigRepository {

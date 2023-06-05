@@ -1,4 +1,4 @@
-import { Permission } from "../../domain/entities/Permission";
+import { LandingPagePermission, Permission } from "../../domain/entities/Permission";
 import { ConfigRepository } from "../../domain/repositories/ConfigRepository";
 import { D2Api } from "../../types/d2-api";
 import { cache } from "../../utils/cache";
@@ -6,9 +6,11 @@ import { DataStoreStorageClient } from "../clients/storage/DataStoreStorageClien
 import { Namespaces } from "../clients/storage/Namespaces";
 import { StorageClient } from "../clients/storage/StorageClient";
 import { Instance } from "../entities/Instance";
-import { LandingPagePermission, PersistedConfig } from "../entities/PersistedConfig";
+import { PersistedConfig } from "../entities/PersistedConfig";
 import { getD2APiFromInstance, getMajorVersion } from "../../utils/d2-api";
 import { User } from "../../domain/entities/User";
+import _ from "lodash";
+import { PersistedLandingNode } from "../entities/PersistedLandingNode";
 
 export class Dhis2ConfigRepository implements ConfigRepository {
     private instance: Instance;
@@ -97,26 +99,38 @@ export class Dhis2ConfigRepository implements ConfigRepository {
         const config = await this.getConfig();
         const landingPagesPermissions = config.landingPagePermissions ?? [];
 
-        return landingPagesPermissions;
+        const persisted =
+            (await this.storageClient.getObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES)) ?? [];
+
+        const rootId: string = !_.isEmpty(persisted) ? _.flatten(persisted)[0]?.id ?? "" : "";
+
+        return _.isEmpty(landingPagesPermissions)
+            ? [{ id: rootId, publicAccess: "r-------", userGroups: [], users: [] }]
+            : landingPagesPermissions;
     }
 
     public async updateLandingPagePermissions(update: Partial<LandingPagePermission>, id: string): Promise<void> {
         const config = await this.getConfig();
         const landingPagesPermissions = config.landingPagePermissions ?? [];
 
-        const { users = [], userGroups = [] } =
-            landingPagesPermissions.find(landingPage => landingPage.id === id) ?? {};
+        const {
+            users = [],
+            userGroups = [],
+            publicAccess = "r-------",
+        } = landingPagesPermissions.find(landingPage => landingPage.id === id) ?? {};
 
         landingPagesPermissions.some(landing => landing.id === id)
             ? Object.assign(landingPagesPermissions.find(landing => landing.id === id) ?? {}, {
                   id,
                   userGroups: update.userGroups ?? userGroups,
                   users: update.users ?? users,
+                  publicAccess: update.publicAccess ?? publicAccess,
               })
             : landingPagesPermissions.push({
                   id,
                   userGroups: update.userGroups ?? userGroups,
                   users: update.users ?? users,
+                  publicAccess: update.publicAccess ?? publicAccess,
               });
 
         await this.storageClient.saveObject<PersistedConfig>(Namespaces.CONFIG, {

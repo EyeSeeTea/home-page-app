@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { Permission } from "../../../domain/entities/Permission";
+import { LandingPagePermission, Permission } from "../../../domain/entities/Permission";
 import { SharedUpdate } from "../../components/permissions-dialog/PermissionsDialog";
 import { useAppContext } from "../../contexts/app-context";
-import { LandingPagePermission } from "../../../data/entities/PersistedConfig";
 import { User } from "../../../domain/entities/User";
 
 export function useConfig(): useConfigPloc {
@@ -30,17 +29,18 @@ export function useConfig(): useConfigPloc {
     );
 
     const updateLandingPagePermissions = useCallback(
-        async ({ userAccesses, userGroupAccesses }: SharedUpdate, id: string) => {
+        async ({ userAccesses, userGroupAccesses, publicAccess }: SharedUpdate, id: string) => {
             await compositionRoot.config.updateLandingPagePermissions(
                 {
                     users: userAccesses?.map(({ id, name }) => ({ id, name })),
                     userGroups: userGroupAccesses?.map(({ id, name }) => ({ id, name })),
+                    publicAccess,
                 },
                 id
             );
 
-            const newSettings = await compositionRoot.config.getLandingPagePermissions();
-            setLandingPagePermissions(newSettings);
+            const newLandingPagePermissions = await compositionRoot.config.getLandingPagePermissions();
+            setLandingPagePermissions(newLandingPagePermissions);
         },
         [compositionRoot]
     );

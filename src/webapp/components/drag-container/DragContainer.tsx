@@ -1,11 +1,7 @@
-import Draggable, { DraggableProps } from "react-draggable";
+import { DraggableProps } from "react-draggable";
 import styled from "styled-components";
 
-export const DragContainer: React.FC<Partial<DraggableProps> & { className?: string }> = ({
-    className,
-    children,
-    ...rest
-}) => {
+export const DragContainer: React.FC<Partial<DraggableProps> & { className?: string }> = ({ children }) => {
     return <Container>{children}</Container>;
 };
 

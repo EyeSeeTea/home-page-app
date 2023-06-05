@@ -10,7 +10,8 @@ export const ItemCategory: React.FC<{
     isRoot: boolean;
     currentPage: LandingNode;
     openPage(page: LandingNode): void;
-}> = ({ isRoot, currentPage, openPage }) => {
+    showAdditionalComponents?: boolean;
+}> = ({ isRoot, currentPage, openPage, showAdditionalComponents }) => {
     const { translate } = useAppContext();
 
     return (
@@ -43,8 +44,7 @@ export const ItemCategory: React.FC<{
                         );
                     })}
                 </Cardboard>
-
-                <AdditionalComponents currentPage={currentPage} isRoot={isRoot} />
+                {showAdditionalComponents && <AdditionalComponents currentPage={currentPage} isRoot={isRoot} />}{" "}
             </LandingContent>
         </GroupContainer>
     );

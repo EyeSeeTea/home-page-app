@@ -1,7 +1,7 @@
 import React from "react";
 import { LandingNode } from "../../../domain/entities/LandingNode";
 import { useAppContext } from "../../contexts/app-context";
-import { LogoContainer, MarkdownContents } from "../item/Item";
+import { Item, LogoContainer, MarkdownContents } from "../item/Item";
 import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
 import { LandingContent, LandingTitle } from "../landing-layout";
@@ -29,9 +29,19 @@ export const ItemRoot: React.FC<{
 
             <LandingContent>
                 {currentPage.content ? <MarkdownContents source={translate(currentPage.content)} /> : null}
-                <Cardboard rowSize={4} key={`group-${currentPage.id}`}>
-                    {currentPage.children.map((item, idx) => {
-                        return (
+
+                {currentPage.pageRendering === "single" ? (
+                    currentPage.children.map(node => (
+                        <Item
+                            key={`node-${node.id}`}
+                            isRoot={isRoot}
+                            openPage={() => openPage(node)}
+                            currentPage={node}
+                        />
+                    ))
+                ) : (
+                    <Cardboard rowSize={4} key={`group-${currentPage.id}`}>
+                        {currentPage.children.map((item, idx) => (
                             <BigCard
                                 key={`card-${idx}`}
                                 label={translate(item.name)}
@@ -42,9 +52,9 @@ export const ItemRoot: React.FC<{
                                     ) : undefined
                                 }
                             />
-                        );
-                    })}
-                </Cardboard>
+                        ))}
+                    </Cardboard>
+                )}
 
                 <AdditionalComponents currentPage={currentPage} isRoot={isRoot} />
             </LandingContent>

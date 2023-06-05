@@ -1,4 +1,3 @@
-import { FutureData } from "../types/Future";
 import { UserSearch } from "../../data/entities/SearchUser";
 //import { InstalledApp } from "../entities/InstalledApp";
 import { NamedRef } from "../entities/Ref";

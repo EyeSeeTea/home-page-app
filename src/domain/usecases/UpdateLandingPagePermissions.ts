@@ -1,4 +1,4 @@
-import { LandingPagePermission } from "../../data/entities/PersistedConfig";
+import { LandingPagePermission } from "../entities/Permission";
 import { ConfigRepository } from "../repositories/ConfigRepository";
 import { UseCase } from "./UseCase";
 
