@@ -41,6 +41,7 @@ import { UpdateLandingPagePermissionsUseCase } from "../domain/usecases/UpdateLa
 import { GetUserUseCase } from "../domain/usecases/GetUserUseCase";
 import { GetDefaultApplicationUseCase } from "../domain/usecases/GetDefaultApplicationUseCase";
 import { UpdateDefaultApplicationUseCase } from "../domain/usecases/UpdateDefaultApplicationUseCase";
+import { CreateLandingChildUseCase } from "../domain/usecases/CreateLandingChildUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const configRepository = new Dhis2ConfigRepository(instance.url);
@@ -64,6 +65,7 @@ export function getCompositionRoot(instance: Instance) {
         landings: getExecute({
             list: new ListLandingChildrenUseCase(landingPageRepository),
             update: new UpdateLandingChildUseCase(landingPageRepository),
+            create: new CreateLandingChildUseCase(landingPageRepository),
             delete: new DeleteLandingChildUseCase(landingPageRepository),
             export: new ExportLandingNodesUseCase(landingPageRepository),
             import: new ImportLandingNodesUseCase(landingPageRepository),

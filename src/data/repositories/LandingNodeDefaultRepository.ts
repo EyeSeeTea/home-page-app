@@ -28,7 +28,7 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
                 (await this.storageClient.getObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES)) ?? [];
 
             const roots = _.every(persisted, persist => Array.isArray(persist))
-                ? _.compact(persisted.map(model => model?.find(({ parent }) => parent === "none")))
+                ? persisted.flatMap(model => model?.filter(({ parent }) => parent === "none"))
                 : [];
 
             const validations = roots.map(root =>
@@ -95,6 +95,16 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
         await this.storageClient.saveObject(Namespaces.LANDING_PAGES, updatedLandingNodes);
 
         return items;
+    }
+
+    public async create(node: LandingNode): Promise<void> {
+        const persisted =
+            (await this.storageClient.getObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES)) ?? [];
+        const updatedNodes = extractChildrenNodes(node, node.parent);
+
+        const updatedLandingNodes = updateLandingNode(persisted, updatedNodes, true);
+
+        await this.storageClient.saveObject(Namespaces.LANDING_PAGES, updatedLandingNodes);
     }
 
     public async updateChild(node: LandingNode): Promise<void> {
@@ -244,12 +254,16 @@ const updateLandingNode = (
     models: PersistedLandingNode[][],
     items: PersistedLandingNode[],
     importNewNode?: boolean
-) => {
+): PersistedLandingNode[][] => {
     const rootItem = items.find(item => item.type === "root");
-    const isItemSavedInDatastore = models.some(model => model.find(persisted => persisted.id === items[0]?.id));
+    const isItemSavedInDatastore = models.some(nodes => {
+        return _.intersectionBy(nodes, items, node => node.id).length > 0;
+    });
 
     if (isItemSavedInDatastore) {
-        return models.map(model => model.map(persisted => (persisted.id === items[0]?.id ? items[0] : persisted)));
+        return models.map(model => {
+            return model.map(persisted => items.find(item => item.id === persisted.id) || persisted);
+        });
     } else if (importNewNode) {
         return _.concat(models, [items]);
     } else {

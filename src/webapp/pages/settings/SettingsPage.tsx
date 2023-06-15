@@ -14,6 +14,7 @@ import { DhisLayout } from "../../components/dhis-layout/DhisLayout";
 import { useNavigate } from "react-router-dom";
 import { useConfig } from "./useConfig";
 import TextFieldOnBlur from "../../components/form/TextFieldOnBlur";
+import { CreateButton } from "./CreateButton";
 
 export const SettingsPage: React.FC = () => {
     const { actions, landings, reload, compositionRoot, isLoading, isAdmin } = useAppContext();
@@ -87,10 +88,6 @@ export const SettingsPage: React.FC = () => {
         compositionRoot.instance.listDanglingDocuments().then(setDanglingDocuments);
         await reload();
     }, [reload, compositionRoot]);
-
-    const openAddAction = useCallback(() => {
-        navigate("/actions/new");
-    }, [navigate]);
 
     const toggleShowAllActions = useCallback(async () => {
         updateShowAllActions(!showAllActions);
@@ -223,9 +220,11 @@ export const SettingsPage: React.FC = () => {
                     rows={buildListActions(actions)}
                     refreshRows={refreshActions}
                     tableActions={tableActions}
-                    onActionButtonClick={openAddAction}
+                    onActionButtonClick={undefined}
                     isLoading={isLoading}
                 />
+
+                <CreateButton landings={landings} />
             </Container>
         </DhisLayout>
     );
