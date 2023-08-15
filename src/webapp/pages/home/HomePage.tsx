@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import CircularProgress from "material-ui/CircularProgress";
 import styled from "styled-components";
-import { LandingNode, updateLandingNodes } from "../../../domain/entities/LandingNode";
+import {
+    LandingNode,
+    getPrimaryRedirectUrl as getPrimaryActionUrl,
+    updateLandingNodes,
+} from "../../../domain/entities/LandingNode";
 import i18n from "../../../locales";
 import { LandingLayout, LandingContent } from "../../components/landing-layout";
 import { useAppContext } from "../../contexts/app-context";
@@ -10,6 +14,7 @@ import { Item } from "../../components/item/Item";
 import { useConfig } from "../settings/useConfig";
 import { Cardboard } from "../../components/card-board/Cardboard";
 import { BigCard } from "../../components/card-board/BigCard";
+import { goTo } from "../../utils/routes";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, landings, reload, isLoading, launchAppBaseUrl, translate } = useAppContext();
@@ -79,6 +84,8 @@ export const HomePage: React.FC = React.memo(() => {
         }
     }, [defaultApplication, isLoadingLong, launchAppBaseUrl, userLandings]);
 
+    useRedirectOnSinglePrimaryAction(currentPage);
+
     return (
         <StyledLanding
             backgroundColor={currentPage?.backgroundColor}
@@ -147,3 +154,13 @@ const ContentWrapper = styled.div`
     padding: 15px;
     min-height: 100vh;
 `;
+
+function useRedirectOnSinglePrimaryAction(landingNode: LandingNode | undefined) {
+    const { actions, launchAppBaseUrl } = useAppContext();
+    const { user } = useConfig();
+    const url = user && landingNode ? getPrimaryActionUrl(landingNode, { actions, user }) : undefined;
+
+    React.useEffect(() => {
+        if (url) goTo(url, { baseUrl: launchAppBaseUrl });
+    }, [url, launchAppBaseUrl]);
+}

@@ -3,6 +3,7 @@ import { Codec, GetSchemaType, Schema } from "../../utils/codec";
 import { TranslatableText, TranslatableTextModel } from "./TranslatableText";
 import { LandingPagePermission } from "./Permission";
 import { User } from "./User";
+import { Action, getPageActions } from "./Action";
 
 export const LandingPageNodeTypeModel = Schema.oneOf([
     Schema.exact("root"),
@@ -31,6 +32,7 @@ export interface LandingNode {
     actions: string[];
     children: LandingNode[];
     backgroundColor: string;
+    secondary: boolean | undefined;
 }
 
 export const LandingNodeModel: Codec<LandingNode> = Schema.object({
@@ -47,6 +49,7 @@ export const LandingNodeModel: Codec<LandingNode> = Schema.object({
     actions: Schema.optionalSafe(Schema.array(Schema.string), []),
     children: Schema.lazy(() => Schema.array(LandingNodeModel)),
     backgroundColor: Schema.optionalSafe(Schema.string, ""),
+    secondary: Schema.optional(Schema.boolean),
 });
 
 export interface OrderedLandingNode extends LandingNode {
@@ -88,3 +91,43 @@ export const updateLandingNodes = (
         .compact()
         .value();
 };
+
+/* Return a redirect URL if there is only one visible action on primary nodes */
+export function getPrimaryRedirectUrl(
+    landingNode: LandingNode,
+    options: { actions: Action[]; user: User }
+): Url | undefined {
+    const { actions, user } = options;
+
+    const actionsById = _.keyBy(actions, action => action.id);
+    const showAllActions = false;
+    const isRoot = true;
+
+    const primaryUrls = _(landingNode.children)
+        .reject(node => Boolean(node.secondary))
+        .flatMap((node): Url[] => {
+            const nodeActions = actions.filter(action => node.actions.includes(action.id));
+            const actionIds = user && getPageActions(isRoot, showAllActions, actions, user, nodeActions);
+
+            return _(actionIds)
+                .map(actionId => actionsById[actionId])
+                .compact()
+                .map(action => action.dhisLaunchUrl)
+                .compact()
+                .value();
+        })
+        .value();
+
+    const redirectUrl = primaryUrls.length === 1 ? primaryUrls[0] : undefined;
+
+    const message = [
+        `Primary URLs [${primaryUrls.length}]: ${primaryUrls.join(", ")}`,
+        `Redirect URL: ${redirectUrl || "-"}`,
+    ].join("\n");
+
+    console.debug(message);
+
+    return redirectUrl;
+}
+
+type Url = string;

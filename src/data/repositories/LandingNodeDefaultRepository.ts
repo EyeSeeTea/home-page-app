@@ -63,6 +63,7 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
                     content: undefined,
                     actions: [],
                     backgroundColor: "#276696",
+                    secondary: false,
                 };
 
                 await this.storageClient.saveObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES, [[root]]);

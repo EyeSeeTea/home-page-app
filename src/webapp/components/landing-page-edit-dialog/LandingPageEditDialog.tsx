@@ -36,6 +36,7 @@ const buildDefaultNode = (
         children: [],
         actions: [],
         backgroundColor: "",
+        secondary: false,
     };
 };
 
@@ -91,6 +92,10 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
         setValue(value => ({ ...value, iconLocation: event.target.checked ? "bottom" : "top" }));
     };
 
+    const onChangeSecondary = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(value => ({ ...value, secondary: event.target.checked }));
+    };
+
     const onChangePageRendering = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPageRendering(event.target.checked);
         setValue(value => ({ ...value, pageRendering: event.target.checked ? "single" : "multiple" }));
@@ -136,6 +141,31 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                     onChange={onChangeField("title")}
                 />
             </Row>
+
+            {type === "section" && (
+                <Row style={{ marginBottom: 40 }}>
+                    <h3
+                        title={i18n.t(
+                            "If only one action in primary sections is visible for a user, an automatic redirect to that section URL will be performed."
+                        )}
+                    >
+                        {i18n.t("Section visibility mode")}
+                    </h3>
+
+                    <div>
+                        <IconLocationSwitch>
+                            <p>{i18n.t("Primary")}</p>
+                            <Switch
+                                color="primary"
+                                checked={Boolean(value.secondary)}
+                                onChange={onChangeSecondary}
+                                name="secondary"
+                            />
+                            <p>{i18n.t("Secondary")}</p>
+                        </IconLocationSwitch>
+                    </div>
+                </Row>
+            )}
 
             <Row>
                 <h3>{i18n.t("Icon")}</h3>

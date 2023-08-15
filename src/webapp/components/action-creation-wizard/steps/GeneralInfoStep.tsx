@@ -152,7 +152,7 @@ export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ actio
                 </ColorSelectorContainer>
 
                 <TextAlignmentContainer>
-                    <p>Text Alignment</p>
+                    <p>{i18n.t("Text Alignment")}</p>
 
                     {["left", "center", "right"].map((alignment, i) => (
                         <Button

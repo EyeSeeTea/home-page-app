@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-06-15T07:57:09.720Z\n"
-"PO-Revision-Date: 2023-06-15T07:57:09.720Z\n"
+"POT-Creation-Date: 2023-08-15T11:06:27.074Z\n"
+"PO-Revision-Date: 2023-08-15T11:06:27.074Z\n"
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""
@@ -48,6 +48,9 @@ msgid "Background Color"
 msgstr ""
 
 msgid "Font Color"
+msgstr ""
+
+msgid "Text Alignment"
 msgstr ""
 
 msgid "DHIS2 Compatibility"
@@ -198,6 +201,20 @@ msgid "Field name is mandatory"
 msgstr ""
 
 msgid "Title"
+msgstr ""
+
+msgid ""
+"If only one action in primary sections is visible for a user, an automatic "
+"redirect to that section URL will be performed."
+msgstr ""
+
+msgid "Section visibility mode"
+msgstr ""
+
+msgid "Primary"
+msgstr ""
+
+msgid "Secondary"
 msgstr ""
 
 msgid "Icon Location"
