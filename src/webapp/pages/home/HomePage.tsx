@@ -84,7 +84,7 @@ export const HomePage: React.FC = React.memo(() => {
         }
     }, [defaultApplication, isLoadingLong, launchAppBaseUrl, userLandings]);
 
-    useRedirectOnSinglePrimaryAction(currentPage);
+    const redirect = useRedirectOnSinglePrimaryAction(currentPage);
 
     return (
         <StyledLanding
@@ -97,12 +97,14 @@ export const HomePage: React.FC = React.memo(() => {
             centerChildren={true}
         >
             <ContentWrapper>
-                {isLoading ? (
+                {isLoading || redirect.isActive ? (
                     <ProgressContainer>
                         <CircularProgress color={"white"} size={65} />
                         {isLoadingLong ? (
                             <p>{i18n.t("First load can take a couple of minutes, please wait...")}</p>
-                        ) : null}
+                        ) : (
+                            <p>{i18n.t("Loading the user configuration...")}</p>
+                        )}
                     </ProgressContainer>
                 ) : userLandings && pageType === "userLandings" ? (
                     <>
@@ -155,12 +157,18 @@ const ContentWrapper = styled.div`
     min-height: 100vh;
 `;
 
-function useRedirectOnSinglePrimaryAction(landingNode: LandingNode | undefined) {
+function useRedirectOnSinglePrimaryAction(landingNode: LandingNode | undefined): { isActive: boolean } {
     const { actions, launchAppBaseUrl } = useAppContext();
     const { user } = useConfig();
     const url = user && landingNode ? getPrimaryActionUrl(landingNode, { actions, user }) : undefined;
+    const [isActive, setIsActive] = React.useState(false);
 
     React.useEffect(() => {
-        if (url) goTo(url, { baseUrl: launchAppBaseUrl });
+        if (url) {
+            goTo(url, { baseUrl: launchAppBaseUrl });
+            setIsActive(true);
+        }
     }, [url, launchAppBaseUrl]);
+
+    return { isActive };
 }
