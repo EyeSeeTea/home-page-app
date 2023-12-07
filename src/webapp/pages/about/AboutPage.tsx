@@ -11,13 +11,15 @@ export const AboutPage = () => {
     const contents = [
         `# ${i18n.t("About Home Page App")}`,
         `#### ${i18n.t("Distributed under GNU GLPv3")}`,
-        i18n.t("Home page App is a DHIS2 application that aims to provide direct links to DHIS2 applications."),
         i18n.t(
-            "This application has been entirely funded by the WHO Global Malaria Programme to support countries using DHIS2 in strengthening the collection and use of health data. The application has been designed by [Lushomo](https://lushomo.net) and developed by [EyeSeeTea SL](http://eyeseetea.com). The source code and release notes can be found at the [WHO GitHub repository](https://github.com/EyeSeeTea/home-page-app). If you wish to contribute to the development of Home Page App with new features, please contact [EyeSeeTea](mailto:hello@eyeseetea.com). To continue developing the tool in a coordinated manner please always contact also [WHO](mailto:integrated-data@who.int)",
+            "Home page App is a DHIS2 application that aims to provide direct links to DHIS2 applications. This app re-uses Training App technology to provide fully customizable landing pages for DHIS2 instances that can work on a per-user/group basis."
+        ),
+        i18n.t(
+            "This application has been funded by the WHO Integrated Data Platform initiative, composed by multiple departments at WHO and by Samaritan’s Purse to support countries in strengthening the collection and use of health data by using DHIS2. The application has been developed by [EyeSeeTea SL](http://eyeseetea.com). The source code and release notes can be found at the [EyeSeeTea GitHub repository](https://github.com/EyeSeeTea/home-page-app).",
             { nsSeparator: false }
         ),
         i18n.t(
-            "*Disclaimer: The WHO has developed this application to support countries build capacity for health data collection and use. WHO provides a series of tutorials to support countries to use the WHO DHIS2 standard packages which can be found in the [WHO Tutorial GitHub repository](https://github.com/WorldHealthOrganization/DHIS2-tutorials) and can be installed in the application. WHO provides no assurance as to the validity, accuracy or completeness of any other tutorials built by the application's user community.*",
+            "If you wish to contribute to the development of Home Page App with new features, please contact [EyeSeeTea](mailto:hello@eyeseetea.com).",
             { nsSeparator: false }
         ),
     ].join("\n\n");
@@ -32,8 +34,8 @@ export const AboutPage = () => {
                 <MarkdownViewer source={contents} center={true} />
                 <LogoWrapper>
                     <Logo alt={i18n.t("World Health Organization")} src="img/logo-who.svg" />
+                    <LogoSmall alt={i18n.t("Samaritan’s Purse")} src="img/logo-samaritans.svg" />
                     <Logo alt={i18n.t("EyeSeeTea")} src="img/logo-eyeseetea.png" />
-                    <Logo alt={i18n.t("Lushomo")} src="img/logo-lushomo.png" />
                 </LogoWrapper>
             </LandingContent>
         </StyledLanding>
@@ -60,4 +62,10 @@ const LogoWrapper = styled.div`
 const Logo = styled.img`
     width: 200px;
     margin: 0 50px;
+`;
+
+const LogoSmall = styled.img`
+    width: 250px;
+    margin: 0 50px;
+    padding-bottom: 20px;
 `;

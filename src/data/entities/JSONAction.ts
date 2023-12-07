@@ -4,6 +4,7 @@ export interface JSONAction {
     _version: number;
     id: string;
     name: TranslatableText;
+    description: TranslatableText;
     icon: string;
     iconLocation: string;
     backgroundColor: string;

@@ -6,6 +6,7 @@ import { useAppContext } from "../../contexts/app-context";
 import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
 import { LandingParagraph } from "../landing-layout";
+import { getPageActions } from "../../../domain/entities/Action";
 
 export const AdditionalComponents: React.FC<{
     isRoot: boolean;
@@ -13,22 +14,23 @@ export const AdditionalComponents: React.FC<{
 }> = ({ isRoot, currentPage }) => {
     const { actions, translate, launchAppBaseUrl } = useAppContext();
 
-    const { showAllActions } = useConfig();
+    const { showAllActions, user } = useConfig();
 
-    const pageActions = isRoot && showAllActions ? actions.map(({ id }) => id) : currentPage?.actions ?? [];
+    const currentPageActions = actions.filter(action => currentPage.actions.includes(action.id));
+    const pageActions = user && getPageActions(isRoot, showAllActions, actions, user, currentPageActions);
 
-    const rowSize = actions.length === 3 ? 3 : 4;
+    const rowSize = actions.length % 3 ? 3 : 4;
 
     return (
         <React.Fragment>
-            {isRoot && showAllActions && pageActions.length !== 0 ? (
+            {isRoot && showAllActions && pageActions?.length !== 0 ? (
                 <LandingParagraph size={28} align={"left"}>
                     {i18n.t("Available actions:")}
                 </LandingParagraph>
             ) : null}
 
             <Cardboard rowSize={rowSize} key={`group-${currentPage.id}`}>
-                {pageActions.map(actionId => {
+                {pageActions?.map(actionId => {
                     const action = actions.find(({ id }) => id === actionId);
                     if (!action || !action.compatible) return null;
 
@@ -42,6 +44,7 @@ export const AdditionalComponents: React.FC<{
                     };
 
                     const name = translate(action.name);
+                    const description = translate(action.description);
 
                     return (
                         <BigCard
@@ -51,6 +54,7 @@ export const AdditionalComponents: React.FC<{
                             disabled={action?.disabled}
                             icon={action?.icon ? <img src={action.icon} alt={`Icon for ${name}`} /> : undefined}
                             iconLocation={action?.iconLocation}
+                            description={description}
                             backgroundColor={action?.backgroundColor}
                             fontColor={action?.fontColor}
                             textAlignment={action?.textAlignment}

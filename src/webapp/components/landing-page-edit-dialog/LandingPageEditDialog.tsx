@@ -8,7 +8,7 @@ import { Switch, TextField } from "@material-ui/core";
 import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { generateUid } from "../../../data/utils/uid";
-import { LandingNode, LandingNodeType } from "../../../domain/entities/LandingNode";
+import { LandingNode, LandingNodePageRendering, LandingNodeType } from "../../../domain/entities/LandingNode";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
 import { MarkdownEditor } from "../markdown-editor/MarkdownEditor";
@@ -16,13 +16,19 @@ import { MarkdownViewer } from "../markdown-viewer/MarkdownViewer";
 import { LandingBody } from "../landing-layout";
 import { ColorPicker } from "../color-picker/ColorPicker";
 
-const buildDefaultNode = (type: LandingNodeType, parent: string, order: number) => {
+const buildDefaultNode = (
+    type: LandingNodeType,
+    parent: string,
+    order: number,
+    pageRendering: LandingNodePageRendering
+) => {
     return {
         id: generateUid(),
         type,
         parent,
         icon: "",
         iconLocation: "",
+        pageRendering,
         order,
         name: { key: "", referenceValue: "", translations: {} },
         title: undefined,
@@ -30,6 +36,7 @@ const buildDefaultNode = (type: LandingNodeType, parent: string, order: number) 
         children: [],
         actions: [],
         backgroundColor: "",
+        secondary: false,
     };
 };
 
@@ -39,8 +46,9 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
     const { actions, translate, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
-    const [value, setValue] = useState<LandingNode>(initialNode ?? buildDefaultNode(type, parent, order));
-    const [iconLocation, setIconLocation] = React.useState(value.iconLocation === "bottom" ?? false);
+    const [value, setValue] = useState<LandingNode>(initialNode ?? buildDefaultNode(type, parent, order, "multiple"));
+    const [iconLocation, setIconLocation] = React.useState(value.iconLocation === "bottom");
+    const [pageRendering, setPageRendering] = React.useState(value.pageRendering === "single");
 
     const items = useMemo(
         () =>
@@ -84,6 +92,15 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
         setValue(value => ({ ...value, iconLocation: event.target.checked ? "bottom" : "top" }));
     };
 
+    const onChangeSecondary = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(value => ({ ...value, secondary: event.target.checked }));
+    };
+
+    const onChangePageRendering = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setPageRendering(event.target.checked);
+        setValue(value => ({ ...value, pageRendering: event.target.checked ? "single" : "multiple" }));
+    };
+
     const handleFileUpload = useCallback(
         (event: ChangeEvent<HTMLInputElement>) => {
             const file = event.target.files ? event.target.files[0] : undefined;
@@ -125,6 +142,31 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                 />
             </Row>
 
+            {type === "section" && (
+                <Row style={{ marginBottom: 40 }}>
+                    <h3
+                        title={i18n.t(
+                            "If only one action in primary sections is visible for a user, an automatic redirect to that section URL will be performed."
+                        )}
+                    >
+                        {i18n.t("Section visibility mode")}
+                    </h3>
+
+                    <div>
+                        <IconLocationSwitch>
+                            <p>{i18n.t("Primary")}</p>
+                            <Switch
+                                color="primary"
+                                checked={Boolean(value.secondary)}
+                                onChange={onChangeSecondary}
+                                name="secondary"
+                            />
+                            <p>{i18n.t("Secondary")}</p>
+                        </IconLocationSwitch>
+                    </div>
+                </Row>
+            )}
+
             <Row>
                 <h3>{i18n.t("Icon")}</h3>
 
@@ -139,16 +181,16 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                 </IconUpload>
 
                 <div>
-                    <Label>Icon Location</Label>
+                    <Label>{i18n.t("Icon Location")}</Label>
                     <IconLocationSwitch>
-                        <p>Top</p>
+                        <p>{i18n.t("Top")}</p>
                         <Switch
                             color="primary"
                             checked={iconLocation}
                             onChange={onChangeIconLocation}
                             name="iconLocation"
                         />
-                        <p>Bottom</p>
+                        <p>{i18n.t("Bottom")}</p>
                     </IconLocationSwitch>
                 </div>
             </Row>
@@ -166,6 +208,20 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                             height={36}
                         />
                     </ColorSelectorContainer>
+
+                    <div>
+                        <Label>{i18n.t("Page Rendering")}</Label>
+                        <IconLocationSwitch>
+                            <p>{i18n.t("Multiple Page")}</p>
+                            <Switch
+                                color="primary"
+                                checked={pageRendering}
+                                onChange={onChangePageRendering}
+                                name="pageRendering"
+                            />
+                            <p>{i18n.t("Single page")}</p>
+                        </IconLocationSwitch>
+                    </div>
                 </Row>
             )}
 
@@ -214,7 +270,7 @@ const Row = styled.div`
 const IconContainer = styled.div`
     margin-right: 60px;
     flex-shrink: 0;
-    height: 12vh;
+    height: 100%;
     width: 12vh;
 
     img {

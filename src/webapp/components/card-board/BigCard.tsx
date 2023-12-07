@@ -6,6 +6,7 @@ import { CardProgress, CardProgressText } from "./CardProgress";
 const BaseCard: React.FC<BigCardProps> = ({
     className,
     label,
+    description,
     icon,
     iconLocation,
     backgroundColor,
@@ -33,6 +34,7 @@ const BaseCard: React.FC<BigCardProps> = ({
             {icon && iconLocation === "top" ? <BigCardIcon>{icon}</BigCardIcon> : null}
             <BigCardTitle>{label}</BigCardTitle>
             {icon && (!iconLocation || iconLocation === "bottom") ? <BigCardIcon>{icon}</BigCardIcon> : null}
+            {description ? <p>{description}</p> : null}
             {progress !== undefined ? <CardProgressText>{`${normalizedProgress}%`}</CardProgressText> : null}
             {progress !== undefined ? <CardProgress value={normalizedProgress} max="100"></CardProgress> : null}
         </div>
@@ -60,6 +62,7 @@ export interface BigCardProps {
     onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
     onContextMenu?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
     disabled?: boolean;
+    description?: string;
     icon?: ReactNode;
     iconLocation?: string;
     backgroundColor?: string;
@@ -82,8 +85,9 @@ const BigCardIcon = styled.span`
 
     img,
     svg {
+        height: 72px;
         max-height: 10vw;
-        max-width: 18vh;
+        // max-width: 18vh;
         margin: 0;
         user-drag: none;
     }

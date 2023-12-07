@@ -1,5 +1,5 @@
 import _ from "lodash";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { LandingNode } from "../../../domain/entities/LandingNode";
 import { ItemCategory } from "../item-category/ItemCategory";
@@ -16,20 +16,48 @@ export const Item: React.FC<{
     const { currentPage, isRoot, openPage } = props;
     const logoText = React.useMemo(() => getLogoText(currentPage.icon), [currentPage.icon]);
 
+    const [isSinglePage, setSinglePage] = useState<boolean>(true);
+    useEffect(() => {
+        if (currentPage.pageRendering === "single" && currentPage.type === "root") {
+            setSinglePage(true);
+        }
+    }, [currentPage]);
+
     if (currentPage.type === "root") {
         return <ItemRoot currentPage={currentPage} isRoot={isRoot} logoText={logoText} openPage={openPage} />;
     }
 
     if (currentPage.type === "section") {
-        return <ItemSection currentPage={currentPage} isRoot={isRoot} openPage={openPage} />;
+        return (
+            <ItemSection
+                showAdditionalComponents={isSinglePage}
+                currentPage={currentPage}
+                isRoot={isRoot}
+                openPage={openPage}
+            />
+        );
     }
 
     if (currentPage.type === "sub-section") {
-        return <ItemSubSection currentPage={currentPage} isRoot={isRoot} openPage={openPage} />;
+        return (
+            <ItemSubSection
+                showAdditionalComponents={isSinglePage}
+                currentPage={currentPage}
+                isRoot={isRoot}
+                openPage={openPage}
+            />
+        );
     }
 
     if (currentPage.type === "category") {
-        return <ItemCategory currentPage={currentPage} isRoot={isRoot} openPage={openPage} />;
+        return (
+            <ItemCategory
+                showAdditionalComponents={isSinglePage}
+                currentPage={currentPage}
+                isRoot={isRoot}
+                openPage={openPage}
+            />
+        );
     }
 
     return null;

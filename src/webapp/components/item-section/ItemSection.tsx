@@ -8,7 +8,8 @@ export const ItemSection: React.FC<{
     isRoot: boolean;
     currentPage: LandingNode;
     openPage(page: LandingNode): void;
-}> = ({ isRoot, currentPage, openPage }) => {
+    showAdditionalComponents?: boolean;
+}> = ({ isRoot, currentPage, openPage, showAdditionalComponents }) => {
     const { translate } = useAppContext();
 
     return (
@@ -28,7 +29,7 @@ export const ItemSection: React.FC<{
                 {currentPage.children.map(node => (
                     <Item key={`node-${node.id}`} isRoot={isRoot} openPage={() => openPage(node)} currentPage={node} />
                 ))}
-                <AdditionalComponents currentPage={currentPage} isRoot={isRoot} />
+                {showAdditionalComponents && <AdditionalComponents currentPage={currentPage} isRoot={isRoot} />}
             </LandingContent>
         </GroupContainer>
     );

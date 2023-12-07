@@ -1,7 +1,7 @@
 import FileSaver from "file-saver";
 import JSZip from "jszip";
 import _ from "lodash";
-import { defaultAction, isValidActionType, Action } from "../../domain/entities/Action";
+import { defaultAction, isValidActionType, Action, defaultTranslatableModel } from "../../domain/entities/Action";
 import { TranslatableText } from "../../domain/entities/TranslatableText";
 import { validateUserPermission } from "../../domain/entities/User";
 import { ActionRepository } from "../../domain/repositories/ActionRepository";
@@ -60,8 +60,8 @@ export class ActionDefaultRepository implements ActionRepository {
     }
 
     public async get(key: string): Promise<Action | undefined> {
-        const dataStoreModel = await this.storageClient.getObjectInCollection<PersistedAction>(Namespaces.ACTIONS, key);
-
+        const actions = (await this.storageClient.getObject<PersistedAction[]>(Namespaces.ACTIONS)) ?? [];
+        const dataStoreModel = _(actions).find(action => action.id === key);
         if (!dataStoreModel) return undefined;
 
         const domainModel = await this.buildDomainModel(dataStoreModel);
@@ -168,6 +168,7 @@ export class ActionDefaultRepository implements ActionRepository {
             _version: model._version,
             id: model.id,
             name: model.name,
+            description: model.description,
             icon: model.icon,
             iconLocation: model.iconLocation,
             backgroundColor: model.backgroundColor,
@@ -202,6 +203,7 @@ export class ActionDefaultRepository implements ActionRepository {
 
         return {
             ...rest,
+            description: model.description ?? defaultTranslatableModel("description"),
             installed: await this.instanceRepository.isAppInstalledByUrl(model.dhisLaunchUrl),
             editable: validateUserPermission(model, "write", currentUser),
             compatible: validateDhisVersion(model, instanceVersion),

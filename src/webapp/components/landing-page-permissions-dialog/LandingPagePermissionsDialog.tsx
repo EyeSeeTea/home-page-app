@@ -43,9 +43,9 @@ export function LandingPagePermissionsDialog(props: LandingPagePermissionsDialog
                 meta={metaObject}
                 showOptions={{
                     dataSharing: false,
-                    publicSharing: false,
+                    publicSharing: true,
                     externalSharing: false,
-                    permissionPicker: false,
+                    permissionPicker: true,
                 }}
                 onSearch={search}
                 onChange={onUpdateSharingOptions}

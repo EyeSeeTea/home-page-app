@@ -1,8 +1,4 @@
-import { Permission } from "../../domain/entities/Permission";
-
-export interface LandingPagePermission extends Permission {
-    id: string;
-}
+import { LandingPagePermission, Permission } from "../../domain/entities/Permission";
 
 export interface PersistedConfig {
     poeditorToken?: string;
