@@ -32,7 +32,12 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
                 : [];
 
             const validations = roots.map(root =>
-                LandingNodeModel.decode(buildDomainLandingNode(root, _.flatten(persisted)))
+                LandingNodeModel.decode(
+                    buildDomainLandingNode(
+                        root,
+                        persisted.find(model => model.find(item => item.parent === root.id)) ?? []
+                    )
+                )
             );
 
             _.forEach(validations, validation => {

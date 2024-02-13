@@ -108,6 +108,9 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     @cache()
     public async isAppInstalledByUrl(launchUrl: string): Promise<boolean> {
+        const isUrlRelative = launchUrl.startsWith("/");
+        if (!isUrlRelative) return false;
+
         try {
             await this.api.baseConnection.request({ method: "get", url: launchUrl }).getData();
         } catch (error: any) {
