@@ -19,12 +19,7 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
                 : [];
 
             const validations = roots.map(root =>
-                LandingNodeModel.decode(
-                    buildDomainLandingNode(
-                        root,
-                        persisted.find(model => model.find(item => item.parent === root.id)) ?? []
-                    )
-                )
+                LandingNodeModel.decode(buildDomainLandingNode(root, _.flatten(persisted)))
             );
 
             _.forEach(validations, validation => {
@@ -105,8 +100,9 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
         const updatedNodes = extractChildrenNodes(node, node.parent);
 
         const updatedLandingNodes = updateLandingNode(persisted, updatedNodes);
+        console.log(updatedLandingNodes);
 
-        await this.storageClient.saveObject(Namespaces.LANDING_PAGES, updatedLandingNodes);
+        // await this.storageClient.saveObject(Namespaces.LANDING_PAGES, updatedLandingNodes);
     }
 
     public async deleteNodes(ids: string[]): Promise<void> {
@@ -145,55 +141,55 @@ const buildDomainLandingNode = (root: PersistedLandingNode, items: PersistedLand
     };
 };
 
-const areItemsInModels = (models: PersistedLandingNode[][], items: PersistedLandingNode[]): boolean => {
-    return models.some(nodes => {
-        return _.intersectionBy(nodes, items, node => node.id).length > 0;
+const areItemsInModels = (landingTrees: PersistedLandingNode[][], items: PersistedLandingNode[]): boolean => {
+    return landingTrees.some(tree => {
+        return _.intersectionBy(tree, items, node => node.id).length > 0;
     });
 };
 
 const replaceNodesWithItems = (
-    models: PersistedLandingNode[][],
+    landingTrees: PersistedLandingNode[][],
     items: PersistedLandingNode[]
 ): PersistedLandingNode[][] => {
-    return models.map(model => {
-        return model.map(persisted => items.find(item => item.id === persisted.id) || persisted);
+    return landingTrees.map(tree => {
+        return tree.map(persisted => items.find(item => item.id === persisted.id) || persisted);
     });
 };
 
 const appendItemsToModels = (
-    models: PersistedLandingNode[][],
+    landingTrees: PersistedLandingNode[][],
     items: PersistedLandingNode[]
 ): PersistedLandingNode[][] => {
-    return _.concat(models, [items]);
+    return _.concat(landingTrees, [items]);
 };
 
 const addItemsToGroupsWithoutParent = (
-    models: PersistedLandingNode[][],
+    landingTrees: PersistedLandingNode[][],
     items: PersistedLandingNode[],
     rootItem?: PersistedLandingNode
 ): PersistedLandingNode[][] => {
-    return models.map(modelGroup => {
-        const landingNode = modelGroup.find(model => model.id === rootItem?.parent);
+    return landingTrees.map(tree => {
+        const landingNode = tree.find(model => model.id === rootItem?.parent);
         if (!landingNode) {
-            return [...modelGroup, ...items];
-        } else return modelGroup;
+            return [...tree, ...items];
+        } else return tree;
     });
 };
 
 export const updateLandingNode = (
-    persistedLandingNodes: PersistedLandingNode[][],
+    persistedLandingTrees: PersistedLandingNode[][],
     items: PersistedLandingNode[],
     importNewNode?: boolean
 ): PersistedLandingNode[][] => {
     const rootItem = items.find(item => item.type === "root");
-    const isItemSavedInDatastore = areItemsInModels(persistedLandingNodes, items);
+    const isItemSavedInDatastore = areItemsInModels(persistedLandingTrees, items);
 
     if (isItemSavedInDatastore) {
-        return replaceNodesWithItems(persistedLandingNodes, items);
+        return replaceNodesWithItems(persistedLandingTrees, items);
     } else if (importNewNode) {
-        return appendItemsToModels(persistedLandingNodes, items);
+        return appendItemsToModels(persistedLandingTrees, items);
     } else {
-        return addItemsToGroupsWithoutParent(persistedLandingNodes, items, rootItem);
+        return addItemsToGroupsWithoutParent(persistedLandingTrees, items, rootItem);
     }
 };
 
