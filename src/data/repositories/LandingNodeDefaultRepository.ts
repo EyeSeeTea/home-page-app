@@ -100,9 +100,8 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
         const updatedNodes = extractChildrenNodes(node, node.parent);
 
         const updatedLandingNodes = updateLandingNode(persisted, updatedNodes);
-        console.log(updatedLandingNodes);
 
-        // await this.storageClient.saveObject(Namespaces.LANDING_PAGES, updatedLandingNodes);
+        await this.storageClient.saveObject(Namespaces.LANDING_PAGES, updatedLandingNodes);
     }
 
     public async deleteNodes(ids: string[]): Promise<void> {
@@ -185,10 +184,10 @@ export const updateLandingNode = (
     if (isItemSavedInDatastore) {
         return replaceNodesWithItems(persistedLandingTrees, items);
     } else if (importNewNode) {
-        //for landing "root" node or when import nodes
+        //only being called when creating landing page or when import nodes
         return appendItemsToModels(persistedLandingTrees, items);
     } else {
-        //for other landing type node
+        //onlye being called when creating section, sub-section, or category
         const itemCreated = items[0];
         if (!itemCreated || items.length > 1)
             throw new Error("Unexpected error: 'there is no item to create' or 'creating more than one item'");
