@@ -142,9 +142,7 @@ const buildDomainLandingNode = (root: PersistedLandingNode, items: PersistedLand
 };
 
 const areItemsInModels = (landingTrees: PersistedLandingNode[][], items: PersistedLandingNode[]): boolean => {
-    return landingTrees.some(tree => {
-        return _.intersectionBy(tree, items, node => node.id).length > 0;
-    });
+    return landingTrees.some(tree => _.intersectionBy(tree, items, node => node.id).length > 0);
 };
 
 const replaceNodesWithItems = (
@@ -165,14 +163,15 @@ const appendItemsToModels = (
 
 const addItemsToGroupsWithoutParent = (
     landingTrees: PersistedLandingNode[][],
-    items: PersistedLandingNode[],
-    rootItem?: PersistedLandingNode
+    item: PersistedLandingNode
 ): PersistedLandingNode[][] => {
     return landingTrees.map(tree => {
-        const landingNode = tree.find(model => model.id === rootItem?.parent);
-        if (!landingNode) {
-            return [...tree, ...items];
-        } else return tree;
+        const parentInTree = tree.some(node => node.id === item.parent);
+        if (parentInTree) {
+            return _.concat(tree, item);
+        } else {
+            return tree;
+        }
     });
 };
 
@@ -181,15 +180,19 @@ export const updateLandingNode = (
     items: PersistedLandingNode[],
     importNewNode?: boolean
 ): PersistedLandingNode[][] => {
-    const rootItem = items.find(item => item.type === "root");
     const isItemSavedInDatastore = areItemsInModels(persistedLandingTrees, items);
 
     if (isItemSavedInDatastore) {
         return replaceNodesWithItems(persistedLandingTrees, items);
     } else if (importNewNode) {
+        //for landing "root" node or when import nodes
         return appendItemsToModels(persistedLandingTrees, items);
     } else {
-        return addItemsToGroupsWithoutParent(persistedLandingTrees, items, rootItem);
+        //for other landing type node
+        const itemCreated = items[0];
+        if (!itemCreated || items.length > 1)
+            throw new Error("Unexpected error: 'there is no item to create' or 'creating more than one item'");
+        return addItemsToGroupsWithoutParent(persistedLandingTrees, itemCreated);
     }
 };
 
