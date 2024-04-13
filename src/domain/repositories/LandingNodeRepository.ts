@@ -7,7 +7,6 @@ export interface LandingNodeRepository {
     getAll(): Promise<LandingNode[]>;
     getPersistedLandingPages(): Promise<PersistedLandingPage[]>;
     create(node: LandingNode): Promise<void>;
-    update(node: LandingNode): Promise<void>;
     deleteNodes(ids: string[]): Promise<void>;
     save(landingNodes: PersistedLandingPage[]): Promise<void>;
 }
