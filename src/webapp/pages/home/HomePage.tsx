@@ -15,6 +15,7 @@ import { useConfig } from "../settings/useConfig";
 import { Cardboard } from "../../components/card-board/Cardboard";
 import { BigCard } from "../../components/card-board/BigCard";
 import { goTo } from "../../utils/routes";
+import { Maybe } from "../../../types/utils";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, landings, reload, isLoading, launchAppBaseUrl, translate } = useAppContext();
@@ -84,7 +85,7 @@ export const HomePage: React.FC = React.memo(() => {
         }
     }, [defaultApplication, isLoadingLong, launchAppBaseUrl, userLandings]);
 
-    const redirect = useRedirectOnSinglePrimaryAction(currentPage);
+    const redirect = useRedirectOnSinglePrimaryAction(currentPage, userLandings);
 
     return (
         <StyledLanding
@@ -110,7 +111,7 @@ export const HomePage: React.FC = React.memo(() => {
                     <>
                         <h1>Available Home Pages</h1>
                         <Cardboard rowSize={4}>
-                            {userLandings?.map(landing => {
+                            {userLandings.map(landing => {
                                 return (
                                     <BigCard
                                         key={`card-${landing.id}`}
@@ -157,10 +158,17 @@ const ContentWrapper = styled.div`
     min-height: 100vh;
 `;
 
-function useRedirectOnSinglePrimaryAction(landingNode: LandingNode | undefined): { isActive: boolean } {
+function useRedirectOnSinglePrimaryAction(
+    landingNode: Maybe<LandingNode>,
+    userLandings: Maybe<LandingNode[]>
+): { isActive: boolean } {
     const { actions, launchAppBaseUrl } = useAppContext();
     const { user } = useConfig();
-    const url = user && landingNode ? getPrimaryActionUrl(landingNode, { actions, user }) : undefined;
+    const url =
+        user && landingNode && userLandings?.length === 1
+            ? getPrimaryActionUrl(landingNode, { actions, user })
+            : undefined;
+
     const [isActive, setIsActive] = React.useState(false);
 
     React.useEffect(() => {
