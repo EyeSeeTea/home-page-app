@@ -1,4 +1,4 @@
-import { ConfirmationDialog, ConfirmationDialogProps } from "@eyeseetea/d2-ui-components";
+import { ConfirmationDialog, ConfirmationDialogProps, useSnackbar } from "@eyeseetea/d2-ui-components";
 import _ from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
@@ -30,6 +30,7 @@ export const ActionDetailPage: React.FC<ActionDetailPageProps> = ({ mode }) => {
     const { compositionRoot, reload } = useAppContext();
     const { id } = useParams();
     const navigate = useNavigate();
+    const snackbar = useSnackbar();
 
     const [stateAction, updateStateAction] = useState<PartialAction>(defaultAction);
 
@@ -51,9 +52,9 @@ export const ActionDetailPage: React.FC<ActionDetailPageProps> = ({ mode }) => {
     }, [navigate]);
 
     const saveAction = useCallback(async () => {
-        await compositionRoot.actions.update({ ...stateAction, id: _.kebabCase(stateAction.id) });
+        await compositionRoot.actions.update({ ...stateAction, id: _.kebabCase(stateAction.id) }).catch(snackbar.error);
         await reload();
-    }, [stateAction, compositionRoot, reload]);
+    }, [stateAction, compositionRoot, reload, snackbar]);
 
     const onChange = useCallback((update: Parameters<typeof updateStateAction>[0]) => {
         updateStateAction(update);

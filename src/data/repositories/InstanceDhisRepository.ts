@@ -132,7 +132,7 @@ async function transformFile(blob: Blob, mime: string): Promise<Blob> {
         });
     } else if (process.env.NODE_ENV === "development" && mime === "image/gif") {
         try {
-            const ffmpeg = createFFmpeg({ corePath: "https://unpkg.com/@ffmpeg/core/dist/ffmpeg-core.js" });
+            const ffmpeg = createFFmpeg({ corePath: "https://unpkg.com/@ffmpeg/core@0.12.6" });
 
             await ffmpeg.load();
             ffmpeg.FS("writeFile", "file.gif", await fetchFile(blob));
@@ -151,6 +151,7 @@ async function transformFile(blob: Blob, mime: string): Promise<Blob> {
             const data = ffmpeg.FS("readFile", "file.mp4");
             return new Blob([data.buffer], { type: "video/mp4" });
         } catch (error: any) {
+            console.error(error);
             return blob;
         }
     }
