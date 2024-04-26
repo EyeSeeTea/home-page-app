@@ -16,6 +16,7 @@ import { Cardboard } from "../../components/card-board/Cardboard";
 import { BigCard } from "../../components/card-board/BigCard";
 import { goTo } from "../../utils/routes";
 import { defaultIcon, defaultTitle } from "../../router/Router";
+import { useAnalytics } from "../../hooks/useAnalytics";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, landings, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } =
@@ -29,6 +30,7 @@ export const HomePage: React.FC = React.memo(() => {
     }, [landingPagePermissions, landings, user]);
 
     const navigate = useNavigate();
+    const analytics = useAnalytics();
     const [history, updateHistory] = useState<LandingNode[]>([]);
     const [isLoadingLong, setLoadingLong] = useState<boolean>(false);
     const [pageType, setPageType] = useState<"userLandings" | "singleLanding">(
@@ -99,22 +101,22 @@ export const HomePage: React.FC = React.memo(() => {
             icon?.setAttribute("href", defaultIcon);
             document.title = defaultTitle;
         };
-    }, [reload, currentPage, pageType, translate, compositionRoot]);
+    }, [reload, currentPage, pageType, translate]);
 
     useEffect(() => {
         if (userLandings && userLandings?.length > 1 && pageType === "userLandings") {
-            compositionRoot.analytics.sendPageView({
+            analytics.sendPageView({
                 title: "Homepage - Available Home Pages",
                 location: `${window.location.hash.split("?")[0]}home-page-app/available-landings`,
             });
         } else if (currentPage && pageType === "singleLanding" && currentHistory) {
             const type = currentPage.type === "root" ? "landing" : currentPage.type;
-            compositionRoot.analytics.sendPageView({
+            analytics.sendPageView({
                 title: `Homepage - ${currentPage.name.referenceValue}`,
                 location: `${window.location.hash.split("?")[0]}home-page-app/${type}/${currentPage.id}`,
             });
         }
-    }, [currentPage, compositionRoot.analytics, pageType, userLandings, currentHistory]);
+    }, [currentPage, analytics, pageType, userLandings, currentHistory]);
 
     const redirect = useRedirectOnSinglePrimaryAction(currentPage);
 

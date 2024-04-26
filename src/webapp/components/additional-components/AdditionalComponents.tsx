@@ -7,14 +7,15 @@ import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
 import { LandingParagraph } from "../landing-layout";
 import { getPageActions } from "../../../domain/entities/Action";
+import { useAnalytics } from "../../hooks/useAnalytics";
 
 export const AdditionalComponents: React.FC<{
     isRoot: boolean;
     currentPage: LandingNode;
 }> = ({ isRoot, currentPage }) => {
-    const { actions, translate, launchAppBaseUrl, compositionRoot } = useAppContext();
-
+    const { actions, translate, launchAppBaseUrl } = useAppContext();
     const { showAllActions, user } = useConfig();
+    const analytics = useAnalytics();
 
     const currentPageActions = actions.filter(action => currentPage.actions.includes(action.id));
     const pageActions = user && getPageActions(isRoot, showAllActions, actions, user, currentPageActions);
@@ -46,7 +47,7 @@ export const AdditionalComponents: React.FC<{
                             ? `${action.dhisLaunchUrl}`
                             : `${launchAppBaseUrl}${action.dhisLaunchUrl}`;
 
-                        compositionRoot.analytics.sendPageView({ title: name, location: href });
+                        analytics.sendPageView({ title: name, location: href });
                         window.location.href = href;
                     };
 
