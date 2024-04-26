@@ -29,6 +29,8 @@ export const HomePage: React.FC = React.memo(() => {
             : undefined;
     }, [landingPagePermissions, landings, user]);
 
+    const initLandings = useMemo(() => userLandings?.filter(landing => landing.executeOnInit), [userLandings]);
+
     const navigate = useNavigate();
     const analytics = useAnalytics();
     const [history, updateHistory] = useState<LandingNode[]>([]);
@@ -40,8 +42,8 @@ export const HomePage: React.FC = React.memo(() => {
     const favicon = useRef<HTMLLinkElement>(document.head.querySelector('link[rel="icon"]'));
 
     const currentPage = useMemo<LandingNode | undefined>(() => {
-        return history[0] ?? userLandings?.[0];
-    }, [history, userLandings]);
+        return history[0] ?? initLandings?.[0];
+    }, [history, initLandings]);
 
     const isRoot = history.length === 0;
     const currentHistory = history[0];
@@ -54,19 +56,23 @@ export const HomePage: React.FC = React.memo(() => {
         navigate("/about");
     }, [navigate]);
 
-    const openPage = useCallback((page: LandingNode) => {
-        updateHistory(history => [page, ...history]);
-    }, []);
+    const openPage = useCallback(
+        (page: LandingNode) => {
+            compositionRoot.analytics.sendPageView({ title: page.name.referenceValue, location: undefined });
+            updateHistory(history => [page, ...history]);
+        },
+        [compositionRoot.analytics]
+    );
 
     const goBack = useCallback(() => {
-        if (userLandings?.length === 1 || currentPage?.type !== "root") updateHistory(history => history.slice(1));
+        if (initLandings?.length === 1 || currentPage?.type !== "root") updateHistory(history => history.slice(1));
         else setPageType("userLandings");
-    }, [currentPage, userLandings]);
+    }, [currentPage, initLandings]);
 
     const goHome = useCallback(() => {
-        if (userLandings?.length === 1) updateHistory([]);
+        if (initLandings?.length === 1) updateHistory([]);
         else setPageType("userLandings");
-    }, [userLandings?.length]);
+    }, [initLandings?.length]);
 
     const logout = useCallback(() => {
         window.location.href = `${launchAppBaseUrl}/dhis-web-commons-security/logout.action`;
@@ -83,15 +89,15 @@ export const HomePage: React.FC = React.memo(() => {
     }, [compositionRoot]);
 
     useEffect(() => {
-        if (userLandings?.length === 0) {
+        if (initLandings?.length === 0) {
             window.location.href = !defaultApplication
                 ? `${launchAppBaseUrl}/dhis-web-dashboard/index.html`
                 : `${launchAppBaseUrl}${defaultApplication}`;
         }
-        if (userLandings && userLandings?.length > 1) {
+        if (initLandings && initLandings?.length > 1) {
             setPageType("userLandings");
         }
-    }, [defaultApplication, isLoadingLong, launchAppBaseUrl, userLandings]);
+    }, [defaultApplication, isLoadingLong, launchAppBaseUrl, initLandings]);
 
     useEffect(() => {
         const icon = favicon.current;
@@ -140,11 +146,11 @@ export const HomePage: React.FC = React.memo(() => {
                             <p>{i18n.t("Loading the user configuration...")}</p>
                         )}
                     </ProgressContainer>
-                ) : userLandings && pageType === "userLandings" ? (
+                ) : initLandings && pageType === "userLandings" ? (
                     <>
                         <h1>Available Home Pages</h1>
                         <Cardboard rowSize={4}>
-                            {userLandings?.map(landing => {
+                            {initLandings?.map(landing => {
                                 return (
                                     <BigCard
                                         key={`card-${landing.id}`}

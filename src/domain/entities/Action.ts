@@ -6,11 +6,7 @@ import { TranslatableTextModel } from "./TranslatableText";
 import { User } from "./User";
 import { ModelValidation } from "./Validation";
 
-export const ActionTypeModel = Schema.oneOf([
-    Schema.exact("app"),
-    // Schema.exact("core"),
-    // Schema.exact("widget"),
-]);
+export const ActionTypeModel = Schema.oneOf([Schema.exact("app"), Schema.exact("page")]);
 
 export const defaultTranslatableModel = (type: string) => ({
     key: `action-${type}`,
@@ -34,6 +30,7 @@ export const ActionModel = Schema.extend(
         dhisVersionRange: Schema.string,
         dhisAppKey: Schema.string,
         dhisLaunchUrl: Schema.string,
+        launchPageId: Schema.optionalSafe(Schema.string, ""),
         dhisAuthorities: Schema.array(Schema.string),
         installed: Schema.boolean,
         compatible: Schema.boolean,
@@ -59,8 +56,7 @@ export type PartialAction = PartialBy<
 >;
 
 export const isValidActionType = (type: string): type is ActionType => {
-    //return ["app", "core", "widget"].includes(type);
-    return ["app"].includes(type);
+    return ["app", "page"].includes(type);
 };
 
 export const actionValidations: ModelValidation[] = [
@@ -79,6 +75,11 @@ export const actionValidations: ModelValidation[] = [
         validation: "hasText",
         alias: "launch url",
     },
+    {
+        property: "launchPageId",
+        validation: "hasText", //should be idExists
+        alias: "launch page",
+    },
 ];
 
 export const defaultAction: PartialAction = {
@@ -94,6 +95,7 @@ export const defaultAction: PartialAction = {
     dhisVersionRange: "",
     dhisAppKey: "",
     dhisLaunchUrl: "",
+    launchPageId: "",
     dhisAuthorities: [],
     disabled: false,
 };

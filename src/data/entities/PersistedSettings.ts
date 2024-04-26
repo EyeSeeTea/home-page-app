@@ -1,6 +1,6 @@
 import { LandingPagePermission, Permission } from "../../domain/entities/Permission";
 
-export interface PersistedConfig {
+export interface PersistedSettings {
     poeditorToken?: string;
     defaultApplication?: string;
     settingsPermissions?: Permission;

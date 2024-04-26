@@ -221,14 +221,22 @@ export const ActionListTable: React.FC<ActionListTableProps> = props => {
                     return (
                         <div>
                             {item.name}
-                            {!item.installed && !isAbsoluteUrl ? (
+                            {!item.installed && !isAbsoluteUrl && item.type === "app" ? (
                                 <AlertIcon tooltip={i18n.t("App is not installed in this instance")} />
                             ) : null}
-                            {!item.compatible && !isAbsoluteUrl ? (
+                            {!item.compatible && !isAbsoluteUrl && item.type === "app" ? (
                                 <AlertIcon tooltip={i18n.t("Action does not support this DHIS2 version")} />
                             ) : null}
                         </div>
                     );
+                },
+            },
+            {
+                name: "type",
+                text: "Type",
+                sortable: false,
+                getValue: item => {
+                    return <div>{actionTypes[item.type]}</div>;
                 },
             },
             {
@@ -307,7 +315,11 @@ export const ActionListTable: React.FC<ActionListTableProps> = props => {
                 icon: <GetAppIcon />,
                 onClick: installApp,
                 isActive: rows => {
-                    return !!tableActions.installApp && _.every(rows, item => !item.installed);
+                    return (
+                        !!tableActions.installApp &&
+                        _.every(rows, item => !item.installed) &&
+                        _.every(rows, item => item.type === "app")
+                    );
                 },
             },
             {
@@ -398,6 +410,11 @@ export const buildListActions = (actions: Action[]): ListItemAction[] => {
         lastPosition: actions.length - 1,
     }));
 };
+
+const actionTypes = {
+    app: i18n.t("App/Link"),
+    page: i18n.t("Landing page"),
+} as const;
 
 const PageWrapper = styled.div`
     .MuiTableRow-root {
