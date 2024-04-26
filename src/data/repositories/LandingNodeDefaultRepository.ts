@@ -19,12 +19,7 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
                 : [];
 
             const validations = roots.map(root =>
-                LandingNodeModel.decode(
-                    buildDomainLandingNode(
-                        root,
-                        persisted.find(model => model.find(item => item.parent === root.id)) ?? []
-                    )
-                )
+                LandingNodeModel.decode(buildLandingNode(root, _.flatten(persisted)))
             );
 
             _.forEach(validations, validation => {
@@ -70,7 +65,7 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
             executeOnInit: true,
         };
 
-        await this.storageClient.saveObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES, [[root]]);
+        await this.storageClient.saveObject<PersistedLandingPage[]>(Namespaces.LANDING_PAGES, [[root]]);
         return [{ ...root, children: [] }];
     }
 
@@ -85,13 +80,12 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
 
     public getPersistedLandingPages(): Promise<PersistedLandingPage[]> {
         return this.storageClient
-            .getObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES)
+            .getObject<PersistedLandingPage[]>(Namespaces.LANDING_PAGES)
             .then(nodes => nodes ?? []);
     }
 
     public async create(node: LandingNode): Promise<void> {
-        const persisted =
-            (await this.storageClient.getObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES)) ?? [];
+        const persisted = (await this.storageClient.getObject<PersistedLandingPage[]>(Namespaces.LANDING_PAGES)) ?? [];
         const updatedNodes = extractChildrenNodes(node, node.parent);
 
         const updatedLandingNodes = updateLandingNode(persisted, updatedNodes, true);
@@ -99,24 +93,14 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
         await this.storageClient.saveObject(Namespaces.LANDING_PAGES, updatedLandingNodes);
     }
 
-    public async update(node: LandingNode): Promise<void> {
-        const persisted =
-            (await this.storageClient.getObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES)) ?? [];
-        const updatedNodes = extractChildrenNodes(node, node.parent);
-
-        const updatedLandingNodes = updateLandingNode(persisted, updatedNodes);
-
-        await this.storageClient.saveObject(Namespaces.LANDING_PAGES, updatedLandingNodes);
-    }
-
     public async deleteNodes(ids: string[]): Promise<void> {
-        const nodes = (await this.storageClient.getObject<PersistedLandingNode[][]>(Namespaces.LANDING_PAGES)) ?? [];
+        const nodes = (await this.storageClient.getObject<PersistedLandingPage[]>(Namespaces.LANDING_PAGES)) ?? [];
 
         const newNodes = nodes.map(models => {
             const root = models.find(model => model.type === "root");
             if (!root) throw new Error("No value for root");
 
-            const node = LandingNodeModel.decode(buildDomainLandingNode(root, models)).toMaybe().extract();
+            const node = LandingNodeModel.decode(buildLandingNode(root, models)).toMaybe().extract();
             if (!node) throw new Error("No value for node");
 
             const childNodes = extractChildrenNodes(node, root.id);
@@ -134,66 +118,69 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
     }
 }
 
-const buildDomainLandingNode = (root: PersistedLandingNode, items: PersistedLandingNode[]): LandingNode => {
+export const buildLandingNode = (root: PersistedLandingNode, items: PersistedLandingNode[]): LandingNode => {
     return {
         ...root,
         children: _(items)
             .filter(({ parent }) => parent === root.id)
             .sortBy(item => item.order ?? 1000)
-            .map((node, order) => ({ ...buildDomainLandingNode(node, items), order }))
+            .map((node, order) => ({ ...buildLandingNode(node, items), order }))
             .value(),
     };
 };
 
-const areItemsInModels = (models: PersistedLandingNode[][], items: PersistedLandingNode[]): boolean => {
-    return models.some(nodes => {
-        return _.intersectionBy(nodes, items, node => node.id).length > 0;
-    });
+const areItemsInModels = (landingTrees: PersistedLandingPage[], items: PersistedLandingNode[]): boolean => {
+    return landingTrees.some(tree => _.intersectionBy(tree, items, node => node.id).length > 0);
 };
 
 const replaceNodesWithItems = (
-    models: PersistedLandingNode[][],
+    landingTrees: PersistedLandingPage[],
     items: PersistedLandingNode[]
-): PersistedLandingNode[][] => {
-    return models.map(model => {
-        return model.map(persisted => items.find(item => item.id === persisted.id) || persisted);
+): PersistedLandingPage[] => {
+    return landingTrees.map(tree => {
+        return tree.map(persisted => items.find(item => item.id === persisted.id) || persisted);
     });
 };
 
 const appendItemsToModels = (
-    models: PersistedLandingNode[][],
+    landingTrees: PersistedLandingPage[],
     items: PersistedLandingNode[]
-): PersistedLandingNode[][] => {
-    return _.concat(models, [items]);
+): PersistedLandingPage[] => {
+    return _.concat(landingTrees, [items]);
 };
 
 const addItemsToGroupsWithoutParent = (
-    models: PersistedLandingNode[][],
-    items: PersistedLandingNode[],
-    rootItem?: PersistedLandingNode
-): PersistedLandingNode[][] => {
-    return models.map(modelGroup => {
-        const landingNode = modelGroup.find(model => model.id === rootItem?.parent);
-        if (!landingNode) {
-            return [...modelGroup, ...items];
-        } else return modelGroup;
+    landingTrees: PersistedLandingPage[],
+    item: PersistedLandingNode
+): PersistedLandingPage[] => {
+    return landingTrees.map(tree => {
+        const parentInTree = tree.some(node => node.id === item.parent);
+        if (parentInTree) {
+            return _.concat(tree, item);
+        } else {
+            return tree;
+        }
     });
 };
 
 export const updateLandingNode = (
-    persistedLandingNodes: PersistedLandingNode[][],
+    persistedLandingTrees: PersistedLandingPage[],
     items: PersistedLandingNode[],
     importNewNode?: boolean
-): PersistedLandingNode[][] => {
-    const rootItem = items.find(item => item.type === "root");
-    const isItemSavedInDatastore = areItemsInModels(persistedLandingNodes, items);
+): PersistedLandingPage[] => {
+    const isItemSavedInDatastore = areItemsInModels(persistedLandingTrees, items);
 
     if (isItemSavedInDatastore) {
-        return replaceNodesWithItems(persistedLandingNodes, items);
+        return replaceNodesWithItems(persistedLandingTrees, items);
     } else if (importNewNode) {
-        return appendItemsToModels(persistedLandingNodes, items);
+        //only being called when creating landing page or when import nodes
+        return appendItemsToModels(persistedLandingTrees, items);
     } else {
-        return addItemsToGroupsWithoutParent(persistedLandingNodes, items, rootItem);
+        //onlye being called when creating section, sub-section, or category
+        const itemCreated = items[0];
+        if (!itemCreated || items.length > 1)
+            throw new Error("Unexpected error: 'there is no item to create' or 'creating more than one item'");
+        return addItemsToGroupsWithoutParent(persistedLandingTrees, itemCreated);
     }
 };
 
