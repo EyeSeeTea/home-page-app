@@ -10,9 +10,9 @@ export class UpdateActionUseCase implements UseCase {
     public async execute(action: PartialAction): Promise<void> {
         if (action.type !== "page") return this.actionRepository.update(action);
         const landing = await this.landingRepository.getById(action.launchPageId);
-        if (!landing) throw Error(i18n.t("Landing page not found"));
+        if (!landing) return Promise.reject(i18n.t("Landing page not found"));
         if (landing.actions.some(actionId => actionId === action.id))
-            throw Error(i18n.t("Landing page cannot have an action to launch the landing page itself"));
+            return Promise.reject(i18n.t("Landing page cannot have an action to launch the landing page itself"));
         else return this.actionRepository.update(action);
     }
 }

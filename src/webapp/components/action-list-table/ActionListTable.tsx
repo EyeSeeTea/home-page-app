@@ -54,8 +54,10 @@ export const ActionListTable: React.FC<ActionListTableProps> = props => {
             } else {
                 loading.show(true, i18n.t("Importing action(s)"));
                 try {
-                    const actions = await compositionRoot.actions.import(files);
-                    snackbar.success(i18n.t("Imported {{n}} actions", { n: actions.length }));
+                    await compositionRoot.actions
+                        .import(files)
+                        .then(actions => snackbar.success(i18n.t("Imported {{n}} actions", { n: actions.length })))
+                        .catch(snackbar.error);
                     await refreshRows();
                 } catch (err: any) {
                     snackbar.error((err && err.message) || err.toString());
