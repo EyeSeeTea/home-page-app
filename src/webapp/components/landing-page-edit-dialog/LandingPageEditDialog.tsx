@@ -20,7 +20,8 @@ const buildDefaultNode = (
     type: LandingNodeType,
     parent: string,
     order: number,
-    pageRendering: LandingNodePageRendering
+    pageRendering: LandingNodePageRendering,
+    executeOnInit: boolean
 ) => {
     return {
         id: generateUid(),
@@ -37,6 +38,7 @@ const buildDefaultNode = (
         actions: [],
         backgroundColor: "",
         secondary: false,
+        executeOnInit,
     };
 };
 
@@ -46,7 +48,9 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
     const { actions, translate, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
-    const [value, setValue] = useState<LandingNode>(initialNode ?? buildDefaultNode(type, parent, order, "multiple"));
+    const [value, setValue] = useState<LandingNode>(
+        initialNode ?? buildDefaultNode(type, parent, order, "multiple", true)
+    );
     const [iconLocation, setIconLocation] = React.useState(value.iconLocation === "bottom");
     const [pageRendering, setPageRendering] = React.useState(value.pageRendering === "single");
 
@@ -54,8 +58,9 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
         () =>
             actions
                 .filter(({ compatible }) => compatible)
+                .filter(({ type, launchPageId }) => type === "app" || (type === "page" && value.id !== launchPageId))
                 .map(({ id, name }) => ({ value: id, text: translate(name) })),
-        [actions, translate]
+        [actions, translate, value.id]
     );
 
     const save = useCallback(() => {
@@ -94,6 +99,10 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
 
     const onChangeSecondary = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(value => ({ ...value, secondary: event.target.checked }));
+    };
+
+    const onChangeExecuteOnInit = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(value => ({ ...value, executeOnInit: event.target.checked }));
     };
 
     const onChangePageRendering = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -220,6 +229,20 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                                 name="pageRendering"
                             />
                             <p>{i18n.t("Single page")}</p>
+                        </IconLocationSwitch>
+                    </div>
+
+                    <div>
+                        <Label>{i18n.t("Execute on init")}</Label>
+                        <IconLocationSwitch>
+                            <p>{i18n.t("Disabled")}</p>
+                            <Switch
+                                color="primary"
+                                checked={Boolean(value.executeOnInit)}
+                                onChange={onChangeExecuteOnInit}
+                                name="executeOnInit"
+                            />
+                            <p>{i18n.t("Enabled")}</p>
                         </IconLocationSwitch>
                     </div>
                 </Row>

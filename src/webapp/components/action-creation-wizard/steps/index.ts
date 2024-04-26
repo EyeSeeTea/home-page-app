@@ -1,5 +1,5 @@
 import { WizardStep } from "@eyeseetea/d2-ui-components";
-import { PartialAction } from "../../../../domain/entities/Action";
+import { PartialAction, actionValidations } from "../../../../domain/entities/Action";
 import i18n from "../../../../locales";
 import { AccessStep } from "./AccessStep";
 import { GeneralInfoStep } from "./GeneralInfoStep";
@@ -25,7 +25,7 @@ export const actionCreationWizardSteps: ActionCreationWizardStep[] = [
         key: "general-info",
         label: i18n.t("General info"),
         component: GeneralInfoStep,
-        validationKeys: ["id", "name.referenceValue", "dhisLaunchUrl"],
+        validationKeys: actionValidations.map(({ property }) => property),
     },
     {
         key: "access",

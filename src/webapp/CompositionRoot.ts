@@ -17,8 +17,8 @@ import { SwapActionOrderUseCase } from "../domain/usecases/SwapActionOrderUseCas
 import { UpdateActionUseCase } from "../domain/usecases/UpdateActionUseCase";
 import { UseCase } from "../domain/usecases/UseCase";
 import { ListLandingChildrenUseCase } from "../domain/usecases/ListLandingChildrenUseCase";
-import { UpdateLandingChildUseCase } from "../domain/usecases/UpdateLandingChildUseCase";
-import { DeleteLandingChildUseCase } from "../domain/usecases/DeleteLandingChildUseCase";
+import { UpdateLandingNodeUseCase } from "../domain/usecases/UpdateLandingNodeUseCase";
+import { DeleteLandingNodesUseCase } from "../domain/usecases/DeleteLandingNodesUseCase";
 import { ExportLandingNodesUseCase } from "../domain/usecases/ExportLandingNodesUseCase";
 import { ImportLandingNodesUseCase } from "../domain/usecases/ImportLandingNodesUseCase";
 import { ExportLandingNodesTranslationsUseCase } from "../domain/usecases/ExportLandingNodesTranslationsUseCase";
@@ -41,34 +41,46 @@ import { UpdateLandingPagePermissionsUseCase } from "../domain/usecases/UpdateLa
 import { GetUserUseCase } from "../domain/usecases/GetUserUseCase";
 import { GetDefaultApplicationUseCase } from "../domain/usecases/GetDefaultApplicationUseCase";
 import { UpdateDefaultApplicationUseCase } from "../domain/usecases/UpdateDefaultApplicationUseCase";
-import { CreateLandingChildUseCase } from "../domain/usecases/CreateLandingChildUseCase";
+import { CreateLandingNodeUseCase } from "../domain/usecases/CreateLandingNodeUseCase";
+import { SendPageViewUseCase } from "../domain/usecases/SendPageViewUseCase";
+import { GoogleAnalyticsRepository } from "../data/repositories/GoogleAnalyticsRepository";
+import { ImportExportClient } from "../data/clients/importExport/ImportExportClient";
+import { GetConfigUseCase } from "../domain/usecases/GetConfigUseCase";
+import { UpdateGoogleAnalyticsCode } from "../domain/usecases/UpdateGoogleAnalyticsCode";
+import { GetGoogleAnalyticsCodeUseCase } from "../domain/usecases/GetGoogleAnalyticsCodeUseCase";
 
-export function getCompositionRoot(instance: Instance) {
+export async function getCompositionRoot(instance: Instance) {
     const configRepository = new Dhis2ConfigRepository(instance.url);
+    const config = await new GetConfigUseCase(configRepository).execute();
     const userRepository = new UserApiRepository(instance);
     const instanceRepository = new InstanceDhisRepository(instance);
-    const actionRepository = new ActionDefaultRepository(configRepository, instanceRepository);
-    const landingPageRepository = new LandingNodeDefaultRepository(configRepository, instanceRepository);
+
+    const importExportClientLandings = new ImportExportClient(instanceRepository, "landing-pages");
+    const importExportClientActions = new ImportExportClient(instanceRepository, "actions");
+
+    const actionRepository = new ActionDefaultRepository(config);
+    const landingPageRepository = new LandingNodeDefaultRepository(config.storageClient);
+    const analyticsRepository = new GoogleAnalyticsRepository();
 
     return {
         actions: getExecute({
             get: new GetActionByIdUseCase(actionRepository),
-            list: new ListActionsUseCase(actionRepository),
-            update: new UpdateActionUseCase(actionRepository),
+            list: new ListActionsUseCase(config, actionRepository),
+            update: new UpdateActionUseCase(actionRepository, landingPageRepository),
             delete: new DeleteActionsUseCase(actionRepository),
             swapOrder: new SwapActionOrderUseCase(actionRepository),
-            export: new ExportActionsUseCase(actionRepository),
-            import: new ImportActionsUseCase(actionRepository),
+            export: new ExportActionsUseCase(actionRepository, importExportClientActions),
+            import: new ImportActionsUseCase(actionRepository, landingPageRepository, importExportClientActions),
             exportTranslations: new ExportActionTranslationsUseCase(actionRepository),
             importTranslations: new ImportActionTranslationsUseCase(actionRepository),
         }),
         landings: getExecute({
             list: new ListLandingChildrenUseCase(landingPageRepository),
-            update: new UpdateLandingChildUseCase(landingPageRepository),
-            create: new CreateLandingChildUseCase(landingPageRepository),
-            delete: new DeleteLandingChildUseCase(landingPageRepository),
-            export: new ExportLandingNodesUseCase(landingPageRepository),
-            import: new ImportLandingNodesUseCase(landingPageRepository),
+            update: new UpdateLandingNodeUseCase(landingPageRepository),
+            create: new CreateLandingNodeUseCase(landingPageRepository),
+            delete: new DeleteLandingNodesUseCase(landingPageRepository),
+            export: new ExportLandingNodesUseCase(landingPageRepository, importExportClientLandings),
+            import: new ImportLandingNodesUseCase(landingPageRepository, importExportClientLandings),
             exportTranslations: new ExportLandingNodesTranslationsUseCase(landingPageRepository),
             importTranslations: new ImportLandingNodesTranslationsUseCase(landingPageRepository),
             swapOrder: new SwapLandingChildOrderUseCase(landingPageRepository),
@@ -77,6 +89,8 @@ export function getCompositionRoot(instance: Instance) {
             getUser: new GetUserUseCase(configRepository),
             getDefaultApplication: new GetDefaultApplicationUseCase(configRepository),
             updateDefaultApplication: new UpdateDefaultApplicationUseCase(configRepository),
+            getGoogleAnalyticsCode: new GetGoogleAnalyticsCodeUseCase(configRepository),
+            updateGoogleAnalyticsCode: new UpdateGoogleAnalyticsCode(configRepository),
             getSettingsPermissions: new GetSettingsPermissionsUseCase(configRepository),
             updateSettingsPermissions: new UpdateSettingsPermissionsUseCase(configRepository),
             getLandingPagePermissions: new GetLandingPagePermissionsUseCase(configRepository),
@@ -99,10 +113,13 @@ export function getCompositionRoot(instance: Instance) {
             checkSettingsPermissions: new CheckSettingsPermissionsUseCase(configRepository),
             checkAdminAuthority: new CheckAdminAuthorityUseCase(configRepository),
         }),
+        analytics: getExecute({
+            sendPageView: new SendPageViewUseCase(analyticsRepository, configRepository),
+        }),
     };
 }
 
-export type CompositionRoot = ReturnType<typeof getCompositionRoot>;
+export type CompositionRoot = Awaited<ReturnType<typeof getCompositionRoot>>;
 
 function getExecute<UseCases extends Record<Key, UseCase>, Key extends keyof UseCases>(
     useCases: UseCases

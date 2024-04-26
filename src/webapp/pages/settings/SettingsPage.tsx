@@ -24,7 +24,9 @@ export const SettingsPage: React.FC = () => {
         settingsPermissions,
         updateSettingsPermissions,
         defaultApplication,
+        googleAnalyticsCode,
         updateDefaultApplication,
+        updateGoogleAnalyticsCode,
     } = useConfig();
 
     const navigate = useNavigate();
@@ -34,6 +36,7 @@ export const SettingsPage: React.FC = () => {
     const [permissionsType, setPermissionsType] = useState<string | null>(null);
     const [danglingDocuments, setDanglingDocuments] = useState<NamedRef[]>([]);
     const [application, setDefaultApplication] = useState<string>("");
+    const [gaCode, setGaCode] = useState<string>("");
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
     const backHome = useCallback(() => {
@@ -188,25 +191,48 @@ export const SettingsPage: React.FC = () => {
                     )}
 
                     {isAdmin && (
-                        <DefaultApplicationContainer>
-                            <h4>{i18n.t("Default application")}</h4>
-                            <DefaultApplicationForm>
-                                <TextFieldOnBlur
-                                    fullWidth={true}
-                                    label={i18n.t("DHIS2 application")}
-                                    value={defaultApplication}
-                                    onChange={event => setDefaultApplication(event.target.value)}
-                                    placeholder={"/dhis-web-dashboard/index.html"}
-                                />
-                                <Button
-                                    onClick={() => updateDefaultApplication(application)}
-                                    color="primary"
-                                    variant="contained"
-                                >
-                                    {i18n.t("Save")}
-                                </Button>
-                            </DefaultApplicationForm>
-                        </DefaultApplicationContainer>
+                        <div>
+                            <SubContainer>
+                                <h4>{i18n.t("Default application")}</h4>
+                                <GridForm>
+                                    <TextFieldOnBlur
+                                        fullWidth={true}
+                                        label={i18n.t("DHIS2 application")}
+                                        value={defaultApplication}
+                                        onChange={event => setDefaultApplication(event.target.value)}
+                                        placeholder={"/dhis-web-dashboard/index.html"}
+                                    />
+                                    <Button
+                                        onClick={() => updateDefaultApplication(application)}
+                                        color="primary"
+                                        variant="contained"
+                                    >
+                                        {i18n.t("Save")}
+                                    </Button>
+                                </GridForm>
+                            </SubContainer>
+                            <SubContainer>
+                                <h4>{i18n.t("Google Analytics 4")}</h4>
+                                <GridForm>
+                                    <TextFieldOnBlur
+                                        fullWidth={true}
+                                        label={i18n.t("GA4 Code")}
+                                        value={googleAnalyticsCode ?? ""}
+                                        onChange={event => setGaCode(event.target.value)}
+                                        placeholder={"G-XXXXXXX"}
+                                    />
+                                    <Button
+                                        onClick={() => {
+                                            updateGoogleAnalyticsCode(gaCode).then(() => window.location.reload()); // Force reload in order to remove previous GA code initiated script
+                                        }}
+                                        color="primary"
+                                        variant="contained"
+                                    >
+                                        {i18n.t("Save")}
+                                    </Button>
+                                </GridForm>
+                            </SubContainer>
+                        </div>
                     )}
                 </Group>
 
@@ -243,15 +269,15 @@ const Container = styled.div`
     margin: 1.5rem;
 `;
 
+const SubContainer = styled.div`
+    margin-bottom: 2rem;
+`;
+
 const Header = styled(PageHeader)`
     margin-top: 1rem;
 `;
 
-const DefaultApplicationContainer = styled.div`
-    width: 35%;
-`;
-
-const DefaultApplicationForm = styled.div`
+const GridForm = styled.div`
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 20px;

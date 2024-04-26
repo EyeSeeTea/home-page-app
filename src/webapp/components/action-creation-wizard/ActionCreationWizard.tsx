@@ -1,12 +1,12 @@
-import { Wizard, WizardStep } from "@eyeseetea/d2-ui-components";
 import _ from "lodash";
+import { Wizard, WizardStep } from "@eyeseetea/d2-ui-components";
 import React, { useCallback, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { actionValidations } from "../../../domain/entities/Action";
 import { validateModel } from "../../../domain/entities/Validation";
-import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
 import { ActionCreationWizardStepProps, actionCreationWizardSteps } from "./steps";
+import i18n from "../../../locales";
 
 export interface ActionCreationWizardProps extends ActionCreationWizardStepProps {
     className?: string;
@@ -21,12 +21,17 @@ export const ActionCreationWizard: React.FC<ActionCreationWizardProps> = props =
 
     const steps = useMemo(() => actionCreationWizardSteps.map(step => ({ ...step, props: stepProps })), [stepProps]);
 
+    const isApp = props.action.type === "app";
+
     const onStepChangeRequest = useCallback(
         async (_currentStep: WizardStep, newStep: WizardStep) => {
             const index = _(steps).findIndex(step => step.key === newStep.key);
 
             return _.take(steps, index).flatMap(({ validationKeys }) => {
-                const validationErrors = validateModel(props.action, actionValidations, validationKeys).map(
+                // If action.type is app, validate keys except launchPageId, as it should be blank; and viceversa for dhisLaunchUrl
+                const keys = validationKeys.filter(k => (isApp ? k !== "launchPageId" : k !== "dhisLaunchUrl"));
+
+                const validationErrors = validateModel(props.action, actionValidations, keys).map(
                     ({ description }) => description
                 );
 
@@ -39,7 +44,7 @@ export const ActionCreationWizard: React.FC<ActionCreationWizardProps> = props =
                 ]);
             });
         },
-        [props.action, steps, actions, isEdit]
+        [props.action, steps, actions, isEdit, isApp]
     );
 
     const urlHash = location.hash.slice(1);
