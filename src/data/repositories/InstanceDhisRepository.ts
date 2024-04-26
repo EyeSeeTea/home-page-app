@@ -1,19 +1,19 @@
+import _ from "lodash";
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 import FileType from "file-type/browser";
-import _ from "lodash";
 import Resizer from "react-image-file-resizer";
 import { InstalledApp } from "../../domain/entities/InstalledApp";
 import { NamedRef } from "../../domain/entities/Ref";
 import { InstanceRepository, UploadFileOptions } from "../../domain/repositories/InstanceRepository";
 import { D2Api } from "../../types/d2-api";
-import { cache, clearCache } from "../../utils/cache";
+import { cache } from "../../utils/cache";
 import { getUrls } from "../../utils/urls";
 import { DataStoreStorageClient } from "../clients/storage/DataStoreStorageClient";
 import { Namespaces } from "../clients/storage/Namespaces";
 import { StorageClient } from "../clients/storage/StorageClient";
 import { Instance } from "../entities/Instance";
 import { UserSearch } from "../entities/SearchUser";
-import { getD2APiFromInstance } from "../utils/d2-api";
+import { getD2APiFromInstance, getVersion } from "../utils/d2-api";
 import { getUid, extractUids } from "../utils/uid";
 
 const documentNamePrefix = "[Home Page App]";
@@ -33,8 +33,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     @cache()
     public async getVersion(): Promise<string> {
-        const { version } = await this.api.system.info.getData();
-        return version;
+        return getVersion(this.api);
     }
 
     public async uploadFile(data: ArrayBuffer, options: UploadFileOptions = {}): Promise<string> {
@@ -55,8 +54,6 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     public async installApp(appName: string): Promise<boolean> {
-        clearCache(this.isAppInstalledByUrl, this);
-
         const storeApps = await this.listStoreApps();
         const { versions = [] } = storeApps.find(({ name }) => name === appName) ?? {};
         const latestVersion = versions[0]?.id;
@@ -104,20 +101,6 @@ export class InstanceDhisRepository implements InstanceRepository {
         };
 
         return this.api.metadata.get({ users: options, userGroups: options }).getData();
-    }
-
-    @cache()
-    public async isAppInstalledByUrl(launchUrl: string): Promise<boolean> {
-        const isUrlRelative = launchUrl.startsWith("/");
-        if (!isUrlRelative) return false;
-
-        try {
-            await this.api.baseConnection.request({ method: "get", url: launchUrl }).getData();
-        } catch (error: any) {
-            return false;
-        }
-
-        return true;
     }
 
     @cache()

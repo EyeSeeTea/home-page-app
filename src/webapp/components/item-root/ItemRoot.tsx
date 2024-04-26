@@ -56,7 +56,7 @@ export const ItemRoot: React.FC<{
                     </Cardboard>
                 )}
 
-                <AdditionalComponents currentPage={currentPage} isRoot={isRoot} />
+                <AdditionalComponents currentPage={currentPage} isRoot={isRoot} openPage={openPage} />
             </LandingContent>
 
             {currentPage.iconLocation === "bottom" && (
