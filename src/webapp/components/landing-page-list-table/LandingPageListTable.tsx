@@ -8,7 +8,7 @@ import {
     useLoading,
     useSnackbar,
 } from "@eyeseetea/d2-ui-components";
-import { Icon } from "@material-ui/core";
+import { Checkbox, Icon } from "@material-ui/core";
 import _ from "lodash";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { FileRejection } from "react-dropzone";
@@ -152,6 +152,12 @@ export const LandingPageListTable: React.FC<{ nodes: LandingNode[]; isLoading?: 
                 text: "Icon",
                 getValue: item =>
                     item.icon ? <ItemIcon src={item.icon} alt={`Icon for ${item.name.referenceValue}`} /> : "-",
+            },
+            {
+                name: "executeOnInit",
+                text: "Execute on init",
+                getValue: item =>
+                    item.parent === "none" ? <Checkbox checked={item.executeOnInit} color="primary" disabled /> : "",
             },
         ],
         []

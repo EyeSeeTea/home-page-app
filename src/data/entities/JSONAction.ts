@@ -15,5 +15,6 @@ export interface JSONAction {
     dhisVersionRange: string;
     dhisAppKey: string;
     dhisLaunchUrl: string;
+    launchPageId: string;
     dhisAuthorities: string[];
 }

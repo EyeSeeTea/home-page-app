@@ -6,6 +6,6 @@ export class ListLandingChildrenUseCase implements UseCase {
     constructor(private landingNodeRepository: LandingNodeRepository) {}
 
     public async execute(): Promise<LandingNode[]> {
-        return this.landingNodeRepository.list();
+        return this.landingNodeRepository.getAll();
     }
 }

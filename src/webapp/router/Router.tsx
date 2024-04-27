@@ -23,3 +23,6 @@ export const Router: React.FC = React.memo(() => {
         </HashRouter>
     );
 });
+
+export const defaultIcon = process.env.PUBLIC_URL + "/icon-small.png";
+export const defaultTitle = "Homepage App";

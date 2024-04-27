@@ -3,11 +3,13 @@ import { LandingPagePermission, Permission } from "../../../domain/entities/Perm
 import { SharedUpdate } from "../../components/permissions-dialog/PermissionsDialog";
 import { useAppContext } from "../../contexts/app-context";
 import { User } from "../../../domain/entities/User";
+import { Maybe } from "../../../types/utils";
 
 export function useConfig(): useConfigPloc {
     const { compositionRoot } = useAppContext();
     const [showAllActions, setShowAllActions] = useState(false);
     const [defaultApplication, setDefaultApplication] = useState<string>("");
+    const [googleAnalyticsCode, setGoogleAnalyticsCode] = useState<Maybe<string>>();
     const [settingsPermissions, setSettingsPermissions] = useState<Permission>();
     const [landingPagePermissions, setLandingPagePermissions] = useState<LandingPagePermission[]>();
     const [user, setUser] = useState<User>();
@@ -15,6 +17,7 @@ export function useConfig(): useConfigPloc {
     useEffect(() => {
         compositionRoot.config.getShowAllActions().then(setShowAllActions);
         compositionRoot.config.getDefaultApplication().then(setDefaultApplication);
+        compositionRoot.config.getGoogleAnalyticsCode().then(setGoogleAnalyticsCode);
         compositionRoot.config.getSettingsPermissions().then(setSettingsPermissions);
         compositionRoot.config.getLandingPagePermissions().then(setLandingPagePermissions);
         compositionRoot.config.getUser().then(setUser);
@@ -23,7 +26,15 @@ export function useConfig(): useConfigPloc {
     const updateDefaultApplication = useCallback(
         async (value: string) => {
             setDefaultApplication(value);
-            compositionRoot.config.updateDefaultApplication(value);
+            await compositionRoot.config.updateDefaultApplication(value);
+        },
+        [compositionRoot]
+    );
+
+    const updateGoogleAnalyticsCode = useCallback(
+        async (code: string) => {
+            setGoogleAnalyticsCode(code);
+            await compositionRoot.config.updateGoogleAnalyticsCode(code);
         },
         [compositionRoot]
     );
@@ -61,7 +72,7 @@ export function useConfig(): useConfigPloc {
     const updateShowAllActions = useCallback(
         async (value: boolean) => {
             setShowAllActions(value);
-            compositionRoot.config.setShowAllActions(value);
+            await compositionRoot.config.setShowAllActions(value);
         },
         [compositionRoot]
     );
@@ -72,10 +83,12 @@ export function useConfig(): useConfigPloc {
         updateShowAllActions,
         defaultApplication,
         updateDefaultApplication,
+        updateGoogleAnalyticsCode,
         settingsPermissions,
         updateSettingsPermissions,
         landingPagePermissions,
         updateLandingPagePermissions,
+        googleAnalyticsCode,
     };
 }
 
@@ -85,8 +98,10 @@ interface useConfigPloc {
     updateShowAllActions: (value: boolean) => void;
     defaultApplication: string;
     updateDefaultApplication: (value: string) => void;
+    updateGoogleAnalyticsCode: (code: string) => Promise<void>;
     settingsPermissions?: Permission;
     updateSettingsPermissions: (sharedUpdate: SharedUpdate) => Promise<void>;
     landingPagePermissions?: LandingPagePermission[];
     updateLandingPagePermissions: (sharedUpdate: SharedUpdate, id: string) => Promise<void>;
+    googleAnalyticsCode: Maybe<string>;
 }

@@ -33,6 +33,7 @@ export interface LandingNode {
     children: LandingNode[];
     backgroundColor: string;
     secondary: boolean | undefined;
+    executeOnInit: boolean;
 }
 
 export const LandingNodeModel: Codec<LandingNode> = Schema.object({
@@ -50,6 +51,7 @@ export const LandingNodeModel: Codec<LandingNode> = Schema.object({
     children: Schema.lazy(() => Schema.array(LandingNodeModel)),
     backgroundColor: Schema.optionalSafe(Schema.string, ""),
     secondary: Schema.optional(Schema.boolean),
+    executeOnInit: Schema.optionalSafe(Schema.boolean, true),
 });
 
 export interface OrderedLandingNode extends LandingNode {

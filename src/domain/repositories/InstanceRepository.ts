@@ -7,7 +7,6 @@ export interface InstanceRepository {
     getBaseUrl(): string;
     uploadFile(file: ArrayBuffer, options?: UploadFileOptions): Promise<string>;
     installApp(appId: string): Promise<boolean>;
-    isAppInstalledByUrl(launchUrl: string): Promise<boolean>;
     searchUsers(query: string): Promise<UserSearch>;
     listInstalledApps(): Promise<InstalledApp[]>;
     getVersion(): Promise<string>;
