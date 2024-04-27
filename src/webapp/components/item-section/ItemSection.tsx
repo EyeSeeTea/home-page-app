@@ -29,7 +29,9 @@ export const ItemSection: React.FC<{
                 {currentPage.children.map(node => (
                     <Item key={`node-${node.id}`} isRoot={isRoot} openPage={() => openPage(node)} currentPage={node} />
                 ))}
-                {showAdditionalComponents && <AdditionalComponents currentPage={currentPage} isRoot={isRoot} />}
+                {showAdditionalComponents && (
+                    <AdditionalComponents currentPage={currentPage} isRoot={isRoot} openPage={openPage} />
+                )}
             </LandingContent>
         </GroupContainer>
     );

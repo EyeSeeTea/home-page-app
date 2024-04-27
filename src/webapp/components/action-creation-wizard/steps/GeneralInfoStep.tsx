@@ -1,4 +1,4 @@
-import { MultipleDropdown } from "@eyeseetea/d2-ui-components";
+import { Dropdown, MultipleDropdown } from "@eyeseetea/d2-ui-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Dictionary } from "lodash";
 import React, { ChangeEvent, useCallback, useState } from "react";
@@ -15,7 +15,7 @@ import { Button, Switch } from "@material-ui/core";
 import { ColorPicker } from "../../color-picker/ColorPicker";
 
 export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ action, onChange, isEdit }) => {
-    const { compositionRoot } = useAppContext();
+    const { compositionRoot, landings } = useAppContext();
 
     const [errors, setErrors] = useState<Dictionary<string | undefined>>({});
 
@@ -64,6 +64,13 @@ export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ actio
         [onChange]
     );
 
+    const onChangeLandingPage = useCallback<ComponentParameter<typeof Dropdown, "onChange">>(
+        value => {
+            onChange(action => ({ ...action, launchPageId: value ?? "" }));
+        },
+        [onChange]
+    );
+
     const handleFileUpload = useCallback(
         (event: ChangeEvent<HTMLInputElement>) => {
             const file = event.target.files ? event.target.files[0] : undefined;
@@ -73,6 +80,11 @@ export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ actio
             });
         },
         [compositionRoot, onChange]
+    );
+
+    const landingPages = React.useMemo(
+        () => (landings ?? []).map(landing => ({ value: landing.id, text: landing.name.referenceValue ?? "-" })),
+        [landings]
     );
 
     return (
@@ -162,7 +174,7 @@ export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ actio
                     />
                 </ColorSelectorContainer>
 
-                <TextAlignmentContainer>
+                <OptionContainer>
                     <p>{i18n.t("Text Alignment")}</p>
 
                     {["left", "center", "right"].map((alignment, i) => (
@@ -180,7 +192,7 @@ export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ actio
                             {alignment}
                         </Button>
                     ))}
-                </TextAlignmentContainer>
+                </OptionContainer>
             </Row>
 
             <Row>
@@ -195,19 +207,49 @@ export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ actio
             </Row>
 
             <Row>
-                <h3>{i18n.t("Launch application")}</h3>
+                <h3>{i18n.t("Launch action")}</h3>
 
-                <TextFieldOnBlur
-                    fullWidth={true}
-                    label={i18n.t("DHIS2 application *")}
-                    value={action.dhisLaunchUrl}
-                    onChange={onChangeField("dhisLaunchUrl")}
-                    placeholder={"/dhis-web-dashboard/index.html"}
-                />
+                <OptionContainer>
+                    <p>{i18n.t("Action type")}</p>
+
+                    {(["app", "page"] as const).map((actionType, i) => (
+                        <Button
+                            key={i}
+                            color={actionType === action.type ? "primary" : "default"}
+                            variant="contained"
+                            value={actionType}
+                            onClick={() => onChange(action => ({ ...action, type: actionType }))}
+                        >
+                            {actionTypes[actionType]}
+                        </Button>
+                    ))}
+                </OptionContainer>
+
+                {action.type === "app" ? (
+                    <TextFieldOnBlur
+                        fullWidth={true}
+                        label={i18n.t("DHIS2 application *")}
+                        value={action.dhisLaunchUrl}
+                        onChange={onChangeField("dhisLaunchUrl")}
+                        placeholder={"/dhis-web-dashboard/index.html"}
+                    />
+                ) : (
+                    <LandingPageSelector
+                        label={i18n.t("Landing page *")}
+                        items={landingPages}
+                        value={action.launchPageId}
+                        onChange={onChangeLandingPage}
+                    />
+                )}
             </Row>
         </React.Fragment>
     );
 };
+
+const actionTypes = {
+    app: i18n.t("App/link"),
+    page: i18n.t("Landing page"),
+} as const;
 
 const Row = styled.div`
     margin-bottom: 25px;
@@ -253,14 +295,26 @@ const ColorSelectorContainer = styled.div`
     width: 50%;
 `;
 
-const TextAlignmentContainer = styled.div`
+const OptionContainer = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     width: 50%;
     gap: 10px;
+    margin-bottom: 20px;
 `;
 
 const DHISVersionSelector = styled(MultipleDropdown)`
+    width: 100%;
+    margin-left: -10px;
+    margin-top: 10px;
+
+    div,
+    label {
+        color: black;
+    }
+`;
+
+const LandingPageSelector = styled(Dropdown)`
     width: 100%;
     margin-left: -10px;
     margin-top: 10px;
@@ -281,4 +335,6 @@ const dhisVersions = [
     { value: "2.36", text: "2.36" },
     { value: "2.37", text: "2.37" },
     { value: "2.38", text: "2.38" },
+    { value: "2.39", text: "2.39" },
+    { value: "2.40", text: "2.40" },
 ];

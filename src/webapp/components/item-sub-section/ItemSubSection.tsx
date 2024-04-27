@@ -34,7 +34,9 @@ export const ItemSubSection: React.FC<{
                 })}
             </Cardboard>
 
-            {showAdditionalComponents && <AdditionalComponents currentPage={currentPage} isRoot={isRoot} />}
+            {showAdditionalComponents && (
+                <AdditionalComponents currentPage={currentPage} isRoot={isRoot} openPage={openPage} />
+            )}
         </GroupContainer>
     );
 };

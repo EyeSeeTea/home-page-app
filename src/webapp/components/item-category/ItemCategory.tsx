@@ -44,7 +44,9 @@ export const ItemCategory: React.FC<{
                         );
                     })}
                 </Cardboard>
-                {showAdditionalComponents && <AdditionalComponents currentPage={currentPage} isRoot={isRoot} />}{" "}
+                {showAdditionalComponents && (
+                    <AdditionalComponents currentPage={currentPage} isRoot={isRoot} openPage={openPage} />
+                )}{" "}
             </LandingContent>
         </GroupContainer>
     );
