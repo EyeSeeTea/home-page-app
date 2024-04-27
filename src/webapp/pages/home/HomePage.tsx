@@ -17,6 +17,7 @@ import { BigCard } from "../../components/card-board/BigCard";
 import { goTo } from "../../utils/routes";
 import { defaultIcon, defaultTitle } from "../../router/Router";
 import { useAnalytics } from "../../hooks/useAnalytics";
+import { Maybe } from "../../../types/utils";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, landings, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } =
@@ -124,7 +125,7 @@ export const HomePage: React.FC = React.memo(() => {
         }
     }, [currentPage, analytics, pageType, userLandings, currentHistory]);
 
-    const redirect = useRedirectOnSinglePrimaryAction(currentPage);
+    const redirect = useRedirectOnSinglePrimaryAction(currentPage, userLandings);
 
     return (
         <StyledLanding
@@ -197,10 +198,17 @@ const ContentWrapper = styled.div`
     min-height: 100vh;
 `;
 
-function useRedirectOnSinglePrimaryAction(landingNode: LandingNode | undefined): { isActive: boolean } {
+function useRedirectOnSinglePrimaryAction(
+    landingNode: Maybe<LandingNode>,
+    userLandings: Maybe<LandingNode[]>
+): { isActive: boolean } {
     const { actions, launchAppBaseUrl } = useAppContext();
     const { user } = useConfig();
-    const url = user && landingNode ? getPrimaryActionUrl(landingNode, { actions, user }) : undefined;
+    const url =
+        user && landingNode && userLandings?.length === 1
+            ? getPrimaryActionUrl(landingNode, { actions, user })
+            : undefined;
+
     const [isActive, setIsActive] = React.useState(false);
 
     React.useEffect(() => {
