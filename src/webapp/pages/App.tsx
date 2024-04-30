@@ -1,5 +1,7 @@
 import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import { MuiThemeProvider, StylesProvider } from "@material-ui/core/styles";
+import { Migrations } from "../../d2-migrations/webapp/Migrations";
+import { DataStoreStorage } from "../../d2-migrations/storages/DataStoreStorage";
 import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect } from "react";
 import { AppContextProvider } from "../contexts/app-context";
@@ -7,12 +9,13 @@ import { Router } from "../router/Router";
 import muiThemeLegacy from "../themes/dhis2-legacy.theme";
 import { muiTheme } from "../themes/dhis2.theme";
 import { useConfig } from "./settings/useConfig";
-import { Migrations } from "../../d2-migrations/webapp/Migrations";
 import "./App.css";
 
 const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl }) => {
+    const storage = new DataStoreStorage();
+
     return (
-        <Migrations>
+        <Migrations storage={storage}>
             <AppContextProvider locale={locale} baseUrl={baseUrl}>
                 <Analytics />
 
