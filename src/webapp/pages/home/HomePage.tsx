@@ -1,12 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CircularProgress from "material-ui/CircularProgress";
 import styled from "styled-components";
-import {
-    LandingNode,
-    getPrimaryRedirectUrl as getPrimaryActionUrl,
-    updateLandingNodes,
-} from "../../../domain/entities/LandingNode";
-import i18n from "../../../locales";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { LandingNode, getPrimaryRedirectUrl as getPrimaryActionUrl } from "../../../domain/entities/LandingNode";
 import { LandingLayout, LandingContent } from "../../components/landing-layout";
 import { useAppContext } from "../../contexts/app-context";
 import { useNavigate } from "react-router-dom";
@@ -18,29 +14,24 @@ import { goTo } from "../../utils/routes";
 import { defaultIcon, defaultTitle } from "../../router/Router";
 import { useAnalytics } from "../../hooks/useAnalytics";
 import { Maybe } from "../../../types/utils";
+import i18n from "../../../locales";
 
 export const HomePage: React.FC = React.memo(() => {
-    const { hasSettingsAccess, landings, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } =
-        useAppContext();
-    const { defaultApplication, landingPagePermissions, user } = useConfig();
-
-    const userLandings = useMemo<LandingNode[] | undefined>(() => {
-        return landings && landingPagePermissions && user
-            ? updateLandingNodes(landings, landingPagePermissions, user)
-            : undefined;
-    }, [landingPagePermissions, landings, user]);
+    const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } = useAppContext();
+    const { defaultApplication, userLandings } = useConfig();
 
     const initLandings = useMemo(() => userLandings?.filter(landing => landing.executeOnInit), [userLandings]);
 
     const navigate = useNavigate();
     const analytics = useAnalytics();
+    const snackbar = useSnackbar();
     const [history, updateHistory] = useState<LandingNode[]>([]);
     const [isLoadingLong, setLoadingLong] = useState<boolean>(false);
     const [pageType, setPageType] = useState<"userLandings" | "singleLanding">(
         userLandings && userLandings?.length > 1 ? "userLandings" : "singleLanding"
     );
 
-    const favicon = useRef<HTMLLinkElement>(document.head.querySelector('link[rel="icon"]'));
+    const favicon = useRef<HTMLLinkElement>(document.head.querySelector('link[rel="shortcut icon"]'));
 
     const currentPage = useMemo<LandingNode | undefined>(() => {
         return history[0] ?? initLandings?.[0];
@@ -59,10 +50,14 @@ export const HomePage: React.FC = React.memo(() => {
 
     const openPage = useCallback(
         (page: LandingNode) => {
-            compositionRoot.analytics.sendPageView({ title: page.name.referenceValue, location: undefined });
-            updateHistory(history => [page, ...history]);
+            if (userLandings?.some(landing => landing.id === page.id)) {
+                compositionRoot.analytics.sendPageView({ title: page.name.referenceValue, location: undefined });
+                updateHistory(history => [page, ...history]);
+            } else {
+                snackbar.error(i18n.t("You do not have access to this page."));
+            }
         },
-        [compositionRoot.analytics]
+        [compositionRoot.analytics, userLandings, snackbar]
     );
 
     const goBack = useCallback(() => {
