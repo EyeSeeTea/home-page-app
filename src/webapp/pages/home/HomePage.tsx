@@ -2,7 +2,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import CircularProgress from "material-ui/CircularProgress";
 import styled from "styled-components";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { LandingNode, getPrimaryRedirectUrl as getPrimaryActionUrl } from "../../../domain/entities/LandingNode";
+import {
+    LandingNode,
+    flattenLandingNodes,
+    getPrimaryRedirectUrl as getPrimaryActionUrl,
+} from "../../../domain/entities/LandingNode";
 import { LandingLayout, LandingContent } from "../../components/landing-layout";
 import { useAppContext } from "../../contexts/app-context";
 import { useNavigate } from "react-router-dom";
@@ -50,7 +54,8 @@ export const HomePage: React.FC = React.memo(() => {
 
     const openPage = useCallback(
         (page: LandingNode) => {
-            if (userLandings?.some(landing => landing.id === page.id)) {
+            const nodes = userLandings && flattenLandingNodes(userLandings);
+            if (nodes?.some(landing => landing.id === page.id)) {
                 compositionRoot.analytics.sendPageView({ title: page.name.referenceValue, location: undefined });
                 updateHistory(history => [page, ...history]);
             } else {
