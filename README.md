@@ -19,7 +19,7 @@ For more links, see the [User-Extended App website](https://eyeseetea.github.io/
 
 ## Feedback
 
-We’d like to hear your thoughts on the app in general, improvements, new features or any of the technologies being used. Just drop as a line at community@eyeseetea.com and let us know! If you prefer, you can also [create a new issue](https://github.com/EyeSeeTea/user-extended-app-blessed/issues) on our GitHub repository. Note that you will have to register and be logged in to GitHub to create a new issue.
+We’d like to hear your thoughts on the app! Suggestions for improvements, new features...? Please Just drop as a line at community@eyeseetea.com and let us know! If you prefer, you can also [create a new issue](https://github.com/EyeSeeTea/home-page-app/issues) on our GitHub repository. Note that you will have to register and be logged in to GitHub to create a new issue.
 
 ### About & Sponsorships
 
