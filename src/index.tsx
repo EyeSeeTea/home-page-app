@@ -8,6 +8,8 @@ import ReactDOM from "react-dom";
 import { D2Api } from "./types/d2-api";
 import App from "./webapp/pages/App";
 import "./webapp/utils/wdyr";
+import { getMigrationTasks } from "./migrations/tasks";
+import { DataStoreStorage, Migrations } from "./d2-migrations";
 
 declare global {
     interface Window {
@@ -49,10 +51,15 @@ async function main() {
         const userSettings = await api.get<{ keyUiLocale: string }>("/userSettings").getData();
         configI18n(userSettings);
 
+        const storage = new DataStoreStorage(api, "home-page-app");
+        const migrationsTasks = await getMigrationTasks();
+
         ReactDOM.render(
             <React.StrictMode>
                 <Provider config={{ baseUrl, apiVersion: 30 }}>
-                    <App locale={userSettings.keyUiLocale} baseUrl={baseUrl} />
+                    <Migrations storage={storage} tasks={migrationsTasks}>
+                        <App locale={userSettings.keyUiLocale} baseUrl={baseUrl} />
+                    </Migrations>
                 </Provider>
             </React.StrictMode>,
             document.getElementById("root")

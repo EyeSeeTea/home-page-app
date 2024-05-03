@@ -1,7 +1,5 @@
 import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import { MuiThemeProvider, StylesProvider } from "@material-ui/core/styles";
-import { Migrations } from "../../d2-migrations/webapp/Migrations";
-import { DataStoreStorage } from "../../d2-migrations/storages/DataStoreStorage";
 import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect } from "react";
 import { AppContextProvider } from "../contexts/app-context";
@@ -12,28 +10,23 @@ import { useConfig } from "./settings/useConfig";
 import "./App.css";
 
 const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl }) => {
-    const storage = new DataStoreStorage();
-
     return (
-        <Migrations storage={storage}>
-            <AppContextProvider locale={locale} baseUrl={baseUrl}>
-                <Analytics />
-
-                <StylesProvider injectFirst>
-                    <MuiThemeProvider theme={muiTheme}>
-                        <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
-                            <SnackbarProvider>
-                                <LoadingProvider>
-                                    <div id="app" className="content">
-                                        <Router />
-                                    </div>
-                                </LoadingProvider>
-                            </SnackbarProvider>
-                        </OldMuiThemeProvider>
-                    </MuiThemeProvider>
-                </StylesProvider>
-            </AppContextProvider>
-        </Migrations>
+        <AppContextProvider locale={locale} baseUrl={baseUrl}>
+            <Analytics />
+            <StylesProvider injectFirst>
+                <MuiThemeProvider theme={muiTheme}>
+                    <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
+                        <SnackbarProvider>
+                            <LoadingProvider>
+                                <div id="app" className="content">
+                                    <Router />
+                                </div>
+                            </LoadingProvider>
+                        </SnackbarProvider>
+                    </OldMuiThemeProvider>
+                </MuiThemeProvider>
+            </StylesProvider>
+        </AppContextProvider>
     );
 };
 
