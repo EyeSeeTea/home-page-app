@@ -15,7 +15,7 @@ export interface MigrationWithVersion {
 
 export type Migration = Omit<MigrationWithVersion, "version">;
 
-export type MigrationFn = (debug: Debug) => Promise<void>;
+export type MigrationFn = (storage: MigrationsStorage, debug: Debug) => Promise<void>;
 
 export interface RunnerOptions {
     storage: MigrationsStorage;

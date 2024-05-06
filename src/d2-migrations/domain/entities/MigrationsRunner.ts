@@ -65,7 +65,7 @@ export class MigrationsRunner {
         for (const migration of migrations) {
             debug(`Apply migration ${zeroPad(migration.version, 2)} - ${migration.name}`);
             try {
-                await migration.migrate(debug);
+                await migration.migrate(this.storage, debug);
             } catch (error) {
                 const errorMsg = `${migration.name}: ${error}`;
                 await this.saveConfig({ errorMsg });
