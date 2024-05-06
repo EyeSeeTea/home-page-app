@@ -1,10 +1,12 @@
 import React from "react";
+import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
 import { MigrationsStorage } from "../domain/entities/MigrationsStorage";
 import { MigrationTasks } from "../domain/entities/Migration";
 import { MigrationsRunner } from "../domain/entities/MigrationsRunner";
 import { useMigrations } from "./useMigrations";
+import { CircularProgress } from "@material-ui/core";
 
 const isDebug = process.env.NODE_ENV === "development";
 
@@ -16,7 +18,8 @@ export interface MigrationsProps {
 export const Migrations: React.FC<MigrationsProps> = React.memo(props => {
     const { state, onFinish } = useMigrations(props.storage, props.tasks);
 
-    if (state.type === "checking") return <div>Checking</div>;
+    if (state.type === "checking") return <LoadingMigrations />;
+    // if (state.type === "checking") return props.storage.hasPermission(console.debug) ? <LoadingMigrations /> : null;
     else if (state.type === "pending") return <MigrationsDialog runner={state.runner} onFinish={onFinish} />;
     return <>{props.children}</>;
 });
@@ -79,6 +82,28 @@ const MigrationsDialog: React.FC<MigrationsRunnerProps> = props => {
     );
 };
 
+const LoadingMigrations: React.FC = () => (
+    <ProgressContainer>
+        <CircularProgress size={65} />
+    </ProgressContainer>
+);
+
+const MigrationsError: React.FC<{ runner: MigrationsRunner; onFinish: () => void }> = ({ runner, onFinish }) => (
+    <ConfirmationDialog
+        isOpen={true}
+        title={i18n.t("Error")}
+        onSave={isDebug ? onFinish : undefined}
+        saveText={i18n.t("Continue to the app anyway")}
+        maxWidth="md"
+        fullWidth={true}
+    >
+        {i18n.t(
+            "The database version ({{currentStorageVersion}}) is greater than the app version ({{lastMigrationVersion}}), cannot continue. Please contact the administrator to update the app.",
+            runner
+        )}
+    </ConfirmationDialog>
+);
+
 function runMigrations(
     runner: MigrationsRunner,
     debug: (message: string) => void,
@@ -133,25 +158,17 @@ function getInitialState(runner: MigrationsRunner): DialogState {
 
 function getPendingMigrationsText(runner: MigrationsRunner): string {
     return i18n.t(
-        "The app needs to run pending migrations (from version {{instanceVersion}} to version {{appVersion}}) in order to continue. This may take a long time, make sure the process is not interrupted.",
+        "The app needs to run pending migrations (from version {{currentStorageVersion}} to version {{lastMigrationVersion}}) in order to continue. This may take a long time, make sure the process is not interrupted.",
         runner
     );
 }
 
-const MigrationsError: React.FC<{ runner: MigrationsRunner; onFinish: () => void }> = ({ runner, onFinish }) => (
-    <ConfirmationDialog
-        isOpen={true}
-        title={i18n.t("Error")}
-        onSave={isDebug ? onFinish : undefined}
-        saveText={i18n.t("Continue to the app anyway")}
-        maxWidth="md"
-        fullWidth={true}
-    >
-        {i18n.t(
-            "The database version ({{instanceVersion}}) is greater than the app version ({{appVersion}}), cannot continue. Please contact the administrator to update the app.",
-            runner
-        )}
-    </ConfirmationDialog>
-);
-
 type DialogState = { type: "show-info" } | { type: "app-out-of-date" } | { type: "migrating" } | { type: "success" };
+
+const ProgressContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+`;
