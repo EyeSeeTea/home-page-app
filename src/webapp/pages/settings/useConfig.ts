@@ -26,7 +26,7 @@ export function useConfig(): useConfigPloc {
     const updateDefaultApplication = useCallback(
         async (value: string) => {
             setDefaultApplication(value);
-            compositionRoot.config.updateDefaultApplication(value);
+            await compositionRoot.config.updateDefaultApplication(value);
         },
         [compositionRoot]
     );
@@ -34,7 +34,7 @@ export function useConfig(): useConfigPloc {
     const updateGoogleAnalyticsCode = useCallback(
         async (code: string) => {
             setGoogleAnalyticsCode(code);
-            compositionRoot.config.updateGoogleAnalyticsCode(code);
+            await compositionRoot.config.updateGoogleAnalyticsCode(code);
         },
         [compositionRoot]
     );
@@ -72,7 +72,7 @@ export function useConfig(): useConfigPloc {
     const updateShowAllActions = useCallback(
         async (value: boolean) => {
             setShowAllActions(value);
-            compositionRoot.config.setShowAllActions(value);
+            await compositionRoot.config.setShowAllActions(value);
         },
         [compositionRoot]
     );

@@ -59,9 +59,7 @@ msgstr ""
 msgid "Field {{field}} is not valid"
 msgstr ""
 
-msgid ""
-"Unable to import actions. Some landing page action is referencing the "
-"landing itself."
+msgid "Unable to import actions. Some action is referencing an invalid page."
 msgstr ""
 
 msgid "Landing page not found"

@@ -14,19 +14,15 @@ export class ImportActionsUseCase implements UseCase {
 
     public async execute(files: File[]): Promise<PersistedAction[]> {
         const items = await this.importExportClient.import<PersistedAction>(files);
-        if (
-            items.every(async action => {
-                if (action.type !== "page") return true;
-                const landing = await this.landingRepository.getById(action.launchPageId);
-                if (!landing) return false;
-                if (landing.actions.some(actionId => actionId === action.id)) return false;
-                return true;
-            })
-        )
-            return this.actionRepository.save(items);
-        else
-            throw Error(
-                i18n.t("Unable to import actions. Some landing page action is referencing the landing itself.")
-            );
+        const nodes = await this.landingRepository.getAll();
+        const valid = items.every(action => {
+            if (action.type !== "page") return true;
+            const landing = nodes.find(node => node.id === action.launchPageId);
+            if (!landing) return false;
+            return !landing.actions.some(actionId => actionId === action.id);
+        });
+
+        if (valid) return this.actionRepository.save(items);
+        else return Promise.reject(i18n.t("Unable to import actions. Some action is referencing an invalid page."));
     }
 }

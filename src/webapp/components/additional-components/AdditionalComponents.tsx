@@ -6,6 +6,7 @@ import { useAppContext } from "../../contexts/app-context";
 import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
 import { LandingParagraph } from "../landing-layout";
+import { useAnalytics } from "../../hooks/useAnalytics";
 import { Action, getPageActions } from "../../../domain/entities/Action";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 
@@ -13,10 +14,11 @@ export const AdditionalComponents: React.FC<{
     isRoot: boolean;
     currentPage: LandingNode;
     openPage(page: LandingNode): void;
-}> = React.memo(({ isRoot, currentPage, openPage }) => {
-    const { actions, landings, translate, launchAppBaseUrl, compositionRoot } = useAppContext();
+}> = React.memo(props => {
+    const { isRoot, currentPage, openPage } = props;
+    const { actions, translate, launchAppBaseUrl, landings } = useAppContext();
     const { showAllActions, landingPagePermissions, user } = useConfig();
-
+    const analytics = useAnalytics();
     const snackbar = useSnackbar();
 
     const userLandings = React.useMemo<LandingNode[] | undefined>(() => {
@@ -43,7 +45,7 @@ export const AdditionalComponents: React.FC<{
                             ? `${action.dhisLaunchUrl}`
                             : `${launchAppBaseUrl}${action.dhisLaunchUrl}`;
 
-                        compositionRoot.analytics.sendPageView({ title: name, location: href });
+                        analytics.sendPageView({ title: name, location: href });
                         window.location.href = href;
                     }
                     break;
@@ -63,7 +65,7 @@ export const AdditionalComponents: React.FC<{
                     break;
             }
         },
-        [compositionRoot, getLandingNodeById, launchAppBaseUrl, openPage, snackbar, translate, currentPage]
+        [analytics, getLandingNodeById, launchAppBaseUrl, openPage, snackbar, translate, currentPage]
     );
 
     const currentPageActions = actions.filter(action => currentPage.actions.includes(action.id));

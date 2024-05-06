@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=%REACT_APP_GOOGLE_ANALYTICS_4%"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag() { dataLayer.push(arguments); }
+          gtag('js', new Date());
+      
+          gtag('config', '%REACT_APP_GOOGLE_ANALYTICS_4%');
+        </script>
         <meta charset="utf-8" />
         <link rel="shortcut icon" href="%PUBLIC_URL%/icon-sm.png" sizes="192x192" />
         <link rel="icon" href="%PUBLIC_URL%/icon-small.png" sizes="192x192" />
