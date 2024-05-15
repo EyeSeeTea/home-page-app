@@ -15,7 +15,7 @@ In order to send home page views to Google Analytics, the GA4 code must be provi
 
 See our [wiki](https://github.com/EyeSeeTea/home-page-app/wiki/Home)
 
-For more links, see the [User-Extended App website](https://eyeseetea.github.io/user-extended-app-blessed/)
+For more links, see the [HomePage App website](https://eyeseetea.github.io/home-page-app)
 
 ## Feedback
 
