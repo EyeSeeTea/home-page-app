@@ -29,6 +29,7 @@ const buildDefaultNode = (
         parent,
         icon: "",
         iconLocation: "",
+        favicon: "",
         pageRendering,
         order,
         name: { key: "", referenceValue: "", translations: {} },
@@ -111,11 +112,11 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
     };
 
     const handleFileUpload = useCallback(
-        (event: ChangeEvent<HTMLInputElement>) => {
+        (event: ChangeEvent<HTMLInputElement>, fileType: keyof LandingNode) => {
             const file = event.target.files ? event.target.files[0] : undefined;
             file?.arrayBuffer().then(async data => {
                 const icon = await compositionRoot.instance.uploadFile(data, file.name);
-                setValue(node => ({ ...node, icon }));
+                setValue(node => ({ ...node, [fileType]: icon }));
             });
         },
         [compositionRoot]
@@ -186,7 +187,7 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                         </IconContainer>
                     ) : null}
 
-                    <FileInput type="file" onChange={handleFileUpload} />
+                    <FileInput type="file" onChange={event => handleFileUpload(event, "icon")} />
                 </IconUpload>
 
                 <div>
@@ -202,6 +203,20 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                         <p>{i18n.t("Bottom")}</p>
                     </IconLocationSwitch>
                 </div>
+            </Row>
+
+            <Row>
+                <h3>{i18n.t("Favicon")}</h3>
+
+                <IconUpload>
+                    {value.favicon ? (
+                        <IconContainer>
+                            <img src={value.favicon} alt={`Page favicon`} />
+                        </IconContainer>
+                    ) : null}
+
+                    <FileInput type="file" onChange={event => handleFileUpload(event, "favicon")} />
+                </IconUpload>
             </Row>
 
             {type === "root" && (
