@@ -52,8 +52,9 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
     const [value, setValue] = useState<LandingNode>(
         initialNode ?? buildDefaultNode(type, parent, order, "multiple", true)
     );
-    const [iconLocation, setIconLocation] = React.useState(value.iconLocation === "bottom");
-    const [pageRendering, setPageRendering] = React.useState(value.pageRendering === "single");
+    const [iconLocation, setIconLocation] = useState(value.iconLocation === "bottom");
+    const [pageRendering, setPageRendering] = useState(value.pageRendering === "single");
+    const [warnings, setWarnings] = useState<string[]>([]);
 
     const items = useMemo(
         () =>
@@ -114,7 +115,36 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
     const handleFileUpload = useCallback(
         (event: ChangeEvent<HTMLInputElement>, fileType: keyof LandingNode) => {
             const file = event.target.files ? event.target.files[0] : undefined;
+
             file?.arrayBuffer().then(async data => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const width = img.width;
+                        const height = img.height;
+                        const aspectRatio = width / height;
+
+                        setWarnings([]);
+                        const newWarnings: string[] = [];
+
+                        if (fileType === "favicon") {
+                            if (aspectRatio !== FAVICON_ASPECT_RATIO) {
+                                newWarnings.push("Please ensure that your favicon has a 1:1 aspect ratio.");
+                            }
+
+                            if (width > FAVICON_MAX_SIZE || height > FAVICON_MAX_SIZE) {
+                                newWarnings.push("Please use an icon of 128x128 pixels or smaller.");
+                            }
+
+                            newWarnings.length !== 0 && setWarnings(newWarnings);
+                        }
+                    };
+                    if (e.target?.result) {
+                        img.src = e.target.result as string;
+                    }
+                };
+                reader.readAsDataURL(file);
                 const icon = await compositionRoot.instance.uploadFile(data, file.name);
                 setValue(node => ({ ...node, [fileType]: icon }));
             });
@@ -205,19 +235,29 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                 </div>
             </Row>
 
-            <Row>
-                <h3>{i18n.t("Favicon")}</h3>
+            {type === "root" && (
+                <Row>
+                    <h3>{i18n.t("Favicon")}</h3>
 
-                <IconUpload>
-                    {value.favicon ? (
-                        <IconContainer>
-                            <img src={value.favicon} alt={`Page favicon`} />
-                        </IconContainer>
-                    ) : null}
+                    <IconUpload>
+                        {value.favicon ? (
+                            <IconContainer>
+                                <img src={value.favicon} alt={`Page favicon`} />
+                            </IconContainer>
+                        ) : null}
 
-                    <FileInput type="file" onChange={event => handleFileUpload(event, "favicon")} />
-                </IconUpload>
-            </Row>
+                        <FileInput type="file" onChange={event => handleFileUpload(event, "favicon")} />
+                    </IconUpload>
+
+                    {warnings.length > 0 && (
+                        <WarningText>
+                            {warnings.map(warning => (
+                                <p key={warning}>{warning}</p>
+                            ))}
+                        </WarningText>
+                    )}
+                </Row>
+            )}
 
             {type === "root" && (
                 <Row>
@@ -293,6 +333,9 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
     );
 };
 
+const FAVICON_ASPECT_RATIO = 1;
+const FAVICON_MAX_SIZE = 128;
+
 export interface LandingPageEditDialogProps extends Omit<ConfirmationDialogProps, "onSave"> {
     initialNode?: LandingNode;
     type: LandingNodeType;
@@ -347,6 +390,13 @@ const ColorSelectorContainer = styled.div`
 
 const StyledLandingBody = styled(LandingBody)`
     max-width: 600px;
+`;
+
+const WarningText = styled.p`
+    font-size: 12px;
+    line-height: 0.1;
+    font-style: italic;
+    color: red;
 `;
 
 const StepPreview: React.FC<{
