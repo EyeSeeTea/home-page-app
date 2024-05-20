@@ -32,6 +32,7 @@ export const sectionNode: LandingNode = {
     executeOnInit: true,
     icon: "",
     iconLocation: "",
+    iconSize: "",
     favicon: "",
     id: "XusobLebMel",
     name: {
@@ -56,6 +57,7 @@ export const sectionNode: LandingNode = {
             executeOnInit: true,
             icon: "",
             iconLocation: "",
+            iconSize: "",
             favicon: "",
             id: "ycAtL2slUDJ",
             name: {
@@ -92,6 +94,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
             executeOnInit: true,
             icon: "img/logo-eyeseetea.png",
             iconLocation: "top",
+            iconSize: "small",
             favicon: "img/logo-eyeseetea.png",
             id: "pAfyLmQmCU6",
             name: {
@@ -121,6 +124,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
             executeOnInit: true,
             icon: "",
             iconLocation: "",
+            iconSize: "",
             favicon: "",
             id: "XusobLebMel",
             name: {
@@ -145,6 +149,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
             executeOnInit: true,
             icon: "",
             iconLocation: "",
+            iconSize: "",
             favicon: "",
             id: "ycAtL2slUDJ",
             name: {
@@ -178,6 +183,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
             executeOnInit: true,
             icon: "",
             iconLocation: "",
+            iconSize: "",
             favicon: "",
             id: "SEuEePxkvE7",
             name: {
@@ -207,6 +213,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
             executeOnInit: true,
             icon: "",
             iconLocation: "",
+            iconSize: "",
             favicon: "",
             id: "MmG1BCLXE1Q",
             name: {
@@ -236,6 +243,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
             executeOnInit: true,
             icon: "",
             iconLocation: "",
+            iconSize: "",
             favicon: "",
             id: "Jqdtr2lTgNP",
             name: {
@@ -265,6 +273,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
             executeOnInit: true,
             icon: "",
             iconLocation: "",
+            iconSize: "",
             favicon: "",
             id: "jFYOc9eUhVd",
             name: {

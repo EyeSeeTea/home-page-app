@@ -4,7 +4,7 @@ import {
     MultipleDropdown,
     useSnackbar,
 } from "@eyeseetea/d2-ui-components";
-import { Switch, TextField } from "@material-ui/core";
+import { Button, Switch, TextField } from "@material-ui/core";
 import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { generateUid } from "../../../data/utils/uid";
@@ -29,6 +29,7 @@ const buildDefaultNode = (
         parent,
         icon: "",
         iconLocation: "",
+        iconSize: "",
         favicon: "",
         pageRendering,
         order,
@@ -233,6 +234,23 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                         <p>{i18n.t("Bottom")}</p>
                     </IconLocationSwitch>
                 </div>
+
+                <Label>{i18n.t("Icon Size")}</Label>
+                <OptionContainer>
+                    {["small", "medium", "large"].map((size, i) => (
+                        <Button
+                            key={i}
+                            color={
+                                size === value.iconSize || (!value.iconSize && size === "small") ? "primary" : "default"
+                            }
+                            variant="contained"
+                            value={size}
+                            onClick={() => setValue(value => ({ ...value, iconSize: size }))}
+                        >
+                            {size}
+                        </Button>
+                    ))}
+                </OptionContainer>
             </Row>
 
             {type === "root" && (
@@ -252,7 +270,7 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                     {warnings.length > 0 && (
                         <WarningText>
                             {warnings.map(warning => (
-                                <p key={warning}>{warning}</p>
+                                <p key={warning}>{i18n.t(warning)}</p>
                             ))}
                         </WarningText>
                     )}
@@ -397,6 +415,14 @@ const WarningText = styled.p`
     line-height: 0.1;
     font-style: italic;
     color: red;
+`;
+
+const OptionContainer = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    width: 50%;
+    gap: 10px;
+    margin: 20px 0;
 `;
 
 const StepPreview: React.FC<{
