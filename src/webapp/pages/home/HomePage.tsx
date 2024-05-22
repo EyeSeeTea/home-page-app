@@ -18,6 +18,7 @@ import { goTo } from "../../utils/routes";
 import { defaultIcon, defaultTitle } from "../../router/Router";
 import { useAnalytics } from "../../hooks/useAnalytics";
 import { Maybe } from "../../../types/utils";
+import _ from "lodash";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, landings, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } =
@@ -66,9 +67,17 @@ export const HomePage: React.FC = React.memo(() => {
     );
 
     const goBack = useCallback(() => {
-        if (initLandings?.length === 1 || currentPage?.type !== "root") updateHistory(history => history.slice(1));
-        else setPageType("userLandings");
-    }, [currentPage, initLandings]);
+        if (currentPage?.type === "root" && _.every(history, landing => landing.id === currentPage.id)) {
+            updateHistory([]);
+            setPageType("userLandings");
+        } else if (
+            initLandings?.length === 1 ||
+            currentPage?.type !== "root" ||
+            (currentPage?.type === "root" && !_.isEmpty(history))
+        ) {
+            updateHistory(history => history.slice(1));
+        } else setPageType("userLandings");
+    }, [currentPage, history, initLandings?.length]);
 
     const goHome = useCallback(() => {
         if (initLandings?.length === 1) updateHistory([]);
