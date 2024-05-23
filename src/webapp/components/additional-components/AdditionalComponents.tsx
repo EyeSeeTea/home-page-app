@@ -1,7 +1,6 @@
-import { useConfig } from "../../pages/settings/useConfig";
-import i18n from "@eyeseetea/d2-ui-components/locales";
 import React from "react";
-import { LandingNode, updateLandingNodes } from "../../../domain/entities/LandingNode";
+import { useConfig } from "../../pages/settings/useConfig";
+import { LandingNode } from "../../../domain/entities/LandingNode";
 import { useAppContext } from "../../contexts/app-context";
 import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
@@ -9,6 +8,7 @@ import { LandingParagraph } from "../landing-layout";
 import { useAnalytics } from "../../hooks/useAnalytics";
 import { Action, getPageActions } from "../../../domain/entities/Action";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export const AdditionalComponents: React.FC<{
     isRoot: boolean;
@@ -16,21 +16,10 @@ export const AdditionalComponents: React.FC<{
     openPage(page: LandingNode): void;
 }> = React.memo(props => {
     const { isRoot, currentPage, openPage } = props;
-    const { actions, translate, launchAppBaseUrl, landings } = useAppContext();
-    const { showAllActions, landingPagePermissions, user } = useConfig();
+    const { actions, translate, launchAppBaseUrl, getLandingNodeById } = useAppContext();
+    const { showAllActions, user } = useConfig();
     const analytics = useAnalytics();
     const snackbar = useSnackbar();
-
-    const userLandings = React.useMemo<LandingNode[] | undefined>(() => {
-        return landings && landingPagePermissions && user
-            ? updateLandingNodes(landings, landingPagePermissions, user)
-            : undefined;
-    }, [landingPagePermissions, landings, user]);
-
-    const getLandingNodeById = React.useCallback(
-        (id: string) => userLandings?.find(landing => landing.id === id),
-        [userLandings]
-    );
 
     const actionHandleClick = React.useCallback(
         (action: Action) => {

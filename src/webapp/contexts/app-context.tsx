@@ -9,10 +9,12 @@ import { cacheImages } from "../utils/image-cache";
 import { Instance } from "../../data/entities/Instance";
 import { Typography } from "@material-ui/core";
 import i18n from "../../locales";
+import { Maybe } from "../../types/utils";
 
 const AppContext = React.createContext<AppContextState | null>(null);
 
 export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children, baseUrl, locale }) => {
+    const [compositionRoot, setCompositionRoot] = React.useState<CompositionRoot>();
     const [actions, setActions] = useState<Action[]>([]);
     const [landings, setLandings] = useState<LandingNode[] | undefined>();
     const [hasSettingsAccess, setHasSettingsAccess] = useState(false);
@@ -22,7 +24,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
     const [launchAppBaseUrl, setLaunchAppBaseUrl] = useState<string>("");
     const translate = buildTranslate(locale);
 
-    const [compositionRoot, setCompositionRoot] = React.useState<CompositionRoot>();
+    const getLandingNodeById = useCallback((id: string) => landings?.find(landing => landing.id === id), [landings]);
 
     React.useEffect(() => {
         getCompositionRoot(new Instance({ url: baseUrl })).then(compositionRoot => {
@@ -66,6 +68,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
                 hasSettingsAccess,
                 isAdmin,
                 launchAppBaseUrl,
+                getLandingNodeById,
             }}
         >
             {children}
@@ -112,4 +115,5 @@ export interface AppContextState {
     hasSettingsAccess: boolean;
     isAdmin: boolean;
     launchAppBaseUrl: string;
+    getLandingNodeById: (id: string) => Maybe<LandingNode>;
 }

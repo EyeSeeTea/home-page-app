@@ -32,12 +32,7 @@ export const ItemRoot: React.FC<{
 
                 {currentPage.pageRendering === "single" ? (
                     currentPage.children.map(node => (
-                        <Item
-                            key={`node-${node.id}`}
-                            isRoot={isRoot}
-                            openPage={() => openPage(node)}
-                            currentPage={node}
-                        />
+                        <Item key={`node-${node.id}`} isRoot={isRoot} openPage={openPage} currentPage={node} />
                     ))
                 ) : (
                     <Cardboard rowSize={4} key={`group-${currentPage.id}`}>

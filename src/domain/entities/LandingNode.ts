@@ -136,4 +136,8 @@ export function getPrimaryRedirectUrl(
     return redirectUrl;
 }
 
+export function flattenLandingNodes(nodes: LandingNode[]): LandingNode[] {
+    return nodes.flatMap(node => [node, ...flattenLandingNodes(node.children)]);
+}
+
 type Url = string;

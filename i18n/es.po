@@ -415,6 +415,9 @@ msgstr ""
 msgid "New action"
 msgstr ""
 
+msgid "You do not have access to this page."
+msgstr ""
+
 msgid "First load can take a couple of minutes, please wait..."
 msgstr ""
 

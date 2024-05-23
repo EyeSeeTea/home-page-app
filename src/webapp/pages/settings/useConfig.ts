@@ -1,18 +1,24 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { LandingPagePermission, Permission } from "../../../domain/entities/Permission";
 import { SharedUpdate } from "../../components/permissions-dialog/PermissionsDialog";
 import { useAppContext } from "../../contexts/app-context";
 import { User } from "../../../domain/entities/User";
 import { Maybe } from "../../../types/utils";
+import { LandingNode, updateLandingNodes } from "../../../domain/entities/LandingNode";
 
 export function useConfig(): useConfigPloc {
-    const { compositionRoot } = useAppContext();
+    const { compositionRoot, landings } = useAppContext();
     const [showAllActions, setShowAllActions] = useState(false);
     const [defaultApplication, setDefaultApplication] = useState<string>("");
     const [googleAnalyticsCode, setGoogleAnalyticsCode] = useState<Maybe<string>>();
     const [settingsPermissions, setSettingsPermissions] = useState<Permission>();
     const [landingPagePermissions, setLandingPagePermissions] = useState<LandingPagePermission[]>();
     const [user, setUser] = useState<User>();
+
+    const userLandings = useMemo<LandingNode[] | undefined>(() => {
+        if (!(landings && landingPagePermissions && user)) return undefined;
+        return updateLandingNodes(landings, landingPagePermissions, user);
+    }, [landingPagePermissions, landings, user]);
 
     useEffect(() => {
         compositionRoot.config.getShowAllActions().then(setShowAllActions);
@@ -89,6 +95,7 @@ export function useConfig(): useConfigPloc {
         landingPagePermissions,
         updateLandingPagePermissions,
         googleAnalyticsCode,
+        userLandings,
     };
 }
 
@@ -104,4 +111,5 @@ interface useConfigPloc {
     landingPagePermissions?: LandingPagePermission[];
     updateLandingPagePermissions: (sharedUpdate: SharedUpdate, id: string) => Promise<void>;
     googleAnalyticsCode: Maybe<string>;
+    userLandings: Maybe<LandingNode[]>;
 }
