@@ -51,7 +51,7 @@ export const BigCard = styled(BaseCard)`
     text-align: left;
     margin: 10px 10px 10px;
     user-select: none;
-    height: 305px;
+    max-height: 305px;
     cursor: ${({ onClick, disabled }) => (onClick && !disabled ? "pointer" : "inherit")};
 `;
 
