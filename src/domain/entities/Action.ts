@@ -118,7 +118,7 @@ export const getPageActions = (
 
                 const hasUserAccess = actionUsers.includes(user.id);
                 const hasUserGroupAccess = _.intersection(actionUserGroups, userGroupIds).length > 0;
-                const hasPublicAccess = action.publicAccess && action.publicAccess !== "--------";
+                const hasPublicAccess = Boolean(action.publicAccess) && action.publicAccess !== "--------";
 
                 return hasUserAccess || hasUserGroupAccess || hasPublicAccess;
             })

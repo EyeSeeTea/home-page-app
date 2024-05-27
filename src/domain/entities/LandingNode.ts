@@ -103,17 +103,17 @@ export const updateLandingNodes = (
 const applyFavicon = (parent: LandingNode): LandingNode => {
     const spreadFaviconToChildren = (children: LandingNode[], favicon: string): LandingNode[] => {
         return _.map(children, child => {
-            const updatedChild: LandingNode = { ...child, favicon };
-            if (child.children) {
-                updatedChild.children = spreadFaviconToChildren(child.children, favicon);
-            }
-            return updatedChild;
+            return {
+                ...child,
+                favicon: favicon,
+                children: spreadFaviconToChildren(child.children, favicon),
+            };
         });
     };
 
     return {
         ...parent,
-        children: parent.children ? spreadFaviconToChildren(parent.children, parent.favicon) : [],
+        children: spreadFaviconToChildren(parent.children, parent.favicon),
     };
 };
 

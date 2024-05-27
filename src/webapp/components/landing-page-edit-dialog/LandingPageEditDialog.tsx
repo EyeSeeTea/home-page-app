@@ -5,7 +5,7 @@ import {
     useSnackbar,
 } from "@eyeseetea/d2-ui-components";
 import { Button, Switch, TextField } from "@material-ui/core";
-import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { generateUid } from "../../../data/utils/uid";
 import { LandingNode, LandingNodePageRendering, LandingNodeType } from "../../../domain/entities/LandingNode";
@@ -15,6 +15,8 @@ import { MarkdownEditor } from "../markdown-editor/MarkdownEditor";
 import { MarkdownViewer } from "../markdown-viewer/MarkdownViewer";
 import { LandingBody } from "../landing-layout";
 import { ColorPicker } from "../color-picker/ColorPicker";
+import _ from "lodash";
+import useImageFileUpload from "./useImageFileUpload";
 
 const buildDefaultNode = (
     type: LandingNodeType,
@@ -55,8 +57,8 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
     );
     const [iconLocation, setIconLocation] = useState(value.iconLocation === "bottom");
     const [pageRendering, setPageRendering] = useState(value.pageRendering === "single");
-    const [warnings, setWarnings] = useState<string[]>([]);
 
+    const { faviconWarnings, uploadFavicon, uploadIcon } = useImageFileUpload(setValue);
     const items = useMemo(
         () =>
             actions
@@ -113,45 +115,9 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
         setValue(value => ({ ...value, pageRendering: event.target.checked ? "single" : "multiple" }));
     };
 
-    const handleFileUpload = useCallback(
-        (event: ChangeEvent<HTMLInputElement>, fileType: keyof LandingNode) => {
-            const file = event.target.files ? event.target.files[0] : undefined;
-
-            file?.arrayBuffer().then(async data => {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const width = img.width;
-                        const height = img.height;
-                        const aspectRatio = width / height;
-
-                        setWarnings([]);
-                        const newWarnings: string[] = [];
-
-                        if (fileType === "favicon") {
-                            if (aspectRatio !== FAVICON_ASPECT_RATIO) {
-                                newWarnings.push("Please ensure that your favicon has a 1:1 aspect ratio.");
-                            }
-
-                            if (width > FAVICON_MAX_SIZE || height > FAVICON_MAX_SIZE) {
-                                newWarnings.push("Please use an icon of 128x128 pixels or smaller.");
-                            }
-
-                            newWarnings.length !== 0 && setWarnings(newWarnings);
-                        }
-                    };
-                    if (e.target?.result) {
-                        img.src = e.target.result as string;
-                    }
-                };
-                reader.readAsDataURL(file);
-                const icon = await compositionRoot.instance.uploadFile(data, file.name);
-                setValue(node => ({ ...node, [fileType]: icon }));
-            });
-        },
-        [compositionRoot]
-    );
+    const onChangeIconSize = useCallback(size => {
+        setValue(value => ({ ...value, iconSize: size }));
+    }, []);
 
     return (
         <ConfirmationDialog fullWidth={true} {...props} maxWidth={"md"} onSave={save}>
@@ -218,7 +184,7 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                         </IconContainer>
                     ) : null}
 
-                    <FileInput type="file" onChange={event => handleFileUpload(event, "icon")} />
+                    <FileInput type="file" onChange={uploadIcon} />
                 </IconUpload>
 
                 <div>
@@ -245,7 +211,7 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                             }
                             variant="contained"
                             value={size}
-                            onClick={() => setValue(value => ({ ...value, iconSize: size }))}
+                            onClick={() => onChangeIconSize(size)}
                         >
                             {size}
                         </Button>
@@ -264,12 +230,12 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                             </IconContainer>
                         ) : null}
 
-                        <FileInput type="file" onChange={event => handleFileUpload(event, "favicon")} />
+                        <FileInput type="file" onChange={uploadFavicon} />
                     </IconUpload>
 
-                    {warnings.length > 0 && (
+                    {!_.isEmpty(faviconWarnings) && (
                         <WarningText>
-                            {warnings.map(warning => (
+                            {faviconWarnings.map(warning => (
                                 <p key={warning}>{i18n.t(warning)}</p>
                             ))}
                         </WarningText>
@@ -350,9 +316,6 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
         </ConfirmationDialog>
     );
 };
-
-const FAVICON_ASPECT_RATIO = 1;
-const FAVICON_MAX_SIZE = 128;
 
 export interface LandingPageEditDialogProps extends Omit<ConfirmationDialogProps, "onSave"> {
     initialNode?: LandingNode;
