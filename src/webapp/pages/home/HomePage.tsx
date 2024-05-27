@@ -176,6 +176,7 @@ export const HomePage: React.FC = React.memo(() => {
                                                 <img src={landing.icon} alt={`Icon for ${translate(landing.name)}`} />
                                             ) : undefined
                                         }
+                                        iconSize={landing.iconSize}
                                     />
                                 );
                             })}
