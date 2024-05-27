@@ -75,7 +75,7 @@ export const updateLandingNodes = (
     permissions: LandingPagePermission[],
     user: User
 ): LandingNode[] => {
-    return _(nodes)
+    const updatedNodes = _(nodes)
         .map(node => {
             const pagePermission = permissions?.find(permission => permission.id === node.id);
 
@@ -96,6 +96,25 @@ export const updateLandingNodes = (
         })
         .compact()
         .value();
+
+    return updatedNodes.map(node => applyFavicon(node));
+};
+
+const applyFavicon = (parent: LandingNode): LandingNode => {
+    const spreadFaviconToChildren = (children: LandingNode[], favicon: string): LandingNode[] => {
+        return _.map(children, child => {
+            const updatedChild: LandingNode = { ...child, favicon };
+            if (child.children) {
+                updatedChild.children = spreadFaviconToChildren(child.children, favicon);
+            }
+            return updatedChild;
+        });
+    };
+
+    return {
+        ...parent,
+        children: parent.children ? spreadFaviconToChildren(parent.children, parent.favicon) : [],
+    };
 };
 
 /* Return a redirect URL if there is only one visible action on primary nodes */
