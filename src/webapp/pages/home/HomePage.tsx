@@ -111,7 +111,7 @@ export const HomePage: React.FC = React.memo(() => {
 
     useEffect(() => {
         const icon = favicon.current;
-        const pageFavicon = currentPage?.favicon || currentPage?.icon;
+        const pageFavicon = currentPage?.favicon;
 
         icon?.setAttribute("href", (pageType === "singleLanding" && pageFavicon) || defaultIcon);
         document.title = (pageType === "singleLanding" && currentPage && translate(currentPage.name)) || defaultTitle;
