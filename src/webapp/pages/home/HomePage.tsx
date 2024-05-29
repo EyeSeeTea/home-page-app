@@ -5,7 +5,7 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import {
     LandingNode,
     flattenLandingNodes,
-    getPrimaryRedirectUrl as getPrimaryActionUrl,
+    getPrimaryRedirectNodes as getPrimaryActionNodes,
 } from "../../../domain/entities/LandingNode";
 import { LandingLayout, LandingContent } from "../../components/landing-layout";
 import { useAppContext } from "../../contexts/app-context";
@@ -152,7 +152,8 @@ export const HomePage: React.FC = React.memo(() => {
         }
     }, [analytics, currentHistory, currentPage, isRootPage, isSingleLanding, pageType, userLandings]);
 
-    const redirect = useRedirectOnSinglePrimaryAction(currentPage, userLandings);
+    const redirect = useRedirectOnSinglePrimaryNode(currentPage, userLandings);
+    const pageToRender = redirect.currentPage || (currentPage && isSingleLanding ? currentPage : undefined);
 
     return (
         <StyledLanding
@@ -198,8 +199,8 @@ export const HomePage: React.FC = React.memo(() => {
                             })}
                         </Cardboard>
                     </>
-                ) : currentPage && isSingleLanding ? (
-                    <Item isRoot={isRoot} currentPage={currentPage} openPage={openPage} />
+                ) : pageToRender ? (
+                    <Item isRoot={isRoot} currentPage={pageToRender} openPage={openPage} />
                 ) : null}
             </ContentWrapper>
         </StyledLanding>
@@ -226,25 +227,38 @@ const ContentWrapper = styled.div`
     min-height: 100vh;
 `;
 
-function useRedirectOnSinglePrimaryAction(
+function useRedirectOnSinglePrimaryNode(
     landingNode: Maybe<LandingNode>,
     userLandings: Maybe<LandingNode[]>
-): { isActive: boolean } {
+): { isActive: boolean; currentPage: Maybe<LandingNode> } {
     const { actions, launchAppBaseUrl } = useAppContext();
     const { user } = useConfig();
     const url =
-        user && landingNode && userLandings?.length === 1
-            ? getPrimaryActionUrl(landingNode, { actions, user })
+        user && landingNode && userLandings?.length === 2
+            ? getPrimaryActionNodes(landingNode, { actions, user })
             : undefined;
 
     const [isActive, setIsActive] = React.useState(false);
+    const [currentPage, setCurrentPage] = React.useState<LandingNode | undefined>();
 
     React.useEffect(() => {
         if (url) {
-            goTo(url, { baseUrl: launchAppBaseUrl });
-            setIsActive(true);
+            const { redirectPageId, redirectUrl } = url;
+            if (redirectUrl && redirectPageId) {
+                return;
+            }
+            if (redirectUrl) {
+                goTo(redirectUrl, { baseUrl: launchAppBaseUrl });
+                setIsActive(true);
+            }
+            if (redirectPageId) {
+                const page = userLandings?.find(landing => landing.id === redirectPageId);
+                if (page) {
+                    setCurrentPage(page);
+                }
+            }
         }
-    }, [url, launchAppBaseUrl]);
+    }, [url, launchAppBaseUrl, userLandings]);
 
-    return { isActive };
+    return { isActive: isActive, currentPage: currentPage };
 }

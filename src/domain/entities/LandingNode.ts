@@ -4,6 +4,7 @@ import { TranslatableText, TranslatableTextModel } from "./TranslatableText";
 import { LandingPagePermission } from "./Permission";
 import { User } from "./User";
 import { Action, getPageActions } from "./Action";
+import { Maybe } from "../../types/utils";
 
 export const LandingPageNodeTypeModel = Schema.oneOf([
     Schema.exact("root"),
@@ -117,42 +118,48 @@ const applyFavicon = (parent: LandingNode): LandingNode => {
     };
 };
 
-/* Return a redirect URL if there is only one visible action on primary nodes */
-export function getPrimaryRedirectUrl(
+// Return
+// a redirect URL if there is only one visible action on primary nodes
+// a redirect page id when there is only one visible action on primary nodes
+export function getPrimaryRedirectNodes(
     landingNode: LandingNode,
     options: { actions: Action[]; user: User }
-): Url | undefined {
+): { redirectUrl: Maybe<Url>; redirectPageId: Maybe<string> } {
     const { actions, user } = options;
 
     const actionsById = _.keyBy(actions, action => action.id);
     const showAllActions = false;
     const isRoot = true;
 
-    const primaryUrls = _(landingNode.children)
+    const pageActions = _(landingNode.children)
         .reject(node => Boolean(node.secondary))
-        .flatMap((node): Url[] => {
+        .flatMap((node): Action[] => {
             const nodeActions = actions.filter(action => node.actions.includes(action.id));
             const actionIds = user && getPageActions(isRoot, showAllActions, actions, user, nodeActions);
 
             return _(actionIds)
                 .map(actionId => actionsById[actionId])
                 .compact()
-                .map(action => action.dhisLaunchUrl)
-                .compact()
                 .value();
         })
         .value();
 
-    const redirectUrl = primaryUrls.length === 1 ? primaryUrls[0] : undefined;
+    const launchUrls = _.map(pageActions, action => action.dhisLaunchUrl);
+    const launchPageIds = _.map(pageActions, action => action.launchPageId);
+
+    const redirectUrl = launchUrls.length === 1 ? launchUrls[0] : undefined;
+    const redirectPageId = launchPageIds.length === 1 ? launchPageIds[0] : undefined;
 
     const message = [
-        `Primary URLs [${primaryUrls.length}]: ${primaryUrls.join(", ")}`,
+        `Primary URLs [${launchUrls.length}]: ${launchUrls.join(", ")}`,
         `Redirect URL: ${redirectUrl || "-"}`,
+        `Primary Page IDs [${launchPageIds.length}]: ${launchPageIds.join(", ")}`,
+        `Redirect Page ID: ${redirectPageId || "-"}`,
     ].join("\n");
 
     console.debug(message);
 
-    return redirectUrl;
+    return { redirectUrl, redirectPageId };
 }
 
 export function flattenLandingNodes(nodes: LandingNode[]): LandingNode[] {
