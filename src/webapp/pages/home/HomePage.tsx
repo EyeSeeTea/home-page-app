@@ -234,7 +234,7 @@ function useRedirectOnSinglePrimaryNode(
     const { actions, launchAppBaseUrl } = useAppContext();
     const { user } = useConfig();
     const url =
-        user && landingNode && userLandings?.length === 2
+        user && landingNode && userLandings?.length === 1
             ? getPrimaryActionNodes(landingNode, { actions, user })
             : undefined;
 
