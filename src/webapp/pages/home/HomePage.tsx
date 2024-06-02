@@ -1,7 +1,9 @@
+import _ from "lodash";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CircularProgress from "material-ui/CircularProgress";
 import styled from "styled-components";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { useNavigate } from "react-router-dom";
 import {
     LandingNode,
     flattenLandingNodes,
@@ -9,7 +11,6 @@ import {
 } from "../../../domain/entities/LandingNode";
 import { LandingLayout, LandingContent } from "../../components/landing-layout";
 import { useAppContext } from "../../contexts/app-context";
-import { useNavigate } from "react-router-dom";
 import { Item } from "../../components/item/Item";
 import { useConfig } from "../settings/useConfig";
 import { Cardboard } from "../../components/card-board/Cardboard";
@@ -19,7 +20,6 @@ import { defaultIcon, defaultTitle } from "../../router/Router";
 import { useAnalytics } from "../../hooks/useAnalytics";
 import { Maybe } from "../../../types/utils";
 import i18n from "../../../locales";
-import _ from "lodash";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } = useAppContext();
