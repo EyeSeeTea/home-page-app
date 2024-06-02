@@ -1,6 +1,6 @@
 import { D2Api } from "../types/d2-api";
 import { Debug } from "../domain/entities/Migration";
-import { MigrationsStorage } from "../domain/entities/MigrationsStorage";
+import { MigrationsStorage } from "../domain/repositories/MigrationsStorage";
 
 export class DataStoreStorage implements MigrationsStorage {
     constructor(private api: D2Api, private namespace: string) {}

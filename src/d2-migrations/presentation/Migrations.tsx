@@ -2,9 +2,9 @@ import React from "react";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
-import { MigrationsStorage } from "../domain/entities/MigrationsStorage";
+import { MigrationsStorage } from "../domain/repositories/MigrationsStorage";
 import { MigrationTasks } from "../domain/entities/Migration";
-import { MigrationsRunner } from "../domain/entities/MigrationsRunner";
+import { RunMigrations } from "../domain/usecases/RunMigrations";
 import { useMigrations } from "./useMigrations";
 import { CircularProgress } from "@material-ui/core";
 
@@ -25,7 +25,7 @@ export const Migrations: React.FC<MigrationsProps> = React.memo(props => {
 });
 
 export interface MigrationsRunnerProps {
-    runner: MigrationsRunner;
+    runner: RunMigrations;
     onFinish: () => void;
 }
 
@@ -88,7 +88,7 @@ const LoadingMigrations: React.FC = () => (
     </ProgressContainer>
 );
 
-const MigrationsError: React.FC<{ runner: MigrationsRunner; onFinish: () => void }> = ({ runner, onFinish }) => (
+const MigrationsError: React.FC<{ runner: RunMigrations; onFinish: () => void }> = ({ runner, onFinish }) => (
     <ConfirmationDialog
         isOpen={true}
         title={i18n.t("Error")}
@@ -105,7 +105,7 @@ const MigrationsError: React.FC<{ runner: MigrationsRunner; onFinish: () => void
 );
 
 function runMigrations(
-    runner: MigrationsRunner,
+    runner: RunMigrations,
     debug: (message: string) => void,
     setState: React.Dispatch<React.SetStateAction<DialogState>>
 ): Promise<DialogState> {
@@ -146,7 +146,7 @@ function getActionText(state: DialogState): string | undefined {
     }
 }
 
-function getInitialState(runner: MigrationsRunner): DialogState {
+function getInitialState(runner: RunMigrations): DialogState {
     if (runner.currentStorageVersion === runner.lastMigrationVersion) {
         return { type: "success" };
     } else if (runner.currentStorageVersion > runner.lastMigrationVersion) {
@@ -156,7 +156,7 @@ function getInitialState(runner: MigrationsRunner): DialogState {
     }
 }
 
-function getPendingMigrationsText(runner: MigrationsRunner): string {
+function getPendingMigrationsText(runner: RunMigrations): string {
     return i18n.t(
         "The app needs to run pending migrations (from version {{currentStorageVersion}} to version {{lastMigrationVersion}}) in order to continue. This may take a long time, make sure the process is not interrupted.",
         runner

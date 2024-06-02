@@ -1,4 +1,4 @@
-import { Debug } from "./Migration";
+import { Debug } from "../entities/Migration";
 
 export interface MigrationsStorage {
     get<T extends object>(key: string, defaultValue: T): Promise<T>;

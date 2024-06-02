@@ -1,12 +1,9 @@
 import React from "react";
-import { MigrationsRunner } from "../domain/entities/MigrationsRunner";
-import { MigrationsStorage } from "../domain/entities/MigrationsStorage";
+import { RunMigrations } from "../domain/usecases/RunMigrations";
+import { MigrationsStorage } from "../domain/repositories/MigrationsStorage";
 import { MigrationTasks } from "../domain/entities/Migration";
 
-export type MigrationsState =
-    | { type: "checking" }
-    | { type: "pending"; runner: MigrationsRunner }
-    | { type: "checked" };
+export type MigrationsState = { type: "checking" } | { type: "pending"; runner: RunMigrations } | { type: "checked" };
 
 export interface UseMigrationsResult {
     state: MigrationsState;
@@ -27,7 +24,7 @@ export function useMigrations(storage: MigrationsStorage, tasks: MigrationTasks)
 }
 
 async function runMigrations(storage: MigrationsStorage, tasks: MigrationTasks): Promise<MigrationsState> {
-    const runner = await MigrationsRunner.init({
+    const runner = await RunMigrations.init({
         storage: storage,
         debug: console.debug,
         migrations: tasks,

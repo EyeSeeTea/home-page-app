@@ -1,14 +1,14 @@
 import _ from "lodash";
 import { promiseMap, zeroPad } from "../../utils";
-import { MigrationsStorage } from "./MigrationsStorage";
-import { Config, Debug, MigrationWithVersion, RunnerOptions } from "./Migration";
+import { MigrationsStorage } from "../repositories/MigrationsStorage";
+import { Config, Debug, MigrationWithVersion, RunnerOptions } from "../entities/Migration";
 
 const configKey = "migrations";
 
-export class MigrationsRunner {
-    public migrations: MigrationWithVersion[];
-    public debug: Debug;
-    public lastMigrationVersion: number;
+export class RunMigrations {
+    lastMigrationVersion: number;
+    private migrations: MigrationWithVersion[];
+    private debug: Debug;
     private backupPrefix = "backup-";
 
     constructor(private storage: MigrationsStorage, private config: Config, private options: RunnerOptions) {
@@ -19,39 +19,26 @@ export class MigrationsRunner {
         this.storage = storage;
     }
 
-    setDebug(debug: Debug) {
-        const newOptions = { ...this.options, debug };
-        return new MigrationsRunner(this.storage, this.config, newOptions);
-    }
-
-    static async init(options: RunnerOptions): Promise<MigrationsRunner> {
-        const { storage } = options;
-        const config = await storage.get<Config>(configKey, {
-            version: 0,
-        });
-        return new MigrationsRunner(storage, config, options);
-    }
-
     public async execute(): Promise<void> {
         // Re-load the runner to make sure we have the latest data as config.
-        const runner = await MigrationsRunner.init(this.options);
+        const runner = await RunMigrations.init(this.options);
         return runner.migrateFromCurrent();
     }
 
-    public async migrateFromCurrent(): Promise<void> {
-        const { config, migrations, debug } = this;
-
-        if (_.isEmpty(migrations)) {
-            debug(`No migrations pending to run (current version: ${config.version})`);
-            return;
-        }
-
-        debug(`Migrate: version ${this.currentStorageVersion} to version ${this.lastMigrationVersion}`);
-
-        await this.runMigrations(migrations);
+    public hasPendingMigrations(): boolean {
+        return this.config.version !== this.lastMigrationVersion;
     }
 
-    async runMigrations(migrations: MigrationWithVersion[]): Promise<Config> {
+    public get currentStorageVersion(): number {
+        return this.config.version;
+    }
+
+    setDebug(debug: Debug) {
+        const newOptions = { ...this.options, debug };
+        return new RunMigrations(this.storage, this.config, newOptions);
+    }
+
+    public async runMigrations(migrations: MigrationWithVersion[]): Promise<Config> {
         const { debug, config } = this;
 
         const configWithCurrentMigration: Config = {
@@ -78,9 +65,30 @@ export class MigrationsRunner {
         return newConfig;
     }
 
+    static async init(options: RunnerOptions): Promise<RunMigrations> {
+        const { storage } = options;
+        const config = await storage.get<Config>(configKey, {
+            version: 0,
+        });
+        return new RunMigrations(storage, config, options);
+    }
+
+    private async migrateFromCurrent(): Promise<void> {
+        const { config, migrations, debug } = this;
+
+        if (_.isEmpty(migrations)) {
+            debug(`No migrations pending to run (current version: ${config.version})`);
+            return;
+        }
+
+        debug(`Migrate: version ${this.currentStorageVersion} to version ${this.lastMigrationVersion}`);
+
+        await this.runMigrations(migrations);
+    }
+
     // dataStore backup methods are currently unused, call only if a migration needs it.
 
-    async deleteBackup() {
+    private async deleteBackup() {
         try {
             const { debug } = this;
             const backupKeys = await this.getBackupKeys();
@@ -94,13 +102,13 @@ export class MigrationsRunner {
         }
     }
 
-    async rollBackExistingBackup() {
+    private async rollBackExistingBackup() {
         if (this.config.migration) {
             await this.rollbackDataStore(new Error("Rollback existing backup"));
         }
     }
 
-    async backupDataStore() {
+    private async backupDataStore() {
         const { debug } = this;
         debug(`Backup data store`);
         const allKeys = await this.storage.getKeys();
@@ -117,12 +125,12 @@ export class MigrationsRunner {
         });
     }
 
-    async getBackupKeys() {
+    private async getBackupKeys() {
         const allKeys = await this.storage.getKeys();
         return allKeys.filter(key => key.startsWith(this.backupPrefix));
     }
 
-    async rollbackDataStore(error: Error): Promise<Config> {
+    private async rollbackDataStore(error: Error): Promise<Config> {
         const { debug, config } = this;
         const errorMsg = error.message || error.toString();
         const keysToRestore = await this.getBackupKeys();
@@ -152,18 +160,10 @@ export class MigrationsRunner {
         return newConfig;
     }
 
-    getMigrationToApply(allMigrations: MigrationWithVersion[], config: Config) {
+    private getMigrationToApply(allMigrations: MigrationWithVersion[], config: Config) {
         return _(allMigrations)
             .filter(info => info.version > config.version)
             .sortBy(info => info.version)
             .value();
-    }
-
-    hasPendingMigrations(): boolean {
-        return this.config.version !== this.lastMigrationVersion;
-    }
-
-    get currentStorageVersion(): number {
-        return this.config.version;
     }
 }

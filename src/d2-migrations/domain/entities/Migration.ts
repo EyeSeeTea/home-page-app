@@ -1,4 +1,4 @@
-import { MigrationsStorage } from "./MigrationsStorage";
+import { MigrationsStorage } from "../repositories/MigrationsStorage";
 
 export interface Config {
     version: number;
