@@ -52,6 +52,7 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
     const { actions, translate, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
+    /* TODO: File is increasing, move to useHook */
     const [value, setValue] = useState<LandingNode>(
         initialNode ?? buildDefaultNode(type, parent, order, "multiple", true)
     );
@@ -119,6 +120,7 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
         setValue(value => ({ ...value, iconSize: size }));
     }, []);
 
+    /* TODO: Move to separate components to make it more readable */
     return (
         <ConfirmationDialog fullWidth={true} {...props} maxWidth={"md"} onSave={save}>
             <Row>
