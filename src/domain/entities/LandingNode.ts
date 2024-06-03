@@ -71,7 +71,7 @@ export const buildOrderedLandingNodes = (nodes: LandingNode[]): OrderedLandingNo
     }));
 };
 
-function updateLandingNodes(nodes: LandingNode[], permissions: LandingPagePermission[], user: User): LandingNode[] {
+function updateNodesPermissions(nodes: LandingNode[], permissions: LandingPagePermission[], user: User): LandingNode[] {
     const updatedNodes = _(nodes)
         .map(node => {
             const pagePermission = permissions?.find(permission => permission.id === node.id);
@@ -88,7 +88,7 @@ function updateLandingNodes(nodes: LandingNode[], permissions: LandingPagePermis
 
             return {
                 ...node,
-                children: updateLandingNodes(node.children, permissions, user),
+                children: updateNodesPermissions(node.children, permissions, user),
             };
         })
         .compact()
@@ -97,20 +97,22 @@ function updateLandingNodes(nodes: LandingNode[], permissions: LandingPagePermis
     return updatedNodes;
 }
 
-function spreadFavicon(children: LandingNode[], favicon: string): LandingNode[] {
-    return _.map(children, child => {
-        return {
-            ...child,
-            favicon: favicon,
-            children: spreadFavicon(child.children, favicon),
-        };
-    });
+function spreadFavicon(node: LandingNode, favicon: string): LandingNode {
+    return {
+        ...node,
+        favicon: favicon,
+        children: node.children.map(child => spreadFavicon(child, favicon)),
+    };
 }
 
-export function updateLandings(nodes: LandingNode[], permissions: LandingPagePermission[], user: User): LandingNode[] {
-    const landings = updateLandingNodes(nodes, permissions, user);
+export function updateLandings(
+    landings: LandingNode[],
+    permissions: LandingPagePermission[],
+    user: User
+): LandingNode[] {
+    const landingsWithPermissions = updateNodesPermissions(landings, permissions, user);
 
-    return landings.map(landing => ({ ...landing, children: spreadFavicon(landing.children, landing.favicon) }));
+    return landingsWithPermissions.map(landing => spreadFavicon(landing, landing.favicon));
 }
 
 // Return
