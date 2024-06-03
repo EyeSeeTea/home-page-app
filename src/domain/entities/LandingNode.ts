@@ -97,12 +97,12 @@ function updateLandingNodes(nodes: LandingNode[], permissions: LandingPagePermis
     return updatedNodes;
 }
 
-function applyFavicon(children: LandingNode[], favicon: string): LandingNode[] {
+function spreadFavicon(children: LandingNode[], favicon: string): LandingNode[] {
     return _.map(children, child => {
         return {
             ...child,
             favicon: favicon,
-            children: applyFavicon(child.children, favicon),
+            children: spreadFavicon(child.children, favicon),
         };
     });
 }
@@ -110,7 +110,7 @@ function applyFavicon(children: LandingNode[], favicon: string): LandingNode[] {
 export function updateLandings(nodes: LandingNode[], permissions: LandingPagePermission[], user: User): LandingNode[] {
     const landings = updateLandingNodes(nodes, permissions, user);
 
-    return landings.map(landing => ({ ...landing, children: applyFavicon(landing.children, landing.favicon) }));
+    return landings.map(landing => ({ ...landing, children: spreadFavicon(landing.children, landing.favicon) }));
 }
 
 // Return
