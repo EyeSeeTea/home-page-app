@@ -46,6 +46,7 @@ export const ItemRoot: React.FC<{
                                         <img src={item.icon} alt={`Icon for ${translate(item.name)}`} />
                                     ) : undefined
                                 }
+                                iconSize={item.iconSize}
                             />
                         ))}
                     </Cardboard>

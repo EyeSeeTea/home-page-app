@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-04-30T15:58:34.129Z\n"
-"PO-Revision-Date: 2024-04-30T15:58:34.129Z\n"
+"POT-Creation-Date: 2024-05-27T14:20:48.393Z\n"
+"PO-Revision-Date: 2024-05-27T14:20:48.393Z\n"
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""
@@ -259,6 +259,12 @@ msgstr ""
 msgid "Bottom"
 msgstr ""
 
+msgid "Icon Size"
+msgstr ""
+
+msgid "Favicon"
+msgstr ""
+
 msgid "Page Rendering"
 msgstr ""
 
@@ -284,6 +290,12 @@ msgid "Actions assigned"
 msgstr ""
 
 msgid "Contents"
+msgstr ""
+
+msgid "Please ensure that your favicon has a {{aspectRatio}} aspect ratio."
+msgstr ""
+
+msgid "Please use an icon of {{max}}x{{max}} pixels or smaller."
 msgstr ""
 
 msgid "Importing landing pages(s)"
