@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { ChangeEvent, useCallback, useState } from "react";
 import { useAppContext } from "../../contexts/app-context";
 import { LandingNode } from "../../../domain/entities/LandingNode";
@@ -30,7 +31,7 @@ export default function useImageFileUpload(updateNode: (value: React.SetStateAct
                     ];
 
                     const imageDimensionWarnings = [
-                        ...(!isWithinMargin(width) || !isWithinMargin(height)
+                        ...(!(isWithinMargin(width) && isWithinMargin(height))
                             ? [
                                   i18n.t("Please use an icon of {{max}}x{{max}} pixels or smaller.", {
                                       max: FAVICON_MAX_SIZE,
@@ -52,7 +53,7 @@ export default function useImageFileUpload(updateNode: (value: React.SetStateAct
 
     const handleImageFileUpload = useCallback(
         (event: ChangeEvent<HTMLInputElement>, fileType: keyof LandingNode) => {
-            const file = event.target.files ? event.target.files[0] : undefined;
+            const file = _.first(event.target.files);
 
             file?.arrayBuffer().then(async data => {
                 const icon = await compositionRoot.instance.uploadFile(data, file.name);
@@ -67,6 +68,7 @@ export default function useImageFileUpload(updateNode: (value: React.SetStateAct
         (event: ChangeEvent<HTMLInputElement>) => handleImageFileUpload(event, "icon"),
         [handleImageFileUpload]
     );
+
     const uploadFavicon = useCallback(
         (event: ChangeEvent<HTMLInputElement>) => handleImageFileUpload(event, "favicon"),
         [handleImageFileUpload]
@@ -88,6 +90,7 @@ const ASPECT_RATIO_MARGIN = 0.015;
 const isWithinMargin = (dimension: number): boolean => {
     return dimension >= FAVICON_MAX_SIZE - ALLOWED_MARGIN && dimension <= FAVICON_MAX_SIZE + ALLOWED_MARGIN;
 };
+
 const isAspectRatioWithinMargin = (aspectRatio: number): boolean =>
     aspectRatio >= FAVICON_ASPECT_RATIO.value - ASPECT_RATIO_MARGIN &&
     aspectRatio <= FAVICON_ASPECT_RATIO.value + ASPECT_RATIO_MARGIN;
