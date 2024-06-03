@@ -298,6 +298,12 @@ msgstr ""
 msgid "Bottom"
 msgstr ""
 
+msgid "Icon Size"
+msgstr ""
+
+msgid "Favicon"
+msgstr ""
+
 msgid "Page Rendering"
 msgstr ""
 
@@ -323,6 +329,12 @@ msgid "Actions assigned"
 msgstr ""
 
 msgid "Contents"
+msgstr ""
+
+msgid "Please ensure that your favicon has a {{aspectRatio}} aspect ratio."
+msgstr ""
+
+msgid "Please use an icon of {{max}}x{{max}} pixels or smaller."
 msgstr ""
 
 msgid "Importing landing pages(s)"

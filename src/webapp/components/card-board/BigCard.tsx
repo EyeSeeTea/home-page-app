@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import styled from "styled-components";
 import { CardTitleIcon } from "./CardTitleIcon";
 import { CardProgress, CardProgressText } from "./CardProgress";
+import { BigCardIcon } from "./BigCardIcon";
 
 const BaseCard: React.FC<BigCardProps> = ({
     className,
@@ -9,6 +10,7 @@ const BaseCard: React.FC<BigCardProps> = ({
     description,
     icon,
     iconLocation,
+    iconSize,
     backgroundColor,
     fontColor,
     textAlignment,
@@ -31,9 +33,11 @@ const BaseCard: React.FC<BigCardProps> = ({
             onContextMenu={onContextMenu}
         >
             {progress && progress >= 100 ? <CardTitleIcon>done</CardTitleIcon> : null}
-            {icon && iconLocation === "top" ? <BigCardIcon>{icon}</BigCardIcon> : null}
+            {icon && iconLocation === "top" ? <BigCardIcon iconSize={iconSize}>{icon}</BigCardIcon> : null}
             <BigCardTitle>{label}</BigCardTitle>
-            {icon && (!iconLocation || iconLocation === "bottom") ? <BigCardIcon>{icon}</BigCardIcon> : null}
+            {icon && (!iconLocation || iconLocation === "bottom") ? (
+                <BigCardIcon iconSize={iconSize}>{icon}</BigCardIcon>
+            ) : null}
             {description ? <p>{description}</p> : null}
             {progress !== undefined ? <CardProgressText>{`${normalizedProgress}%`}</CardProgressText> : null}
             {progress !== undefined ? <CardProgress value={normalizedProgress} max="100"></CardProgress> : null}
@@ -47,6 +51,7 @@ export const BigCard = styled(BaseCard)`
     text-align: left;
     margin: 10px 10px 10px;
     user-select: none;
+    max-height: 305px;
     cursor: ${({ onClick, disabled }) => (onClick && !disabled ? "pointer" : "inherit")};
 `;
 
@@ -65,6 +70,7 @@ export interface BigCardProps {
     description?: string;
     icon?: ReactNode;
     iconLocation?: string;
+    iconSize?: string;
     backgroundColor?: string;
     fontColor?: string;
     textAlignment?: any;
@@ -76,19 +82,4 @@ const BigCardTitle = styled.span`
     font-size: 1.2vw;
     font-weight: 700;
     display: block;
-`;
-
-const BigCardIcon = styled.span`
-    display: flex;
-    place-content: center;
-    margin: 20px 0px;
-
-    img,
-    svg {
-        height: 72px;
-        max-height: 10vw;
-        // max-width: 18vh;
-        margin: 0;
-        user-drag: none;
-    }
 `;

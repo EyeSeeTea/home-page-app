@@ -4,7 +4,7 @@ import { SharedUpdate } from "../../components/permissions-dialog/PermissionsDia
 import { useAppContext } from "../../contexts/app-context";
 import { User } from "../../../domain/entities/User";
 import { Maybe } from "../../../types/utils";
-import { LandingNode, updateLandingNodes } from "../../../domain/entities/LandingNode";
+import { LandingNode, updateLandings } from "../../../domain/entities/LandingNode";
 
 export function useConfig(): useConfigPloc {
     const { compositionRoot, landings } = useAppContext();
@@ -17,7 +17,7 @@ export function useConfig(): useConfigPloc {
 
     const userLandings = useMemo<LandingNode[] | undefined>(() => {
         if (!(landings && landingPagePermissions && user)) return undefined;
-        return updateLandingNodes(landings, landingPagePermissions, user);
+        return updateLandings(landings, landingPagePermissions, user);
     }, [landingPagePermissions, landings, user]);
 
     useEffect(() => {
