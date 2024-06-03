@@ -152,7 +152,7 @@ export const HomePage: React.FC = React.memo(() => {
         }
     }, [analytics, currentHistory, currentPage, isRootPage, isSingleLanding, pageType, userLandings]);
 
-    const redirect = useRedirectOnSinglePrimaryNode(currentPage, userLandings);
+    const redirect = useRedirectOnSinglePrimaryNode(currentPage, userLandings, initLandings);
     const pageToRender = redirect.currentPage || (currentPage && isSingleLanding ? currentPage : undefined);
 
     return (
@@ -229,12 +229,13 @@ const ContentWrapper = styled.div`
 
 function useRedirectOnSinglePrimaryNode(
     landingNode: Maybe<LandingNode>,
-    userLandings: Maybe<LandingNode[]>
+    userLandings: Maybe<LandingNode[]>,
+    initLandings: Maybe<LandingNode[]>
 ): { isActive: boolean; currentPage: Maybe<LandingNode> } {
     const { actions, launchAppBaseUrl } = useAppContext();
     const { user } = useConfig();
     const url =
-        user && landingNode && userLandings?.length === 1
+        user && landingNode && initLandings?.length === 1
             ? getPrimaryActionNodes(landingNode, { actions, user })
             : undefined;
 
