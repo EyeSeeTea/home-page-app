@@ -82,7 +82,7 @@ export default function useImageFileUpload(updateNode: (value: React.SetStateAct
 }
 
 const FAVICON_ASPECT_RATIO = { fraction: "1:1", value: 1 };
-const FAVICON_MAX_SIZE = 128;
+const FAVICON_MAX_SIZE = 512;
 
 const ALLOWED_MARGIN = 5;
 const ASPECT_RATIO_MARGIN = 0.015;
