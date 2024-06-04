@@ -1,12 +1,51 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2024-05-27T14:20:48.393Z\n"
+"POT-Creation-Date: 2024-05-06T08:44:12.108Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgid "There are pending migrations"
+msgstr ""
+
+msgid "Migrations finished successfully, you may now continue to the app"
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Continue to the app anyway"
+msgstr ""
+
+msgid ""
+"The database version ({{currentStorageVersion}}) is greater than the app "
+"version ({{lastMigrationVersion}}), cannot continue. Please contact the "
+"administrator to update the app."
+msgstr ""
+
+msgid ""
+"There has been an error. You can either retry or contact your administrator "
+"if you think there has been an un recoverable error"
+msgstr ""
+
+msgid "Migrate instance"
+msgstr ""
+
+msgid "Migrating..."
+msgstr ""
+
+msgid "Continue to the App"
+msgstr ""
+
+msgid ""
+"The app needs to run pending migrations (from version "
+"{{currentStorageVersion}} to version {{lastMigrationVersion}}) in order to "
+"continue. This may take a long time, make sure the process is not "
+"interrupted."
+msgstr ""
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""

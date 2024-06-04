@@ -3,7 +3,7 @@ import { FutureData } from "../../domain/types/Future";
 import { User } from "../../domain/entities/User";
 import { cache } from "../../utils/cache";
 import { getD2APiFromInstance } from "../../utils/d2-api";
-import { apiToFuture } from "../../utils/futures";
+import { apiToFuture } from "../api-futures";
 import { Instance } from "../entities/Instance";
 import { UserRepository } from "../../domain/repositories/UserRepository";
 
