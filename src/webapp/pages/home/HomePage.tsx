@@ -177,7 +177,7 @@ export const HomePage: React.FC = React.memo(() => {
                     </ProgressContainer>
                 ) : initLandings && pageType === "userLandings" ? (
                     <>
-                        <h1>Available Home Pages</h1>
+                        <h1>{i18n.t("Available Home Pages")}</h1>
                         <Cardboard rowSize={4}>
                             {initLandings?.map(landing => {
                                 return (

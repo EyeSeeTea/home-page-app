@@ -91,6 +91,7 @@ async function getLaunchAppBaseUrl() {
 
 export function useAppContext(): AppContextState {
     const context = useContext(AppContext);
+    i18n.setDefaultNamespace("homepage-app");
     if (context) {
         return context;
     } else {
