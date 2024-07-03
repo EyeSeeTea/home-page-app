@@ -16,8 +16,11 @@ class RemoveDuplicatedNodesMigration {
             const fixedTrees = landingTrees.map(tree =>
                 tree.reduce<PersistedLandingPage>((acc, node) => {
                     const inParentTree =
-                        node.parent === "none" || node.type === "root" || acc.some(parent => parent.id === node.parent);
-                    const alreadyExist = acc.some(n => n.id === node.id);
+                        node.parent === "none" ||
+                        node.type === "root" ||
+                        tree.some(maybeParent => maybeParent.id === node.parent); // To avoid nodes out of place
+
+                    const alreadyExist = acc.some(n => n.id === node.id); // To avoid duplicated nodes
                     if (inParentTree && !alreadyExist) {
                         return [...acc, node];
                     } else {
