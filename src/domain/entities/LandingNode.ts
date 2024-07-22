@@ -4,6 +4,7 @@ import { TranslatableText, TranslatableTextModel } from "./TranslatableText";
 import { LandingPagePermission } from "./Permission";
 import { User } from "./User";
 import { Action, getPageActions } from "./Action";
+import { Maybe } from "../../types/utils";
 
 export const LandingPageNodeTypeModel = Schema.oneOf([
     Schema.exact("root"),
@@ -24,6 +25,8 @@ export interface LandingNode {
     type: LandingNodeType;
     icon: string;
     iconLocation: string;
+    iconSize: string;
+    favicon: string;
     pageRendering: LandingNodePageRendering | undefined;
     order: number | undefined;
     name: TranslatableText;
@@ -42,6 +45,8 @@ export const LandingNodeModel: Codec<LandingNode> = Schema.object({
     type: LandingPageNodeTypeModel,
     icon: Schema.optionalSafe(Schema.string, ""),
     iconLocation: Schema.optionalSafe(Schema.string, ""),
+    iconSize: Schema.optionalSafe(Schema.string, ""),
+    favicon: Schema.optionalSafe(Schema.string, ""),
     pageRendering: Schema.optional(LandingPageNodePageRenderingModel),
     order: Schema.optional(Schema.integer),
     name: TranslatableTextModel,
@@ -66,12 +71,8 @@ export const buildOrderedLandingNodes = (nodes: LandingNode[]): OrderedLandingNo
     }));
 };
 
-export const updateLandingNodes = (
-    nodes: LandingNode[],
-    permissions: LandingPagePermission[],
-    user: User
-): LandingNode[] => {
-    return _(nodes)
+function updateNodesPermissions(nodes: LandingNode[], permissions: LandingPagePermission[], user: User): LandingNode[] {
+    const updatedNodes = _(nodes)
         .map(node => {
             const pagePermission = permissions?.find(permission => permission.id === node.id);
 
@@ -87,49 +88,75 @@ export const updateLandingNodes = (
 
             return {
                 ...node,
-                children: updateLandingNodes(node.children, permissions, user),
+                children: updateNodesPermissions(node.children, permissions, user),
             };
         })
         .compact()
         .value();
-};
 
-/* Return a redirect URL if there is only one visible action on primary nodes */
-export function getPrimaryRedirectUrl(
+    return updatedNodes;
+}
+
+function spreadFavicon(node: LandingNode, favicon: string): LandingNode {
+    return {
+        ...node,
+        favicon: favicon,
+        children: node.children.map(child => spreadFavicon(child, favicon)),
+    };
+}
+
+export function updateLandings(
+    landings: LandingNode[],
+    permissions: LandingPagePermission[],
+    user: User
+): LandingNode[] {
+    const landingsWithPermissions = updateNodesPermissions(landings, permissions, user);
+
+    return landingsWithPermissions.map(landing => spreadFavicon(landing, landing.favicon));
+}
+
+// Return
+// a redirect URL if there is only one visible action on primary nodes
+// a redirect page id when there is only one visible action on primary nodes
+export function getPrimaryRedirectNodes(
     landingNode: LandingNode,
     options: { actions: Action[]; user: User }
-): Url | undefined {
+): { redirectUrl: Maybe<Url>; redirectPageId: Maybe<string> } {
     const { actions, user } = options;
 
     const actionsById = _.keyBy(actions, action => action.id);
     const showAllActions = false;
     const isRoot = true;
 
-    const primaryUrls = _(landingNode.children)
+    const pageActions = _(landingNode.children)
         .reject(node => Boolean(node.secondary))
-        .flatMap((node): Url[] => {
+        .flatMap((node): Action[] => {
             const nodeActions = actions.filter(action => node.actions.includes(action.id));
             const actionIds = user && getPageActions(isRoot, showAllActions, actions, user, nodeActions);
 
             return _(actionIds)
                 .map(actionId => actionsById[actionId])
                 .compact()
-                .map(action => action.dhisLaunchUrl)
-                .compact()
                 .value();
         })
         .value();
 
-    const redirectUrl = primaryUrls.length === 1 ? primaryUrls[0] : undefined;
+    const launchUrls = _.map(pageActions, action => action.dhisLaunchUrl);
+    const launchPageIds = _.map(pageActions, action => action.launchPageId);
+
+    const redirectUrl = launchUrls.length === 1 ? launchUrls[0] : undefined;
+    const redirectPageId = launchPageIds.length === 1 ? launchPageIds[0] : undefined;
 
     const message = [
-        `Primary URLs [${primaryUrls.length}]: ${primaryUrls.join(", ")}`,
+        `Primary URLs [${launchUrls.length}]: ${launchUrls.join(", ")}`,
         `Redirect URL: ${redirectUrl || "-"}`,
+        `Primary Page IDs [${launchPageIds.length}]: ${launchPageIds.join(", ")}`,
+        `Redirect Page ID: ${redirectPageId || "-"}`,
     ].join("\n");
 
     console.debug(message);
 
-    return redirectUrl;
+    return { redirectUrl, redirectPageId };
 }
 
 export function flattenLandingNodes(nodes: LandingNode[]): LandingNode[] {

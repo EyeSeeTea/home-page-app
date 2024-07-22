@@ -1,15 +1,16 @@
+import _ from "lodash";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CircularProgress from "material-ui/CircularProgress";
 import styled from "styled-components";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { useNavigate } from "react-router-dom";
 import {
     LandingNode,
     flattenLandingNodes,
-    getPrimaryRedirectUrl as getPrimaryActionUrl,
+    getPrimaryRedirectNodes as getPrimaryActionNodes,
 } from "../../../domain/entities/LandingNode";
 import { LandingLayout, LandingContent } from "../../components/landing-layout";
 import { useAppContext } from "../../contexts/app-context";
-import { useNavigate } from "react-router-dom";
 import { Item } from "../../components/item/Item";
 import { useConfig } from "../settings/useConfig";
 import { Cardboard } from "../../components/card-board/Cardboard";
@@ -41,7 +42,10 @@ export const HomePage: React.FC = React.memo(() => {
         return history[0] ?? initLandings?.[0];
     }, [history, initLandings]);
 
-    const isRoot = history.length === 0;
+    const isRoot = _.isEmpty(history);
+    const isRootPage = currentPage?.type === "root";
+    const isSingleLanding = pageType === "singleLanding";
+    const hasSingleInitLanding = initLandings?.length === 1;
     const currentHistory = history[0];
 
     const openSettings = useCallback(() => {
@@ -66,9 +70,24 @@ export const HomePage: React.FC = React.memo(() => {
     );
 
     const goBack = useCallback(() => {
-        if (initLandings?.length === 1 || currentPage?.type !== "root") updateHistory(history => history.slice(1));
-        else setPageType("userLandings");
-    }, [currentPage, initLandings]);
+        const allHistoryMatchesCurrentPage = _.every(history, landing => landing.id === currentPage?.id);
+
+        if (isRootPage && allHistoryMatchesCurrentPage) {
+            updateHistory([]);
+            setPageType("userLandings");
+        } else if (hasSingleInitLanding || !isRootPage || !isRoot) {
+            updateHistory(history => history.slice(1));
+        } else {
+            setPageType("userLandings");
+        }
+    }, [currentPage, hasSingleInitLanding, history, isRoot, isRootPage]);
+
+    const allowBackNavigation = useMemo(() => {
+        const isMultipleLandingSubPage = !isRoot && initLandings !== undefined && initLandings.length > 1;
+        const isSingleLandingSubPage = initLandings?.length === 1 && history.length > 1;
+
+        return isSingleLanding && (isMultipleLandingSubPage || isSingleLandingSubPage);
+    }, [history, initLandings, isRoot, isSingleLanding]);
 
     const goHome = useCallback(() => {
         if (initLandings?.length === 1) updateHistory([]);
@@ -90,6 +109,12 @@ export const HomePage: React.FC = React.memo(() => {
     }, [compositionRoot]);
 
     useEffect(() => {
+        if (isSingleLanding && hasSingleInitLanding && isRootPage && isRoot) {
+            updateHistory(history => [currentPage, ...history]);
+        }
+    }, [currentPage, hasSingleInitLanding, isRoot, isRootPage, isSingleLanding]);
+
+    useEffect(() => {
         if (initLandings?.length === 0) {
             window.location.href = !defaultApplication
                 ? `${launchAppBaseUrl}/dhis-web-dashboard/index.html`
@@ -102,13 +127,15 @@ export const HomePage: React.FC = React.memo(() => {
 
     useEffect(() => {
         const icon = favicon.current;
-        icon?.setAttribute("href", (pageType === "singleLanding" && currentPage?.icon) || defaultIcon);
-        document.title = (pageType === "singleLanding" && currentPage && translate(currentPage.name)) || defaultTitle;
+        const pageFavicon = currentPage?.favicon;
+
+        icon?.setAttribute("href", (isSingleLanding && pageFavicon) || defaultIcon);
+        document.title = (isSingleLanding && currentPage && translate(currentPage.name)) || defaultTitle;
         return () => {
             icon?.setAttribute("href", defaultIcon);
             document.title = defaultTitle;
         };
-    }, [reload, currentPage, pageType, translate]);
+    }, [reload, currentPage, isSingleLanding, translate]);
 
     useEffect(() => {
         if (userLandings && userLandings?.length > 1 && pageType === "userLandings") {
@@ -116,24 +143,25 @@ export const HomePage: React.FC = React.memo(() => {
                 title: "Homepage - Available Home Pages",
                 location: `${window.location.hash.split("?")[0]}home-page-app/available-landings`,
             });
-        } else if (currentPage && pageType === "singleLanding" && currentHistory) {
-            const type = currentPage.type === "root" ? "landing" : currentPage.type;
+        } else if (currentPage && isSingleLanding && currentHistory) {
+            const type = isRootPage ? "landing" : currentPage.type;
             analytics.sendPageView({
                 title: `Homepage - ${currentPage.name.referenceValue}`,
                 location: `${window.location.hash.split("?")[0]}home-page-app/${type}/${currentPage.id}`,
             });
         }
-    }, [currentPage, analytics, pageType, userLandings, currentHistory]);
+    }, [analytics, currentHistory, currentPage, isRootPage, isSingleLanding, pageType, userLandings]);
 
-    const redirect = useRedirectOnSinglePrimaryAction(currentPage, userLandings);
+    const redirect = useRedirectOnSinglePrimaryNode(currentPage, userLandings, initLandings);
+    const pageToRender = redirect.currentPage || (currentPage && isSingleLanding ? currentPage : undefined);
 
     return (
         <StyledLanding
             backgroundColor={currentPage?.backgroundColor}
             onSettings={hasSettingsAccess ? openSettings : undefined}
             onAbout={openAbout}
-            onGoBack={!isRoot && pageType === "singleLanding" ? goBack : undefined}
-            onGoHome={!isRoot && pageType === "singleLanding" ? goHome : undefined}
+            onGoBack={allowBackNavigation ? goBack : undefined}
+            onGoHome={!isRoot && isSingleLanding ? goHome : undefined}
             onLogout={logout}
             centerChildren={true}
         >
@@ -149,7 +177,7 @@ export const HomePage: React.FC = React.memo(() => {
                     </ProgressContainer>
                 ) : initLandings && pageType === "userLandings" ? (
                     <>
-                        <h1>Available Home Pages</h1>
+                        <h1>{i18n.t("Available Home Pages")}</h1>
                         <Cardboard rowSize={4}>
                             {initLandings?.map(landing => {
                                 return (
@@ -165,13 +193,14 @@ export const HomePage: React.FC = React.memo(() => {
                                                 <img src={landing.icon} alt={`Icon for ${translate(landing.name)}`} />
                                             ) : undefined
                                         }
+                                        iconSize={landing.iconSize}
                                     />
                                 );
                             })}
                         </Cardboard>
                     </>
-                ) : currentPage && pageType === "singleLanding" ? (
-                    <Item isRoot={isRoot} currentPage={currentPage} openPage={openPage} />
+                ) : pageToRender ? (
+                    <Item isRoot={isRoot} currentPage={pageToRender} openPage={openPage} />
                 ) : null}
             </ContentWrapper>
         </StyledLanding>
@@ -198,25 +227,39 @@ const ContentWrapper = styled.div`
     min-height: 100vh;
 `;
 
-function useRedirectOnSinglePrimaryAction(
+function useRedirectOnSinglePrimaryNode(
     landingNode: Maybe<LandingNode>,
-    userLandings: Maybe<LandingNode[]>
-): { isActive: boolean } {
+    userLandings: Maybe<LandingNode[]>,
+    initLandings: Maybe<LandingNode[]>
+): { isActive: boolean; currentPage: Maybe<LandingNode> } {
     const { actions, launchAppBaseUrl } = useAppContext();
     const { user } = useConfig();
     const url =
-        user && landingNode && userLandings?.length === 1
-            ? getPrimaryActionUrl(landingNode, { actions, user })
+        user && landingNode && initLandings?.length === 1
+            ? getPrimaryActionNodes(landingNode, { actions, user })
             : undefined;
 
     const [isActive, setIsActive] = React.useState(false);
+    const [currentPage, setCurrentPage] = React.useState<LandingNode | undefined>();
 
     React.useEffect(() => {
         if (url) {
-            goTo(url, { baseUrl: launchAppBaseUrl });
-            setIsActive(true);
+            const { redirectPageId, redirectUrl } = url;
+            if (redirectUrl && redirectPageId) {
+                return;
+            }
+            if (redirectUrl) {
+                goTo(redirectUrl, { baseUrl: launchAppBaseUrl });
+                setIsActive(true);
+            }
+            if (redirectPageId) {
+                const page = userLandings?.find(landing => landing.id === redirectPageId);
+                if (page) {
+                    setCurrentPage(page);
+                }
+            }
         }
-    }, [url, launchAppBaseUrl]);
+    }, [url, launchAppBaseUrl, userLandings]);
 
-    return { isActive };
+    return { isActive: isActive, currentPage: currentPage };
 }

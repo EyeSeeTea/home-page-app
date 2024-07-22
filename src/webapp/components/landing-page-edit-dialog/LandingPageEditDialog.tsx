@@ -4,8 +4,8 @@ import {
     MultipleDropdown,
     useSnackbar,
 } from "@eyeseetea/d2-ui-components";
-import { Switch, TextField } from "@material-ui/core";
-import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
+import { Button, Switch, TextField } from "@material-ui/core";
+import React, { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { generateUid } from "../../../data/utils/uid";
 import { LandingNode, LandingNodePageRendering, LandingNodeType } from "../../../domain/entities/LandingNode";
@@ -15,6 +15,8 @@ import { MarkdownEditor } from "../markdown-editor/MarkdownEditor";
 import { MarkdownViewer } from "../markdown-viewer/MarkdownViewer";
 import { LandingBody } from "../landing-layout";
 import { ColorPicker } from "../color-picker/ColorPicker";
+import _ from "lodash";
+import useImageFileUpload from "./useImageFileUpload";
 
 const buildDefaultNode = (
     type: LandingNodeType,
@@ -29,6 +31,8 @@ const buildDefaultNode = (
         parent,
         icon: "",
         iconLocation: "",
+        iconSize: "",
+        favicon: "",
         pageRendering,
         order,
         name: { key: "", referenceValue: "", translations: {} },
@@ -48,12 +52,14 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
     const { actions, translate, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
+    /* TODO: File is increasing, move to useHook */
     const [value, setValue] = useState<LandingNode>(
         initialNode ?? buildDefaultNode(type, parent, order, "multiple", true)
     );
-    const [iconLocation, setIconLocation] = React.useState(value.iconLocation === "bottom");
-    const [pageRendering, setPageRendering] = React.useState(value.pageRendering === "single");
+    const [iconLocation, setIconLocation] = useState(value.iconLocation === "bottom");
+    const [pageRendering, setPageRendering] = useState(value.pageRendering === "single");
 
+    const { faviconWarnings, uploadFavicon, uploadIcon } = useImageFileUpload(setValue);
     const items = useMemo(
         () =>
             actions
@@ -110,17 +116,11 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
         setValue(value => ({ ...value, pageRendering: event.target.checked ? "single" : "multiple" }));
     };
 
-    const handleFileUpload = useCallback(
-        (event: ChangeEvent<HTMLInputElement>) => {
-            const file = event.target.files ? event.target.files[0] : undefined;
-            file?.arrayBuffer().then(async data => {
-                const icon = await compositionRoot.instance.uploadFile(data, file.name);
-                setValue(node => ({ ...node, icon }));
-            });
-        },
-        [compositionRoot]
-    );
+    const onChangeIconSize = useCallback(size => {
+        setValue(value => ({ ...value, iconSize: size }));
+    }, []);
 
+    /* TODO: Move to separate components to make it more readable */
     return (
         <ConfirmationDialog fullWidth={true} {...props} maxWidth={"md"} onSave={save}>
             <Row>
@@ -186,7 +186,7 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                         </IconContainer>
                     ) : null}
 
-                    <FileInput type="file" onChange={handleFileUpload} />
+                    <FileInput type="file" onChange={uploadIcon} />
                 </IconUpload>
 
                 <div>
@@ -202,7 +202,48 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                         <p>{i18n.t("Bottom")}</p>
                     </IconLocationSwitch>
                 </div>
+
+                <Label>{i18n.t("Icon Size")}</Label>
+                <OptionContainer>
+                    {["small", "medium", "large"].map((size, i) => (
+                        <Button
+                            key={i}
+                            color={
+                                size === value.iconSize || (!value.iconSize && size === "small") ? "primary" : "default"
+                            }
+                            variant="contained"
+                            value={size}
+                            onClick={() => onChangeIconSize(size)}
+                        >
+                            {size}
+                        </Button>
+                    ))}
+                </OptionContainer>
             </Row>
+
+            {type === "root" && (
+                <Row>
+                    <h3>{i18n.t("Favicon")}</h3>
+
+                    <IconUpload>
+                        {value.favicon ? (
+                            <IconContainer>
+                                <img src={value.favicon} alt={`Page favicon`} />
+                            </IconContainer>
+                        ) : null}
+
+                        <FileInput type="file" onChange={uploadFavicon} />
+                    </IconUpload>
+
+                    {!_.isEmpty(faviconWarnings) && (
+                        <WarningText>
+                            {faviconWarnings.map(warning => (
+                                <p key={warning}>{i18n.t(warning)}</p>
+                            ))}
+                        </WarningText>
+                    )}
+                </Row>
+            )}
 
             {type === "root" && (
                 <Row>
@@ -332,6 +373,21 @@ const ColorSelectorContainer = styled.div`
 
 const StyledLandingBody = styled(LandingBody)`
     max-width: 600px;
+`;
+
+const WarningText = styled.p`
+    font-size: 12px;
+    line-height: 0.1;
+    font-style: italic;
+    color: red;
+`;
+
+const OptionContainer = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    width: 50%;
+    gap: 10px;
+    margin: 20px 0;
 `;
 
 const StepPreview: React.FC<{

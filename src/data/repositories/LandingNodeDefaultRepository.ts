@@ -46,6 +46,8 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
             type: "root" as const,
             icon: "img/logo-eyeseetea.png",
             iconLocation: "top",
+            iconSize: "small",
+            favicon: "img/logo-eyeseetea.png",
             pageRendering: "multiple",
             order: undefined,
             name: {
