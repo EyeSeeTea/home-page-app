@@ -98,17 +98,22 @@ export class LandingNodeDefaultRepository implements LandingNodeRepository {
     public async deleteNodes(ids: string[]): Promise<void> {
         const nodes = (await this.storageClient.getObject<PersistedLandingPage[]>(Namespaces.LANDING_PAGES)) ?? [];
 
-        const newNodes = nodes.map(models => {
-            const root = models.find(model => model.type === "root");
-            if (!root) throw new Error("No value for root");
+        const newNodes = _(nodes)
+            .map(models => {
+                if (_.isEmpty(models)) return undefined;
 
-            const node = LandingNodeModel.decode(buildLandingNode(root, models)).toMaybe().extract();
-            if (!node) throw new Error("No value for node");
+                const root = models.find(model => model.type === "root");
+                if (!root) throw new Error("No value for root");
 
-            const childNodes = extractChildrenNodes(node, root.id);
+                const node = LandingNodeModel.decode(buildLandingNode(root, models)).toMaybe().extract();
+                if (!node) throw new Error("No value for node");
 
-            return _.reject(childNodes, ({ id, parent }) => ids.includes(id) || ids.includes(parent));
-        });
+                const childNodes = extractChildrenNodes(node, root.id);
+
+                return _.reject(childNodes, ({ id, parent }) => ids.includes(id) || ids.includes(parent));
+            })
+            .compact()
+            .value();
 
         const parentIds = _.union(...newNodes.map(node => node.map(node => node.id)));
         const updatedNodes = newNodes
