@@ -3959,11 +3959,12 @@
     i18next "^10.3"
     moment "^2.24.0"
 
-"@dhis2/d2-i18n@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@dhis2/d2-i18n/-/d2-i18n-1.1.0.tgz#ec777c5091f747e4c5aa4f9801c62ba4d1ef3d16"
-  integrity sha512-x3u58goDQsMfBzy50koxNrJjofJTtjRZOfz6f6Py/wMMJfp/T6vZjWMQgcfWH0JrV6d04K1RTt6bI05wqsVQvg==
+"@dhis2/d2-i18n@1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@dhis2/d2-i18n/-/d2-i18n-1.1.3.tgz#ad73030f7cfceeed1b5bcaad86a9b336130bdfb1"
+  integrity sha512-vOu6RDNumOJM396mHt35bETk9ai9b6XJyAwlUy1HstUZNvfET61F8rjCmMuXZU6zJ8ELux8kMFqlH8IG0vDJmA==
   dependencies:
+    "@types/i18next" "^11.9.0"
     i18next "^10.3"
     moment "^2.24.0"
 
@@ -5470,6 +5471,11 @@
   integrity sha512-5kPLG5BKpWYkw/LVOGWpiq3nEVqxiN32rTgI53Sk12/xHFQ2rG3ehI9IO+O3W2QoKeyB92dJkoka8SUm6BX1pA==
   dependencies:
     "@types/node" "*"
+
+"@types/i18next@^11.9.0":
+  version "11.9.3"
+  resolved "https://registry.yarnpkg.com/@types/i18next/-/i18next-11.9.3.tgz#04d84c6539908ad69665d26d8967f942d1638550"
+  integrity sha512-snM7bMKy6gt7UYdpjsxycqSCAy0fr2JVPY0B8tJ2vp9bN58cE7C880k20PWFM4KXxQ3KsstKM8DLCawGCIH0tg==
 
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0", "@types/istanbul-lib-coverage@^2.0.1":
   version "2.0.3"
