@@ -1,4 +1,4 @@
-import i18n from "../../locales";
+import i18n from "../../utils/i18n";
 import { PartialAction } from "../entities/Action";
 import { ActionRepository } from "../repositories/ActionRepository";
 import { LandingNodeRepository } from "../repositories/LandingNodeRepository";

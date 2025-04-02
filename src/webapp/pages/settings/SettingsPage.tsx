@@ -3,7 +3,7 @@ import { Button, FormGroup, Icon, ListItem, ListItemIcon, ListItemText } from "@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { NamedRef } from "../../../domain/entities/Ref";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 import { ComponentParameter } from "../../../types/utils";
 import { LandingPageListTable } from "../../components/landing-page-list-table/LandingPageListTable";
 import { ActionListTable, buildListActions } from "../../components/action-list-table/ActionListTable";

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import styled from "styled-components";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 import { MarkdownViewer } from "../../components/markdown-viewer/MarkdownViewer";
 import { LandingLayout, LandingContent } from "../../components/landing-layout";
 import { useNavigate } from "react-router-dom";
