@@ -8,7 +8,7 @@ import axios from "axios";
 import { cacheImages } from "../utils/image-cache";
 import { Instance } from "../../data/entities/Instance";
 import { Typography } from "@material-ui/core";
-import i18n from "../../locales";
+import i18n from "../../utils/i18n";
 import { Maybe } from "../../types/utils";
 
 const AppContext = React.createContext<AppContextState | null>(null);
@@ -91,7 +91,6 @@ async function getLaunchAppBaseUrl() {
 
 export function useAppContext(): AppContextState {
     const context = useContext(AppContext);
-    i18n.setDefaultNamespace("homepage-app");
     if (context) {
         return context;
     } else {

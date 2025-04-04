@@ -4,7 +4,7 @@ import Typography from "@material-ui/core/Typography";
 import { DialogButton } from "@eyeseetea/d2-ui-components";
 import React, { ReactNode } from "react";
 import styled from "styled-components";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
     className,

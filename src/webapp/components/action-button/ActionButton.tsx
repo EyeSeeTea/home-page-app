@@ -2,7 +2,7 @@ import { Fab } from "@material-ui/core";
 import EmojiObjectsIcon from "@material-ui/icons/EmojiObjects";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 import { wait } from "../../../utils/promises";
 import { DragContainer } from "../drag-container/DragContainer";
 

@@ -2,7 +2,7 @@ import FileType, { FileTypeResult } from "file-type/browser";
 import _ from "lodash";
 import { Command, CommandContext, ExecuteOptions, PasteCommandContext } from "react-mde";
 import { PasteOptions } from "react-mde/lib/definitions/types";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 
 function dataTransferToArray(items: DataTransferItemList): Array<File> {
     return _(items)

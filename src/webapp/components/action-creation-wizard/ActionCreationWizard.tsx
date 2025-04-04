@@ -6,7 +6,7 @@ import { actionValidations } from "../../../domain/entities/Action";
 import { validateModel } from "../../../domain/entities/Validation";
 import { useAppContext } from "../../contexts/app-context";
 import { ActionCreationWizardStepProps, actionCreationWizardSteps } from "./steps";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 
 export interface ActionCreationWizardProps extends ActionCreationWizardStepProps {
     className?: string;

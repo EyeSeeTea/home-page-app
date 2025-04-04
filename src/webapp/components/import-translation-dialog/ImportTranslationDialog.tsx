@@ -4,7 +4,7 @@ import React, { useCallback, useImperativeHandle, useRef, useState } from "react
 import styled from "styled-components";
 import { Action } from "../../../domain/entities/Action";
 import { TranslateMethod } from "../../../domain/entities/TranslatableText";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 import { useAppContext } from "../../contexts/app-context";
 
 export const ImportTranslationDialog = React.forwardRef(

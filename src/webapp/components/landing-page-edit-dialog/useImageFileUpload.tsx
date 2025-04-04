@@ -2,7 +2,7 @@ import _ from "lodash";
 import { ChangeEvent, useCallback, useState } from "react";
 import { useAppContext } from "../../contexts/app-context";
 import { LandingNode } from "../../../domain/entities/LandingNode";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 
 export default function useImageFileUpload(updateNode: (value: React.SetStateAction<LandingNode>) => void) {
     const { compositionRoot } = useAppContext();

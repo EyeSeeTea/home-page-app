@@ -3,7 +3,7 @@ import _ from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { defaultAction, PartialAction } from "../../../domain/entities/Action";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 import { ActionCreationWizard } from "../../components/action-creation-wizard/ActionCreationWizard";
 import { PageHeader } from "../../components/page-header/PageHeader";
 import { useAppContext } from "../../contexts/app-context";
