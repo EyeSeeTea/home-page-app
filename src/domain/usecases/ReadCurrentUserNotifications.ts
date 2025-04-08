@@ -1,6 +1,6 @@
 import { UseCase } from "./UseCase";
 import { NotificationRepository } from "../repositories/NotificationRepository";
-import { Future, FutureData } from "../types/Future";
+import { FutureData } from "../types/Future";
 import { User } from "../entities/User";
 import { Notification } from "../entities/Notification";
 import { UserRepository } from "../repositories/UserRepository";

@@ -4,7 +4,6 @@ import { NotificationListOptions, NotificationRepository } from "../../domain/re
 import { Future, FutureData } from "../../domain/types/Future";
 import { Notification, NotificationWildcard, NotificationWildcardType } from "../../domain/entities/Notification";
 import { Instance } from "../entities/Instance";
-import { InstanceRepository } from "../../domain/repositories/InstanceRepository";
 import { DataStoreStorageClient } from "../clients/storage/DataStoreStorageClient";
 import { getD2APiFromInstance } from "../utils/d2-api";
 import { Namespaces, notificationsDataStoreNamespace } from "../clients/storage/Namespaces";
@@ -46,7 +45,7 @@ export class NotificationDefaultRepository implements NotificationRepository {
 
     private isValidWildcard(notification: Notification, wildcardOptions: Maybe<NotificationWildcardType[]>): boolean {
         return (
-            !!notification.recipients.wildcard ||
+            !notification.recipients.wildcard ||
             !wildcardOptions ||
             [NotificationWildcard.ALL, ...(wildcardOptions || [])].includes(notification.recipients.wildcard)
         );
