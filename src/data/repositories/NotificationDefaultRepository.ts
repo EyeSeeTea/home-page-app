@@ -16,7 +16,7 @@ export class NotificationDefaultRepository implements NotificationRepository {
     private storageClient: StorageClient;
     private api: D2Api;
 
-    constructor(instance: Instance, private instanceRepository: InstanceRepository) {
+    constructor(instance: Instance) {
         this.storageClient = new DataStoreStorageClient("global", instance, notificationsDataStoreNamespace);
         this.api = getD2APiFromInstance(instance);
     }
