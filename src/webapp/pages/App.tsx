@@ -1,17 +1,28 @@
-import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import { MuiThemeProvider, StylesProvider } from "@material-ui/core/styles";
-import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
+import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import React, { useEffect } from "react";
-import { AppContextProvider } from "../contexts/app-context";
+
+import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
+import { AppContextProvider, AppContextProviderProps } from "../contexts/app-context";
 import { Router } from "../router/Router";
 import muiThemeLegacy from "../themes/dhis2-legacy.theme";
 import { muiTheme } from "../themes/dhis2.theme";
 import { useConfig } from "./settings/useConfig";
 import "./App.css";
+import { getCompositionRoot } from "../CompositionRoot";
+import { Instance } from "../../data/entities/Instance";
 
 const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl }) => {
-    return (
-        <AppContextProvider locale={locale} baseUrl={baseUrl}>
+    const [appContextProps, setAppContextProps] = React.useState<AppContextProviderProps | null>(null);
+
+    useEffect(() => {
+        getCompositionRoot(new Instance({ url: baseUrl })).then(compositionRoot => {
+            setAppContextProps({ locale, compositionRoot });
+        });
+    }, [baseUrl, locale]);
+
+    return appContextProps ? (
+        <AppContextProvider context={appContextProps}>
             <Analytics />
             <StylesProvider injectFirst>
                 <MuiThemeProvider theme={muiTheme}>
@@ -27,6 +38,8 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
                 </MuiThemeProvider>
             </StylesProvider>
         </AppContextProvider>
+    ) : (
+        <h3>Loading...</h3>
     );
 };
 
