@@ -5,7 +5,7 @@ import { Future, FutureData } from "../../domain/types/Future";
 import { Notification, NotificationWildcard, NotificationWildcardType } from "../../domain/entities/Notification";
 import { Instance } from "../entities/Instance";
 import { DataStoreStorageClient } from "../clients/storage/DataStoreStorageClient";
-import { Namespaces, notificationsDataStoreNamespace } from "../clients/storage/Namespaces";
+import { notificationsDataStore } from "../clients/storage/Namespaces";
 import { StorageClient } from "../clients/storage/StorageClient";
 import { Maybe } from "../../types/utils";
 import i18n from "../../utils/i18n";
@@ -14,7 +14,7 @@ export class NotificationDefaultRepository implements NotificationRepository {
     private storageClient: StorageClient;
 
     constructor(instance: Instance) {
-        this.storageClient = new DataStoreStorageClient("global", instance, notificationsDataStoreNamespace);
+        this.storageClient = new DataStoreStorageClient("global", instance, notificationsDataStore);
     }
 
     public list(options: NotificationListOptions): FutureData<Notification[]> {
@@ -37,12 +37,12 @@ export class NotificationDefaultRepository implements NotificationRepository {
     }
 
     private _get(): FutureData<Notification[]> {
-        return Future.fromPromise(this.storageClient.listObjectsInCollection<Notification>(Namespaces.NOTIFICATIONS));
+        return Future.fromPromise(this.storageClient.listObjectsInCollection<Notification>(notificationsDataStore));
     }
 
     private _save(notifications: Notification[]): FutureData<void> {
         return Future.fromPromise(
-            this.storageClient.saveObjectsInCollection<Notification>(Namespaces.NOTIFICATIONS, notifications)
+            this.storageClient.saveObjectsInCollection<Notification>(notificationsDataStore, notifications)
         );
     }
 
