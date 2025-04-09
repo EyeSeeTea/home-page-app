@@ -1,4 +1,4 @@
-import i18n from "@eyeseetea/d2-ui-components/locales";
+import i18n from "../../utils/i18n";
 import { ImportExportClient } from "../../data/clients/importExport/ImportExportClient";
 import { PersistedAction } from "../../data/entities/PersistedAction";
 import { ActionRepository } from "../repositories/ActionRepository";
