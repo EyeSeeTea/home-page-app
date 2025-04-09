@@ -116,13 +116,11 @@ export async function getCompositionRoot(instance: Instance) {
             getCurrent: new GetCurrentUserUseCase(userRepository),
             checkSettingsPermissions: new CheckSettingsPermissionsUseCase(configRepository),
             checkAdminAuthority: new CheckAdminAuthorityUseCase(configRepository),
+            getNotifications: new ListCurrentUserNotificationsUseCase(notificationsRepository, userRepository),
+            readNotifications: new ReadCurrentUserNotifications(notificationsRepository, userRepository),
         }),
         analytics: getExecute({
             sendPageView: new SendPageViewUseCase(analyticsRepository, configRepository),
-        }),
-        notifications: getExecute({
-            getUserNotifications: new ListCurrentUserNotificationsUseCase(notificationsRepository, userRepository),
-            readUserNotifications: new ReadCurrentUserNotifications(notificationsRepository, userRepository),
         }),
     };
 }

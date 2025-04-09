@@ -31,7 +31,7 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
                 setAppContextProps({ locale, compositionRoot });
             };
 
-            const notifications = await compositionRoot.notifications.getUserNotifications().toPromise();
+            const notifications = await compositionRoot.user.getNotifications().toPromise();
             if (notifications.length > 0) {
                 setUserNotificationDialogProps({
                     notifications,
@@ -39,7 +39,7 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
                         continueLoading();
                     },
                     onConfirm: async () => {
-                        await compositionRoot.notifications.readUserNotifications(notifications).toPromise();
+                        await compositionRoot.user.readNotifications(notifications).toPromise();
                         continueLoading();
                     },
                 });
