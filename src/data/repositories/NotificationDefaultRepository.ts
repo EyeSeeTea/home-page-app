@@ -22,17 +22,7 @@ export class NotificationDefaultRepository implements NotificationRepository {
 
     public list(options: NotificationListOptions): FutureData<Notification[]> {
         return Future.fromPromise(this.storageClient.listObjectsInCollection<Notification>(Namespaces.NOTIFICATIONS))
-            .flatMap(notifications => {
-                const filteredNotifications = _(notifications)
-                    .filter(
-                        notification =>
-                            this.isValidWildcard(notification, options?.wildcard) &&
-                            this.isForUser(notification, options)
-                    )
-                    .value();
-
-                return Future.success(filteredNotifications);
-            })
+            .map(notifications => this.filterNotifications(notifications, options))
             .flatMapError(error => {
                 console.error(error);
                 return Future.error("An error has occurred fetching notifications");
@@ -41,6 +31,15 @@ export class NotificationDefaultRepository implements NotificationRepository {
 
     public save(notifications: Partial<Notification>[]): FutureData<void> {
         return Future.success(undefined);
+    }
+
+    private filterNotifications(notifications: Notification[], options: NotificationListOptions): Notification[] {
+        return _(notifications)
+            .filter(
+                notification =>
+                    this.isValidWildcard(notification, options?.wildcard) && this.isForUser(notification, options)
+            )
+            .value();
     }
 
     private isValidWildcard(notification: Notification, wildcardOptions: Maybe<NotificationWildcardType[]>): boolean {
