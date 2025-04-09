@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-06-04T15:47:01.351Z\n"
-"PO-Revision-Date: 2024-06-04T15:47:01.351Z\n"
+"POT-Creation-Date: 2025-04-09T05:01:59.646Z\n"
+"PO-Revision-Date: 2025-04-09T05:01:59.646Z\n"
 
 msgid "There are pending migrations"
 msgstr ""
@@ -45,6 +45,12 @@ msgid ""
 "{{currentStorageVersion}} to version {{lastMigrationVersion}}) in order to "
 "continue. This may take a long time, make sure the process is not "
 "interrupted."
+msgstr ""
+
+msgid "An error has occurred fetching notifications"
+msgstr ""
+
+msgid "An error has occurred while saving notifications"
 msgstr ""
 
 msgid "Field {{field}} cannot be blank"
@@ -404,6 +410,12 @@ msgid "Uploading file..."
 msgstr ""
 
 msgid "Help"
+msgstr ""
+
+msgid "Notifications"
+msgstr ""
+
+msgid "Okay"
 msgstr ""
 
 msgid "Composition root uninitialized"

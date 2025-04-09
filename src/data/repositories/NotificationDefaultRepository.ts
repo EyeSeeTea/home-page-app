@@ -5,32 +5,45 @@ import { Future, FutureData } from "../../domain/types/Future";
 import { Notification, NotificationWildcard, NotificationWildcardType } from "../../domain/entities/Notification";
 import { Instance } from "../entities/Instance";
 import { DataStoreStorageClient } from "../clients/storage/DataStoreStorageClient";
-import { getD2APiFromInstance } from "../utils/d2-api";
 import { Namespaces, notificationsDataStoreNamespace } from "../clients/storage/Namespaces";
 import { StorageClient } from "../clients/storage/StorageClient";
-import { D2Api } from "../../types/d2-api";
 import { Maybe } from "../../types/utils";
+import i18n from "../../utils/i18n";
 
 export class NotificationDefaultRepository implements NotificationRepository {
     private storageClient: StorageClient;
-    private api: D2Api;
 
     constructor(instance: Instance) {
         this.storageClient = new DataStoreStorageClient("global", instance, notificationsDataStoreNamespace);
-        this.api = getD2APiFromInstance(instance);
     }
 
     public list(options: NotificationListOptions): FutureData<Notification[]> {
-        return Future.fromPromise(this.storageClient.listObjectsInCollection<Notification>(Namespaces.NOTIFICATIONS))
+        return this._get()
             .map(notifications => this.filterNotifications(notifications, options))
             .flatMapError(error => {
-                console.error(error);
-                return Future.error("An error has occurred fetching notifications");
+                console.error(`Notification (list): ${error}`);
+                return Future.error(i18n.t("An error has occurred fetching notifications"));
             });
     }
 
     public save(notifications: Partial<Notification>[]): FutureData<void> {
-        return Future.success(undefined);
+        return this.list(null)
+            .map(existingNotifs => this.updateNotifications(existingNotifs, notifications))
+            .flatMap(updatedNotifications => this._save(updatedNotifications))
+            .flatMapError(error => {
+                console.error(`Notification (save): ${error}`);
+                return Future.error(i18n.t("An error has occurred while saving notifications"));
+            });
+    }
+
+    private _get(): FutureData<Notification[]> {
+        return Future.fromPromise(this.storageClient.listObjectsInCollection<Notification>(Namespaces.NOTIFICATIONS));
+    }
+
+    private _save(notifications: Notification[]): FutureData<void> {
+        return Future.fromPromise(
+            this.storageClient.saveObjectsInCollection<Notification>(Namespaces.NOTIFICATIONS, notifications)
+        );
     }
 
     private filterNotifications(notifications: Notification[], options: NotificationListOptions): Notification[] {
@@ -64,5 +77,26 @@ export class NotificationDefaultRepository implements NotificationRepository {
             return notifForUser && options?.isRead === isRead;
         }
         return notifForUser;
+    }
+
+    private updateNotifications(
+        existingNotifications: Notification[],
+        notificationUpdates: Partial<Notification>[]
+    ): Notification[] {
+        const notificationMap = _.keyBy(notificationUpdates, "id");
+        return _(existingNotifications)
+            .filter(notification => !!notificationMap[notification.id])
+            .map(notification => {
+                const updatedNotification = notificationMap[notification.id];
+                return {
+                    ...notification,
+                    ...updatedNotification,
+                    readBy: _.uniqBy(
+                        [...(updatedNotification?.readBy || []), ...(notification.readBy || [])],
+                        ({ id }) => id
+                    ),
+                };
+            })
+            .value();
     }
 }

@@ -26,23 +26,25 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
     useEffect(() => {
         async function setup() {
             const compositionRoot = await getCompositionRoot(new Instance({ url: baseUrl }));
+            const continueLoading = () => {
+                setUserNotificationDialogProps(null);
+                setAppContextProps({ locale, compositionRoot });
+            };
 
             const notifications = await compositionRoot.notifications.getUserNotifications().toPromise();
             if (notifications.length > 0) {
                 setUserNotificationDialogProps({
                     notifications,
                     onClose: () => {
-                        setUserNotificationDialogProps(null);
-                        setAppContextProps({ locale, compositionRoot });
+                        continueLoading();
                     },
-                    onConfirm: () => {
-                        setUserNotificationDialogProps(null);
-                        setAppContextProps({ locale, compositionRoot });
-                        return compositionRoot.notifications.readUserNotifications(notifications);
+                    onConfirm: async () => {
+                        await compositionRoot.notifications.readUserNotifications(notifications).toPromise();
+                        continueLoading();
                     },
                 });
             } else {
-                setAppContextProps({ locale, compositionRoot });
+                continueLoading();
             }
         }
         setup();
