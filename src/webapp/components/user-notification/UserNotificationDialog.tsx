@@ -3,11 +3,8 @@ import { Notification } from "../../../domain/entities/Notification";
 import i18n from "../../../utils/i18n";
 import { NotificationContent } from "./NotificationContent";
 
-export const UserNotificationDialog: React.FC<UserNotificationDialogProps> = ({
-    notifications,
-    onClose,
-    onConfirm,
-}) => {
+export const UserNotificationDialog: React.FC<UserNotificationDialogProps> = (props: UserNotificationDialogProps) => {
+    const { notifications, onClose, onConfirm } = props;
     const content = notifications.map(({ content }) => content).join("\n\n");
 
     return (

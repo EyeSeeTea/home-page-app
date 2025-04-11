@@ -5,7 +5,7 @@ import { User } from "../entities/User";
 
 export interface NotificationRepository {
     list(options: NotificationListOptions): FutureData<Notification[]>;
-    save(notifications: Partial<Notification>[]): FutureData<void>;
+    save(notifications: Notification[]): FutureData<void>;
 }
 
 export type NotificationListOptions = Maybe<{
