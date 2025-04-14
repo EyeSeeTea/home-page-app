@@ -9,7 +9,5 @@ export interface NotificationRepository {
 }
 
 export type NotificationListOptions = Maybe<{
-    user: User;
-    isRead: Maybe<boolean>;
     wildcard: Maybe<NotificationWildcardType[]>;
 }>;

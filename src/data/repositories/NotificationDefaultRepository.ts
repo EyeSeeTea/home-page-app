@@ -7,7 +7,7 @@ import { Instance } from "../entities/Instance";
 import { DataStoreStorageClient } from "../clients/storage/DataStoreStorageClient";
 import { notificationsDataStore } from "../clients/storage/Namespaces";
 import { StorageClient } from "../clients/storage/StorageClient";
-import { isBoolean, Maybe } from "../../types/utils";
+import { Maybe } from "../../types/utils";
 import i18n from "../../utils/i18n";
 
 export class NotificationDefaultRepository implements NotificationRepository {
@@ -49,10 +49,7 @@ export class NotificationDefaultRepository implements NotificationRepository {
 
     private filterNotifications(notifications: Notification[], options: NotificationListOptions): Notification[] {
         return _(notifications)
-            .filter(
-                notification =>
-                    this.isValidWildcard(notification, options?.wildcard) && this.isForUser(notification, options)
-            )
+            .filter(notification => this.isValidWildcard(notification, options?.wildcard))
             .value();
     }
 
@@ -62,21 +59,5 @@ export class NotificationDefaultRepository implements NotificationRepository {
             !wildcardOptions ||
             [NotificationWildcard.ALL, ...wildcardOptions].includes(notification.recipients.wildcard)
         );
-    }
-
-    private isForUser(notification: Notification, options?: NotificationListOptions): boolean {
-        if (!options?.user) return true; // If no user filter is provided, return true
-
-        const isForUser = notification.recipients.users.some(({ id }) => id === options.user.id);
-        const isForGroup = notification.recipients.userGroups.some(({ id }) =>
-            options.user.userGroups.some(group => id === group.id)
-        );
-        const notifForUser = isForUser || isForGroup;
-
-        if (isBoolean(options?.isRead)) {
-            const isRead = notification.readBy.some(({ id }) => id === options.user.id);
-            return notifForUser && options?.isRead === isRead;
-        }
-        return notifForUser;
     }
 }

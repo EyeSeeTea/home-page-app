@@ -24,6 +24,7 @@ export const NotificationWildcard = {
     ALL: "ALL",
     ANDROID: "ANDROID",
     WEB: "WEB",
+    Both: "Both",
 } as const;
 
 export type NotificationWildcardType = keyof typeof NotificationWildcard;
