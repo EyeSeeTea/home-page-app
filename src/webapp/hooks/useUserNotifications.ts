@@ -5,12 +5,10 @@ import { UserNotificationDialogProps } from "../components/user-notification/Use
 export function useUserNotifications(props: useUserNotificationProps) {
     const { appContextProps } = props;
     const [isUserNotifsLoading, setIsUserNotifsLoading] = useState(true);
-    const [userNotificationDialogProps, setUserNotificationDialogProps] = useState<UserNotificationDialogProps | null>(
-        null
-    );
+    const [userNotificationDialogProps, setUserNotificationDialogProps] = useState<UserNotificationDialogProps>();
 
     const continueLoading = () => {
-        setUserNotificationDialogProps(null);
+        setUserNotificationDialogProps(undefined);
         setIsUserNotifsLoading(false);
     };
 

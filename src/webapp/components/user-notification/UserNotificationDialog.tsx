@@ -1,9 +1,10 @@
+import React from "react";
 import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
 import { Notification } from "../../../domain/entities/Notification";
 import i18n from "../../../utils/i18n";
 import { NotificationContent } from "./NotificationContent";
 
-export const UserNotificationDialog: React.FC<UserNotificationDialogProps> = (props: UserNotificationDialogProps) => {
+export const UserNotificationDialog: React.FC<UserNotificationDialogProps> = props => {
     const { notifications, onClose, onConfirm } = props;
     const content = notifications.map(({ content }) => content).join("\n\n");
 
