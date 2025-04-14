@@ -1,3 +1,4 @@
+import { UserNotificationDialog } from "../components/user-notification/UserNotificationDialog";
 import { MuiThemeProvider, StylesProvider } from "@material-ui/core/styles";
 import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import React, { useEffect } from "react";
@@ -9,7 +10,6 @@ import muiThemeLegacy from "../themes/dhis2-legacy.theme";
 import { muiTheme } from "../themes/dhis2.theme";
 import { useConfig } from "./settings/useConfig";
 import "./App.css";
-import { UserNotificationDialog } from "../components/user-notification/UserNotificationDialog";
 import { getCompositionRoot } from "../CompositionRoot";
 import { Instance } from "../../data/entities/Instance";
 import { useUserNotifications } from "../hooks/useUserNotifications";
@@ -27,7 +27,11 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
     }, [baseUrl, locale]);
 
     if (userNotificationDialogProps) {
-        return <UserNotificationDialog {...userNotificationDialogProps} />;
+        return (
+            <StylesProvider injectFirst>
+                <UserNotificationDialog {...userNotificationDialogProps} />
+            </StylesProvider>
+        );
     }
 
     return !isUserNotifsLoading && appContextProps ? (
