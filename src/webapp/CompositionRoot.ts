@@ -48,6 +48,11 @@ import { ImportExportClient } from "../data/clients/importExport/ImportExportCli
 import { GetConfigUseCase } from "../domain/usecases/GetConfigUseCase";
 import { UpdateGoogleAnalyticsCode } from "../domain/usecases/UpdateGoogleAnalyticsCode";
 import { GetGoogleAnalyticsCodeUseCase } from "../domain/usecases/GetGoogleAnalyticsCodeUseCase";
+import { AnalyticsConfigD2Repository } from "../data/repositories/AnalyticsConfigD2Repository";
+import { GetAnalyticsConfig } from "../domain/usecases/GetAnalyticsConfig";
+import { SaveAnalyticsConfigUseCase } from "../domain/usecases/SaveAnalyticsConfigUseCase";
+import { MatomoAnalyticsRepository } from "../data/repositories/MatomoAnalyticsRepository";
+import { TrackMatomoViewUseCase } from "../domain/usecases/TrackMatomoViewUseCase";
 
 export async function getCompositionRoot(instance: Instance) {
     const configRepository = new Dhis2ConfigRepository(instance.url);
@@ -61,6 +66,8 @@ export async function getCompositionRoot(instance: Instance) {
     const actionRepository = new ActionDefaultRepository(config);
     const landingPageRepository = new LandingNodeDefaultRepository(config.storageClient);
     const analyticsRepository = new GoogleAnalyticsRepository();
+    const analyticsConfigRepository = new AnalyticsConfigD2Repository(instance.url);
+    const matomoAnalyticsRepository = new MatomoAnalyticsRepository();
 
     return {
         actions: getExecute({
@@ -97,6 +104,8 @@ export async function getCompositionRoot(instance: Instance) {
             updateLandingPagePermissions: new UpdateLandingPagePermissionsUseCase(configRepository),
             getShowAllActions: new GetShowAllActionsUseCase(configRepository),
             setShowAllActions: new SetShowAllActionsUseCase(configRepository),
+            getAnalyticsConfig: new GetAnalyticsConfig(analyticsConfigRepository),
+            saveAnalyticsConfig: new SaveAnalyticsConfigUseCase(analyticsConfigRepository),
         }),
         instance: getExecute({
             uploadFile: new UploadFileUseCase(instanceRepository),
@@ -115,6 +124,9 @@ export async function getCompositionRoot(instance: Instance) {
         }),
         analytics: getExecute({
             sendPageView: new SendPageViewUseCase(analyticsRepository, configRepository),
+        }),
+        matomo: getExecute({
+            trackView: new TrackMatomoViewUseCase(analyticsConfigRepository, matomoAnalyticsRepository),
         }),
     };
 }

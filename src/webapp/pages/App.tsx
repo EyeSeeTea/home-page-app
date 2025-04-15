@@ -13,6 +13,7 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
     return (
         <AppContextProvider locale={locale} baseUrl={baseUrl}>
             <Analytics />
+            <MatomoScript />
             <StylesProvider injectFirst>
                 <MuiThemeProvider theme={muiTheme}>
                     <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
@@ -48,6 +49,26 @@ const Analytics: React.FC = () => {
     }, [googleAnalyticsCode]);
 
     return <></>; //return as <script/> seems GA doesn't like that :$
+};
+
+export const MatomoScript = () => {
+    const { analyticsConfig } = useConfig();
+    const url = analyticsConfig?.codeUrl;
+
+    React.useEffect(() => {
+        if (!url) return;
+
+        const script = document.createElement("script");
+        script.src = url;
+        script.async = true;
+        document.head.appendChild(script);
+
+        return () => {
+            document.head.removeChild(script);
+        };
+    }, [url]);
+
+    return null;
 };
 
 export default React.memo(App);

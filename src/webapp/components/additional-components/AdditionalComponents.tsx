@@ -34,7 +34,10 @@ export const AdditionalComponents: React.FC<{
                             ? `${action.dhisLaunchUrl}`
                             : `${launchAppBaseUrl}${action.dhisLaunchUrl}`;
 
-                        analytics.sendPageView({ title: name, location: href });
+                        const viewOptions = { title: name, location: href };
+
+                        analytics.sendPageView(viewOptions);
+                        analytics.trackMatomoView(viewOptions);
                         window.location.href = href;
                     }
                     break;

@@ -61,12 +61,13 @@ export const HomePage: React.FC = React.memo(() => {
             const nodes = userLandings && flattenLandingNodes(userLandings);
             if (nodes?.some(landing => landing.id === page.id)) {
                 compositionRoot.analytics.sendPageView({ title: page.name.referenceValue, location: undefined });
+                compositionRoot.matomo.trackView({ title: page.name.referenceValue, location: undefined });
                 updateHistory(history => [page, ...history]);
             } else {
                 snackbar.error(i18n.t("You do not have access to this page."));
             }
         },
-        [compositionRoot.analytics, userLandings, snackbar]
+        [compositionRoot.analytics, compositionRoot.matomo, userLandings, snackbar]
     );
 
     const goBack = useCallback(() => {
@@ -139,16 +140,20 @@ export const HomePage: React.FC = React.memo(() => {
 
     useEffect(() => {
         if (userLandings && userLandings?.length > 1 && pageType === "userLandings") {
-            analytics.sendPageView({
+            const viewOptions = {
                 title: "Homepage - Available Home Pages",
                 location: `${window.location.hash.split("?")[0]}home-page-app/available-landings`,
-            });
+            };
+            analytics.sendPageView(viewOptions);
+            analytics.trackMatomoView(viewOptions);
         } else if (currentPage && isSingleLanding && currentHistory) {
             const type = isRootPage ? "landing" : currentPage.type;
-            analytics.sendPageView({
+            const viewOptions = {
                 title: `Homepage - ${currentPage.name.referenceValue}`,
                 location: `${window.location.hash.split("?")[0]}home-page-app/${type}/${currentPage.id}`,
-            });
+            };
+            analytics.sendPageView(viewOptions);
+            analytics.trackMatomoView(viewOptions);
         }
     }, [analytics, currentHistory, currentPage, isRootPage, isSingleLanding, pageType, userLandings]);
 
