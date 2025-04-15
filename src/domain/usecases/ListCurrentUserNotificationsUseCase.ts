@@ -23,7 +23,7 @@ export class ListCurrentUserNotificationsUseCase {
     private filterUserNotifications(notifications: Notification[], user: User): Notification[] {
         return _(notifications)
             .filter(notification => this.isForUser(notification, user))
-            .sortBy(notification => notification.createdAt, "desc")
+            .orderBy(notification => notification.createdAt, "desc")
             .value();
     }
 
