@@ -8,7 +8,7 @@ export const UserNotificationDialog: React.FC<UserNotificationDialogProps> = pro
     const { notification, onClose, onConfirm } = props;
     return (
         <ConfirmationDialog
-            title={i18n.t("Notifications")}
+            title={i18n.t("Notification")}
             open={true}
             onCancel={onClose}
             cancelText={i18n.t("Close")}
