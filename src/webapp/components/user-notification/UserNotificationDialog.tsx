@@ -5,9 +5,7 @@ import i18n from "../../../utils/i18n";
 import { NotificationContent } from "./NotificationContent";
 
 export const UserNotificationDialog: React.FC<UserNotificationDialogProps> = props => {
-    const { notifications, onClose, onConfirm } = props;
-    const content = notifications.map(({ content }) => content).join("\n\n");
-
+    const { notification, onClose, onConfirm } = props;
     return (
         <ConfirmationDialog
             title={i18n.t("Notifications")}
@@ -19,13 +17,13 @@ export const UserNotificationDialog: React.FC<UserNotificationDialogProps> = pro
             fullWidth={true}
             onSave={onConfirm}
         >
-            <NotificationContent content={content} />
+            <NotificationContent content={notification.content} />
         </ConfirmationDialog>
     );
 };
 
 export interface UserNotificationDialogProps {
-    notifications: Notification[];
+    notification: Notification;
     onClose: () => void;
     onConfirm: () => void;
 }

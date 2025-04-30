@@ -26,10 +26,12 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
         setup();
     }, [baseUrl, locale]);
 
-    if (userNotificationDialogProps) {
+    if (userNotificationDialogProps && userNotificationDialogProps.length) {
         return (
             <StylesProvider injectFirst>
-                <UserNotificationDialog {...userNotificationDialogProps} />
+                {userNotificationDialogProps.map(notifProps => (
+                    <UserNotificationDialog key={notifProps.notification.id} {...notifProps} />
+                ))}
             </StylesProvider>
         );
     }
