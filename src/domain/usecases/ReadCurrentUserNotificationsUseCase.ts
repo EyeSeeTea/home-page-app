@@ -19,6 +19,8 @@ export class ReadCurrentUserNotificationsUseCase {
     }
 
     private markAsRead(notification: Notification, user: User): Notification {
+        if (notification.readBy.some(({ id }) => id === user.id)) return notification;
+
         return {
             ...notification,
             readBy: [
