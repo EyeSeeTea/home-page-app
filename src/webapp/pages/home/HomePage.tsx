@@ -17,9 +17,9 @@ import { Cardboard } from "../../components/card-board/Cardboard";
 import { BigCard } from "../../components/card-board/BigCard";
 import { goTo } from "../../utils/routes";
 import { defaultIcon, defaultTitle } from "../../router/Router";
-import { useAnalytics } from "../../hooks/useAnalytics";
 import { Maybe } from "../../../types/utils";
 import i18n from "../../../utils/i18n";
+import { CompositionRoot } from "../../CompositionRoot";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } = useAppContext();
@@ -28,7 +28,6 @@ export const HomePage: React.FC = React.memo(() => {
     const initLandings = useMemo(() => userLandings?.filter(landing => landing.executeOnInit), [userLandings]);
 
     const navigate = useNavigate();
-    const analytics = useAnalytics();
     const snackbar = useSnackbar();
     const [history, updateHistory] = useState<LandingNode[]>([]);
     const [isLoadingLong, setLoadingLong] = useState<boolean>(false);
@@ -46,7 +45,8 @@ export const HomePage: React.FC = React.memo(() => {
     const isRootPage = currentPage?.type === "root";
     const isSingleLanding = pageType === "singleLanding";
     const hasSingleInitLanding = initLandings?.length === 1;
-    const currentHistory = history[0];
+
+    useTrackAnalyticsOnLoad({ compositionRoot, userLandings });
 
     const openSettings = useCallback(() => {
         navigate("/settings");
@@ -60,14 +60,13 @@ export const HomePage: React.FC = React.memo(() => {
         (page: LandingNode) => {
             const nodes = userLandings && flattenLandingNodes(userLandings);
             if (nodes?.some(landing => landing.id === page.id)) {
-                compositionRoot.analytics.sendPageView({ title: page.name.referenceValue, location: undefined });
-                compositionRoot.matomo.trackView({ title: page.name.referenceValue, location: undefined });
+                trackSingleLanding(page, compositionRoot);
                 updateHistory(history => [page, ...history]);
             } else {
                 snackbar.error(i18n.t("You do not have access to this page."));
             }
         },
-        [compositionRoot.analytics, compositionRoot.matomo, userLandings, snackbar]
+        [compositionRoot, userLandings, snackbar]
     );
 
     const goBack = useCallback(() => {
@@ -76,12 +75,17 @@ export const HomePage: React.FC = React.memo(() => {
         if (isRootPage && allHistoryMatchesCurrentPage) {
             updateHistory([]);
             setPageType("userLandings");
+            trackUserLanding(compositionRoot);
         } else if (hasSingleInitLanding || !isRootPage || !isRoot) {
             updateHistory(history => history.slice(1));
+            if (currentPage) {
+                trackSingleLanding(currentPage, compositionRoot);
+            }
         } else {
             setPageType("userLandings");
+            trackUserLanding(compositionRoot);
         }
-    }, [currentPage, hasSingleInitLanding, history, isRoot, isRootPage]);
+    }, [compositionRoot, currentPage, hasSingleInitLanding, history, isRoot, isRootPage]);
 
     const allowBackNavigation = useMemo(() => {
         const isMultipleLandingSubPage = !isRoot && initLandings !== undefined && initLandings.length > 1;
@@ -92,8 +96,11 @@ export const HomePage: React.FC = React.memo(() => {
 
     const goHome = useCallback(() => {
         if (initLandings?.length === 1) updateHistory([]);
-        else setPageType("userLandings");
-    }, [initLandings?.length]);
+        else {
+            setPageType("userLandings");
+            trackUserLanding(compositionRoot);
+        }
+    }, [compositionRoot, initLandings?.length]);
 
     const logout = useCallback(() => {
         window.location.href = `${launchAppBaseUrl}/dhis-web-commons-security/logout.action`;
@@ -137,25 +144,6 @@ export const HomePage: React.FC = React.memo(() => {
             document.title = defaultTitle;
         };
     }, [reload, currentPage, isSingleLanding, translate]);
-
-    useEffect(() => {
-        if (userLandings && userLandings?.length > 1 && pageType === "userLandings") {
-            const viewOptions = {
-                title: "Homepage - Available Home Pages",
-                location: `${window.location.hash.split("?")[0]}home-page-app/available-landings`,
-            };
-            analytics.sendPageView(viewOptions);
-            analytics.trackMatomoView(viewOptions);
-        } else if (currentPage && isSingleLanding && currentHistory) {
-            const type = isRootPage ? "landing" : currentPage.type;
-            const viewOptions = {
-                title: `Homepage - ${currentPage.name.referenceValue}`,
-                location: `${window.location.hash.split("?")[0]}home-page-app/${type}/${currentPage.id}`,
-            };
-            analytics.sendPageView(viewOptions);
-            analytics.trackMatomoView(viewOptions);
-        }
-    }, [analytics, currentHistory, currentPage, isRootPage, isSingleLanding, pageType, userLandings]);
 
     const redirect = useRedirectOnSinglePrimaryNode(currentPage, userLandings, initLandings);
     const pageToRender = redirect.currentPage || (currentPage && isSingleLanding ? currentPage : undefined);
@@ -267,4 +255,50 @@ function useRedirectOnSinglePrimaryNode(
     }, [url, launchAppBaseUrl, userLandings]);
 
     return { isActive: isActive, currentPage: currentPage };
+}
+
+type UseTrackAnalyticsOnLoadProps = {
+    compositionRoot: CompositionRoot;
+    userLandings: Maybe<LandingNode[]>;
+};
+
+function useTrackAnalyticsOnLoad(props: UseTrackAnalyticsOnLoadProps) {
+    const { compositionRoot, userLandings } = props;
+
+    React.useEffect(() => {
+        const initLandings = userLandings?.filter(landing => landing.executeOnInit);
+        const pageType = initLandings && initLandings?.length > 1 ? "userLandings" : "singleLanding";
+        if (userLandings && userLandings.length > 1 && pageType === "userLandings") {
+            trackUserLanding(compositionRoot);
+        }
+
+        if (initLandings && initLandings.length > 0 && pageType === "singleLanding") {
+            const cuPage = initLandings[0];
+            if (!cuPage) return;
+            trackSingleLanding(cuPage, compositionRoot);
+        }
+    }, [compositionRoot, userLandings]);
+}
+
+function buildViewOptionsFromLanding(landing: LandingNode) {
+    const type = landing.type === "root" ? "landing" : landing.type;
+    return {
+        title: `Homepage - ${landing.name.referenceValue}`,
+        location: `${window.location.hash.split("?")[0]}home-page-app/${type}/${landing.id}`,
+    };
+}
+
+function trackSingleLanding(landing: LandingNode, compositionRoot: CompositionRoot) {
+    const viewOptions = buildViewOptionsFromLanding(landing);
+    compositionRoot.analytics.sendPageView(viewOptions);
+    compositionRoot.matomo.trackView(viewOptions);
+}
+
+function trackUserLanding(compositionRoot: CompositionRoot) {
+    const viewOptions = {
+        location: `${window.location.hash.split("?")[0]}home-page-app/available-landings`,
+        title: "Homepage - Available Home Pages",
+    };
+    compositionRoot.analytics.sendPageView(viewOptions);
+    compositionRoot.matomo.trackView(viewOptions);
 }
