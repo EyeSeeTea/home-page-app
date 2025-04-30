@@ -22,7 +22,7 @@ export class Dhis2ConfigRepository implements ConfigRepository {
     constructor(baseUrl: string) {
         this.instance = new Instance({ url: baseUrl });
         this.api = getD2APiFromInstance(this.instance);
-        this.storageClient = new DataStoreStorageClient("global", this.instance);
+        this.storageClient = new DataStoreStorageClient({ type: "global", instance: this.instance });
     }
 
     async get(): Promise<Config> {

@@ -17,7 +17,7 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { FileRejection } from "react-dropzone";
 import styled from "styled-components";
 import { Action } from "../../../domain/entities/Action";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 import { FlattenUnion } from "../../../utils/flatten-union";
 import { zipMimeType } from "../../../utils/files";
 import { useAppContext } from "../../contexts/app-context";

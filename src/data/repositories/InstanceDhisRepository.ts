@@ -24,7 +24,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     constructor(instance: Instance) {
         this.api = getD2APiFromInstance(instance);
-        this.storageClient = new DataStoreStorageClient("global", instance);
+        this.storageClient = new DataStoreStorageClient({ type: "global", instance: instance });
     }
 
     public getBaseUrl(): string {

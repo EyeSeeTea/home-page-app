@@ -19,7 +19,7 @@ import { goTo } from "../../utils/routes";
 import { defaultIcon, defaultTitle } from "../../router/Router";
 import { useAnalytics } from "../../hooks/useAnalytics";
 import { Maybe } from "../../../types/utils";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } = useAppContext();

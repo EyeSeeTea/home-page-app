@@ -1,6 +1,6 @@
 import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "@eyeseetea/d2-ui-components";
 import { useCallback } from "react";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 import { useAppContext } from "../../contexts/app-context";
 import { PermissionsDialogProps } from "../permissions-dialog/PermissionsDialog";
 import { SharingSetting } from "../../../domain/entities/Ref";

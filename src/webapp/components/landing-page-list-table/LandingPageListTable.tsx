@@ -19,7 +19,7 @@ import {
     OrderedLandingNode,
     buildOrderedLandingNodes,
 } from "../../../domain/entities/LandingNode";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 import { MarkdownViewer } from "../../components/markdown-viewer/MarkdownViewer";
 import { useAppContext } from "../../contexts/app-context";
 import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";

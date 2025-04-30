@@ -5,7 +5,7 @@ import AboutIcon from "@material-ui/icons/Info";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import React from "react";
 import styled from "styled-components";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 import { Tooltip, TooltipWrapper } from "../tooltip/Tooltip";
 import { Grid } from "@material-ui/core";
 

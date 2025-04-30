@@ -1,5 +1,5 @@
 import { Dropdown, MultipleDropdown } from "@eyeseetea/d2-ui-components";
-import i18n from "@eyeseetea/d2-ui-components/locales";
+import i18n from "../../../../utils/i18n";
 import { Dictionary } from "lodash";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import styled from "styled-components";
