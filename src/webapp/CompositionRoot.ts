@@ -48,12 +48,16 @@ import { ImportExportClient } from "../data/clients/importExport/ImportExportCli
 import { GetConfigUseCase } from "../domain/usecases/GetConfigUseCase";
 import { UpdateGoogleAnalyticsCode } from "../domain/usecases/UpdateGoogleAnalyticsCode";
 import { GetGoogleAnalyticsCodeUseCase } from "../domain/usecases/GetGoogleAnalyticsCodeUseCase";
+import { ListCurrentUserNotificationsUseCase } from "../domain/usecases/ListCurrentUserNotificationsUseCase";
+import { NotificationDefaultRepository } from "../data/repositories/NotificationDefaultRepository";
+import { ReadCurrentUserNotificationsUseCase } from "../domain/usecases/ReadCurrentUserNotificationsUseCase";
 
 export async function getCompositionRoot(instance: Instance) {
     const configRepository = new Dhis2ConfigRepository(instance.url);
     const config = await new GetConfigUseCase(configRepository).execute();
     const userRepository = new UserApiRepository(instance);
     const instanceRepository = new InstanceDhisRepository(instance);
+    const notificationsRepository = new NotificationDefaultRepository(instance);
 
     const importExportClientLandings = new ImportExportClient(instanceRepository, "landing-pages");
     const importExportClientActions = new ImportExportClient(instanceRepository, "actions");
@@ -115,6 +119,10 @@ export async function getCompositionRoot(instance: Instance) {
         }),
         analytics: getExecute({
             sendPageView: new SendPageViewUseCase(analyticsRepository, configRepository),
+        }),
+        notifications: getExecute({
+            getUserNotifications: new ListCurrentUserNotificationsUseCase(notificationsRepository, userRepository),
+            readUserNotifications: new ReadCurrentUserNotificationsUseCase(notificationsRepository, userRepository),
         }),
     };
 }

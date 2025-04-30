@@ -1,20 +1,19 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { CompositionRoot, getCompositionRoot } from "../CompositionRoot";
+import { CompositionRoot } from "../CompositionRoot";
 import { LandingNode } from "../../domain/entities/LandingNode";
 import { Action } from "../../domain/entities/Action";
 import { buildTranslate, TranslateMethod } from "../../domain/entities/TranslatableText";
 
 import axios from "axios";
 import { cacheImages } from "../utils/image-cache";
-import { Instance } from "../../data/entities/Instance";
 import { Typography } from "@material-ui/core";
 import i18n from "../../utils/i18n";
 import { Maybe } from "../../types/utils";
 
 const AppContext = React.createContext<AppContextState | null>(null);
 
-export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children, baseUrl, locale }) => {
-    const [compositionRoot, setCompositionRoot] = React.useState<CompositionRoot>();
+export const AppContextProvider: React.FC<{ context: AppContextProviderProps }> = ({ children, context }) => {
+    const { locale, compositionRoot } = context || {};
     const [actions, setActions] = useState<Action[]>([]);
     const [landings, setLandings] = useState<LandingNode[] | undefined>();
     const [hasSettingsAccess, setHasSettingsAccess] = useState(false);
@@ -22,15 +21,9 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
 
     const [isLoading, setIsLoading] = useState(false);
     const [launchAppBaseUrl, setLaunchAppBaseUrl] = useState<string>("");
-    const translate = buildTranslate(locale);
+    const translate = buildTranslate(locale || "en");
 
     const getLandingNodeById = useCallback((id: string) => landings?.find(landing => landing.id === id), [landings]);
-
-    React.useEffect(() => {
-        getCompositionRoot(new Instance({ url: baseUrl })).then(compositionRoot => {
-            setCompositionRoot(compositionRoot);
-        });
-    }, [baseUrl]);
 
     const reload = useCallback(async () => {
         setIsLoading(true);
@@ -101,7 +94,7 @@ export function useAppContext(): AppContextState {
 type ReloadMethod = () => Promise<void>;
 
 export interface AppContextProviderProps {
-    baseUrl: string;
+    compositionRoot: CompositionRoot;
     locale: string;
 }
 
