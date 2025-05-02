@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2025-04-15T20:22:37.566Z\n"
+"POT-Creation-Date: 2025-04-30T06:47:44.651Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,6 +45,12 @@ msgid ""
 "{{currentStorageVersion}} to version {{lastMigrationVersion}}) in order to "
 "continue. This may take a long time, make sure the process is not "
 "interrupted."
+msgstr ""
+
+msgid "An error has occurred fetching notifications"
+msgstr ""
+
+msgid "An error has occurred while saving notifications"
 msgstr ""
 
 msgid "Field {{field}} cannot be blank"
@@ -405,6 +411,12 @@ msgstr ""
 
 msgid "Help"
 msgstr "Ayuda"
+
+msgid "Notification"
+msgstr ""
+
+msgid "Okay"
+msgstr ""
 
 msgid "Composition root uninitialized"
 msgstr ""

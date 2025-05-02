@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import i18n from "@eyeseetea/d2-ui-components/locales";
+import i18n from "../../utils/i18n";
 import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
 import { MigrationsStorage } from "../domain/repositories/MigrationsStorage";
 import { MigrationTasks } from "../domain/entities/Migration";

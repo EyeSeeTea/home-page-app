@@ -8,7 +8,7 @@ import { LandingParagraph } from "../landing-layout";
 import { useAnalytics } from "../../hooks/useAnalytics";
 import { Action, getPageActions } from "../../../domain/entities/Action";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import i18n from "@eyeseetea/d2-ui-components/locales";
+import i18n from "../../../utils/i18n";
 
 export const AdditionalComponents: React.FC<{
     isRoot: boolean;

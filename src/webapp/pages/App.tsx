@@ -1,17 +1,43 @@
-import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
+import { UserNotificationDialog } from "../components/user-notification/UserNotificationDialog";
 import { MuiThemeProvider, StylesProvider } from "@material-ui/core/styles";
-import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
+import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import React, { useEffect } from "react";
-import { AppContextProvider } from "../contexts/app-context";
+
+import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
+import { AppContextProvider, AppContextProviderProps } from "../contexts/app-context";
 import { Router } from "../router/Router";
 import muiThemeLegacy from "../themes/dhis2-legacy.theme";
 import { muiTheme } from "../themes/dhis2.theme";
 import { useConfig } from "./settings/useConfig";
 import "./App.css";
+import { getCompositionRoot } from "../CompositionRoot";
+import { Instance } from "../../data/entities/Instance";
+import { useUserNotifications } from "../hooks/useUserNotifications";
 
 const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl }) => {
-    return (
-        <AppContextProvider locale={locale} baseUrl={baseUrl}>
+    const [appContextProps, setAppContextProps] = React.useState<AppContextProviderProps | null>(null);
+    const { userNotificationDialogProps, isUserNotifsLoading } = useUserNotifications({ appContextProps });
+
+    useEffect(() => {
+        async function setup() {
+            const compositionRoot = await getCompositionRoot(new Instance({ url: baseUrl }));
+            setAppContextProps({ locale, compositionRoot });
+        }
+        setup();
+    }, [baseUrl, locale]);
+
+    if (userNotificationDialogProps && userNotificationDialogProps.length) {
+        return (
+            <StylesProvider injectFirst>
+                {userNotificationDialogProps.map(notifProps => (
+                    <UserNotificationDialog key={notifProps.notification.id} {...notifProps} />
+                ))}
+            </StylesProvider>
+        );
+    }
+
+    return !isUserNotifsLoading && appContextProps ? (
+        <AppContextProvider context={appContextProps}>
             <Analytics />
             <MatomoScript />
             <StylesProvider injectFirst>
@@ -28,6 +54,8 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
                 </MuiThemeProvider>
             </StylesProvider>
         </AppContextProvider>
+    ) : (
+        <h3>Loading...</h3>
     );
 };
 

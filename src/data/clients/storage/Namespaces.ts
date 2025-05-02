@@ -1,3 +1,4 @@
+export const notificationsDataStore = "notifications";
 export const dataStoreNamespace = "home-page-app";
 export const constantPrefix = "Home Page App Storage";
 
