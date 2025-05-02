@@ -12,7 +12,7 @@ export class AnalyticsConfigD2Repository implements AnalyticsConfigRepository {
 
     constructor(baseUrl: string) {
         this.instance = new Instance({ url: baseUrl });
-        this.storageClient = new DataStoreStorageClient("global", this.instance);
+        this.storageClient = new DataStoreStorageClient({ instance: this.instance, type: "global" });
     }
 
     async get(): Promise<AnalyticsConfig> {
