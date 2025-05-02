@@ -19,7 +19,7 @@ import { goTo } from "../../utils/routes";
 import { defaultIcon, defaultTitle } from "../../router/Router";
 import { Maybe } from "../../../types/utils";
 import i18n from "../../../utils/i18n";
-import { CompositionRoot } from "../../CompositionRoot";
+import { trackSingleLanding, trackUserLanding, useTrackAnalyticsOnLoad } from "../../hooks/useAnalytics";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } = useAppContext();
@@ -255,50 +255,4 @@ function useRedirectOnSinglePrimaryNode(
     }, [url, launchAppBaseUrl, userLandings]);
 
     return { isActive: isActive, currentPage: currentPage };
-}
-
-type UseTrackAnalyticsOnLoadProps = {
-    compositionRoot: CompositionRoot;
-    userLandings: Maybe<LandingNode[]>;
-};
-
-function useTrackAnalyticsOnLoad(props: UseTrackAnalyticsOnLoadProps) {
-    const { compositionRoot, userLandings } = props;
-
-    React.useEffect(() => {
-        const initLandings = userLandings?.filter(landing => landing.executeOnInit);
-        const pageType = initLandings && initLandings?.length > 1 ? "userLandings" : "singleLanding";
-        if (userLandings && userLandings.length > 1 && pageType === "userLandings") {
-            trackUserLanding(compositionRoot);
-        }
-
-        if (initLandings && initLandings.length > 0 && pageType === "singleLanding") {
-            const cuPage = initLandings[0];
-            if (!cuPage) return;
-            trackSingleLanding(cuPage, compositionRoot);
-        }
-    }, [compositionRoot, userLandings]);
-}
-
-function buildViewOptionsFromLanding(landing: LandingNode) {
-    const type = landing.type === "root" ? "landing" : landing.type;
-    return {
-        title: `Homepage - ${landing.name.referenceValue}`,
-        location: `${window.location.hash.split("?")[0]}home-page-app/${type}/${landing.id}`,
-    };
-}
-
-function trackSingleLanding(landing: LandingNode, compositionRoot: CompositionRoot) {
-    const viewOptions = buildViewOptionsFromLanding(landing);
-    compositionRoot.analytics.sendPageView(viewOptions);
-    compositionRoot.matomo.trackView(viewOptions);
-}
-
-function trackUserLanding(compositionRoot: CompositionRoot) {
-    const viewOptions = {
-        location: `${window.location.hash.split("?")[0]}home-page-app/available-landings`,
-        title: "Homepage - Available Home Pages",
-    };
-    compositionRoot.analytics.sendPageView(viewOptions);
-    compositionRoot.matomo.trackView(viewOptions);
 }

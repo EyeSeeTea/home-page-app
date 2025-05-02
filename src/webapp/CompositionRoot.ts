@@ -124,8 +124,6 @@ export async function getCompositionRoot(instance: Instance) {
         }),
         analytics: getExecute({
             sendPageView: new SendPageViewUseCase(analyticsRepository, configRepository),
-        }),
-        matomo: getExecute({
             trackView: new TrackMatomoViewUseCase(analyticsConfigRepository, matomoAnalyticsRepository),
         }),
     };

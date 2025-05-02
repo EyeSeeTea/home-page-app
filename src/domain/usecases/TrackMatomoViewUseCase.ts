@@ -8,14 +8,14 @@ export class TrackMatomoViewUseCase {
         private matomoAnalytics: MatomoAnalyticsRepository
     ) {}
 
-    public async execute(options?: { location?: string; title?: string }) {
+    public async execute(options: { location: string; title: string }) {
         const config = await this.configRepository.get();
         if (!config.codeUrl) return;
 
         const defaultOptions: AnalyticsEvent = {
             name: "page_view",
-            pageLocation: options?.location ?? window.location.hash.split("?")[0] ?? window.location.href,
-            pageTitle: options?.title ?? document.title,
+            pageLocation: options.location,
+            pageTitle: options.title,
         };
 
         this.matomoAnalytics.send(defaultOptions, config.codeUrl);

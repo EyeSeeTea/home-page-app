@@ -123,6 +123,17 @@ export const SettingsPage: React.FC = () => {
         reload();
     }, [reload]);
 
+    const updateMatomoUrl = React.useCallback(
+        (value: string, reload?: boolean) => {
+            updateAnalyticsConfig({ codeUrl: value }).then(() => {
+                if (reload) {
+                    window.location.reload();
+                }
+            });
+        },
+        [updateAnalyticsConfig]
+    );
+
     return (
         <DhisLayout>
             {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"lg"} fullWidth={true} {...dialogProps} />}
@@ -239,10 +250,8 @@ export const SettingsPage: React.FC = () => {
                                 title={i18n.t("Matomo Container Tag URL")}
                                 label={i18n.t("Url")}
                                 value={analyticsConfig?.codeUrl ?? ""}
-                                onChange={value => updateAnalyticsConfig({ codeUrl: value })}
-                                onUpdate={value => {
-                                    updateAnalyticsConfig({ codeUrl: value }).then(() => window.location.reload());
-                                }}
+                                onChange={updateMatomoUrl}
+                                onUpdate={value => updateMatomoUrl(value, true)}
                                 placeholder="https://cdn.matomo.cloud/{{website}}/{{container_xxxxxx.js}}"
                                 saveText={i18n.t("Save")}
                             />
