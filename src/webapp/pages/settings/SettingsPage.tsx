@@ -16,6 +16,7 @@ import { useConfig } from "./useConfig";
 import TextFieldOnBlur from "../../components/form/TextFieldOnBlur";
 import { CreateButton } from "./CreateButton";
 import { InlineInputSave } from "../../components/inline-input-save/InlineInputSave";
+import { AnalyticsConfig } from "../../../domain/entities/AnalyticsConfig";
 
 export const SettingsPage: React.FC = () => {
     const { actions, landings, reload, compositionRoot, isLoading, isAdmin } = useAppContext();
@@ -25,11 +26,10 @@ export const SettingsPage: React.FC = () => {
         settingsPermissions,
         updateSettingsPermissions,
         defaultApplication,
-        googleAnalyticsCode,
         updateDefaultApplication,
-        updateGoogleAnalyticsCode,
         analyticsConfig,
         updateAnalyticsConfig,
+        setAnalyticsConfig,
     } = useConfig();
 
     const navigate = useNavigate();
@@ -39,7 +39,6 @@ export const SettingsPage: React.FC = () => {
     const [permissionsType, setPermissionsType] = useState<string | null>(null);
     const [danglingDocuments, setDanglingDocuments] = useState<NamedRef[]>([]);
     const [application, setDefaultApplication] = useState<string>("");
-    const [gaCode, setGaCode] = useState<string>("");
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
     const backHome = useCallback(() => {
@@ -123,16 +122,23 @@ export const SettingsPage: React.FC = () => {
         reload();
     }, [reload]);
 
-    const updateMatomoUrl = React.useCallback(
-        (value: string, reload?: boolean) => {
-            updateAnalyticsConfig({ codeUrl: value }).then(() => {
-                if (reload) {
-                    window.location.reload();
-                }
-            });
+    const updateAnalyticsState = useCallback(
+        (value: string, attributeName: keyof AnalyticsConfig) => {
+            setAnalyticsConfig(prev => ({
+                matomoUrl: prev?.matomoUrl,
+                googleAnalyticsCode: prev?.googleAnalyticsCode,
+                [attributeName]: value,
+            }));
         },
-        [updateAnalyticsConfig]
+        [setAnalyticsConfig]
     );
+
+    const updateAnalyticsConfigAndReload = React.useCallback(() => {
+        updateAnalyticsConfig({
+            googleAnalyticsCode: analyticsConfig?.googleAnalyticsCode,
+            matomoUrl: analyticsConfig?.matomoUrl,
+        }).then(() => window.location.reload());
+    }, [analyticsConfig, updateAnalyticsConfig]);
 
     return (
         <DhisLayout>
@@ -231,14 +237,14 @@ export const SettingsPage: React.FC = () => {
                                     <TextFieldOnBlur
                                         fullWidth={true}
                                         label={i18n.t("GA4 Code")}
-                                        value={googleAnalyticsCode ?? ""}
-                                        onChange={event => setGaCode(event.target.value)}
+                                        value={analyticsConfig?.googleAnalyticsCode ?? ""}
+                                        onChange={event =>
+                                            updateAnalyticsState(event.target.value, "googleAnalyticsCode")
+                                        }
                                         placeholder={"G-XXXXXXX"}
                                     />
                                     <Button
-                                        onClick={() => {
-                                            updateGoogleAnalyticsCode(gaCode).then(() => window.location.reload()); // Force reload in order to remove previous GA code initiated script
-                                        }}
+                                        onClick={updateAnalyticsConfigAndReload}
                                         color="primary"
                                         variant="contained"
                                     >
@@ -249,9 +255,9 @@ export const SettingsPage: React.FC = () => {
                             <InlineInputSave
                                 title={i18n.t("Matomo Container Tag URL")}
                                 label={i18n.t("Url")}
-                                value={analyticsConfig?.codeUrl ?? ""}
-                                onChange={updateMatomoUrl}
-                                onUpdate={value => updateMatomoUrl(value, true)}
+                                value={analyticsConfig?.matomoUrl ?? ""}
+                                onChange={value => updateAnalyticsState(value, "matomoUrl")}
+                                onUpdate={updateAnalyticsConfigAndReload}
                                 placeholder="https://cdn.matomo.cloud/{{website}}/{{container_xxxxxx.js}}"
                                 saveText={i18n.t("Save")}
                             />

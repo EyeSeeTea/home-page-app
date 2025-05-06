@@ -1,9 +1,10 @@
-import { AnalyticsEvent } from "../../domain/entities/AnalyticsEvent";
-import { AnalyticsRepository } from "../../domain/repositories/AnalyticsRepository";
+import { AnalyticsEvent, AnalyticsTrackerImp } from "./analytics";
 
-export class MatomoAnalyticsRepository implements AnalyticsRepository {
-    send(event: AnalyticsEvent, code: string) {
-        if (!window._paq || !code) return;
+export class MatomoAnalytics implements AnalyticsTrackerImp {
+    constructor(private readonly code: string) {}
+
+    send(event: AnalyticsEvent) {
+        if (!window._paq || !this.code) return;
 
         window._paq.push(["setCustomUrl", event.pageLocation]);
         window._paq.push(["setDocumentTitle", event.pageTitle]);
@@ -16,6 +17,6 @@ export type MatomoPush = { push(...commands: MatomoCommand[]): number };
 
 declare global {
     interface Window {
-        _paq: { push(...commands: MatomoCommand[]): number };
+        _paq: MatomoPush;
     }
 }

@@ -1,69 +1,48 @@
 import React from "react";
 import { LandingNode } from "../../domain/entities/LandingNode";
 import { Maybe } from "../../types/utils";
-import { CompositionRoot } from "../CompositionRoot";
-import { useAppContext } from "../contexts/app-context";
-
-export function useAnalytics() {
-    const { compositionRoot } = useAppContext();
-
-    const sendPageView = React.useCallback(
-        (overrideProps: { location: string; title: string }) => compositionRoot.analytics.sendPageView(overrideProps),
-        [compositionRoot]
-    );
-
-    const trackMatomoView = React.useCallback(
-        (overrideProps: { location: string; title: string }) => compositionRoot.analytics.trackView(overrideProps),
-        [compositionRoot]
-    );
-
-    return {
-        sendPageView,
-        trackMatomoView,
-        sendEvent: undefined, // NOT IMPLEMENTED
-    };
-}
+import { AnalyticsEvent, SendAnalyticsEventType } from "../utils/analytics";
 
 export function useTrackAnalyticsOnLoad(props: UseTrackAnalyticsOnLoadProps) {
-    const { compositionRoot, userLandings } = props;
+    const { trackViews, userLandings } = props;
 
     React.useEffect(() => {
         const initLandings = userLandings?.filter(landing => landing.executeOnInit);
 
         const pageType = initLandings && initLandings?.length > 1 ? "userLandings" : "singleLanding";
         if (userLandings && userLandings.length > 1 && pageType === "userLandings") {
-            trackUserLanding(compositionRoot);
+            trackUserLanding(trackViews);
         }
 
         if (initLandings && initLandings.length > 0 && pageType === "singleLanding") {
             const cuPage = initLandings[0];
             if (!cuPage) return;
-            trackSingleLanding(cuPage, compositionRoot);
+            trackSingleLanding(cuPage, trackViews);
         }
-    }, [compositionRoot, userLandings]);
+    }, [trackViews, userLandings]);
 }
 
-export function buildViewOptionsFromLanding(landing: LandingNode) {
+export function buildViewOptionsFromLanding(landing: LandingNode): AnalyticsEvent {
     const type = landing.type === "root" ? "landing" : landing.type;
     return {
-        title: `Homepage - ${landing.name.referenceValue}`,
-        location: `${getRouteNameFromHash()}home-page-app/${type}/${landing.id}`,
+        name: "page_view",
+        pageTitle: `Homepage - ${landing.name.referenceValue}`,
+        pageLocation: `${getRouteNameFromHash()}home-page-app/${type}/${landing.id}`,
     };
 }
 
-export function trackSingleLanding(landing: LandingNode, compositionRoot: CompositionRoot) {
+export function trackSingleLanding(landing: LandingNode, trackViews: SendAnalyticsEventType) {
     const viewOptions = buildViewOptionsFromLanding(landing);
-    compositionRoot.analytics.sendPageView(viewOptions);
-    compositionRoot.analytics.trackView(viewOptions);
+    trackViews(viewOptions);
 }
 
-export function trackUserLanding(compositionRoot: CompositionRoot) {
-    const viewOptions = {
-        location: `${getRouteNameFromHash()}home-page-app/available-landings`,
-        title: "Homepage - Available Home Pages",
+export function trackUserLanding(trackViews: SendAnalyticsEventType) {
+    const viewOptions: AnalyticsEvent = {
+        name: "page_view",
+        pageLocation: `${getRouteNameFromHash()}home-page-app/available-landings`,
+        pageTitle: "Homepage - Available Home Pages",
     };
-    compositionRoot.analytics.sendPageView(viewOptions);
-    compositionRoot.analytics.trackView(viewOptions);
+    trackViews(viewOptions);
 }
 
 export function getDefaultLocation() {
@@ -76,6 +55,6 @@ export function getRouteNameFromHash() {
 }
 
 type UseTrackAnalyticsOnLoadProps = {
-    compositionRoot: CompositionRoot;
+    trackViews: SendAnalyticsEventType;
     userLandings: Maybe<LandingNode[]>;
 };

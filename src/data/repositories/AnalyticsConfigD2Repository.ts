@@ -17,7 +17,7 @@ export class AnalyticsConfigD2Repository implements AnalyticsConfigRepository {
 
     async get(): Promise<AnalyticsConfig> {
         const config = await this.storageClient.getObject<D2AnalyticsConfig>(Namespaces.CONFIG);
-        return { codeUrl: config?.matomoUrl };
+        return { googleAnalyticsCode: config?.googleAnalyticsCode, matomoUrl: config?.matomoUrl };
     }
 
     async save(config: AnalyticsConfig): Promise<void> {
@@ -25,9 +25,10 @@ export class AnalyticsConfigD2Repository implements AnalyticsConfigRepository {
 
         await this.storageClient.saveObject<D2AnalyticsConfig>(Namespaces.CONFIG, {
             ...d2Config,
-            matomoUrl: config.codeUrl,
+            googleAnalyticsCode: config.googleAnalyticsCode,
+            matomoUrl: config.matomoUrl,
         });
     }
 }
 
-type D2AnalyticsConfig = { matomoUrl: Maybe<string> };
+type D2AnalyticsConfig = { googleAnalyticsCode: Maybe<string>; matomoUrl: Maybe<string> };

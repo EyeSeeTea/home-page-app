@@ -23,7 +23,7 @@ import { trackSingleLanding, trackUserLanding, useTrackAnalyticsOnLoad } from ".
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } = useAppContext();
-    const { defaultApplication, userLandings } = useConfig();
+    const { defaultApplication, userLandings, trackViews } = useConfig();
 
     const initLandings = useMemo(() => userLandings?.filter(landing => landing.executeOnInit), [userLandings]);
 
@@ -46,7 +46,7 @@ export const HomePage: React.FC = React.memo(() => {
     const isSingleLanding = pageType === "singleLanding";
     const hasSingleInitLanding = initLandings?.length === 1;
 
-    useTrackAnalyticsOnLoad({ compositionRoot, userLandings });
+    useTrackAnalyticsOnLoad({ trackViews, userLandings });
 
     const openSettings = useCallback(() => {
         navigate("/settings");
@@ -60,13 +60,13 @@ export const HomePage: React.FC = React.memo(() => {
         (page: LandingNode) => {
             const nodes = userLandings && flattenLandingNodes(userLandings);
             if (nodes?.some(landing => landing.id === page.id)) {
-                trackSingleLanding(page, compositionRoot);
+                trackSingleLanding(page, trackViews);
                 updateHistory(history => [page, ...history]);
             } else {
                 snackbar.error(i18n.t("You do not have access to this page."));
             }
         },
-        [compositionRoot, userLandings, snackbar]
+        [trackViews, userLandings, snackbar]
     );
 
     const goBack = useCallback(() => {
@@ -75,17 +75,17 @@ export const HomePage: React.FC = React.memo(() => {
         if (isRootPage && allHistoryMatchesCurrentPage) {
             updateHistory([]);
             setPageType("userLandings");
-            trackUserLanding(compositionRoot);
+            trackUserLanding(trackViews);
         } else if (hasSingleInitLanding || !isRootPage || !isRoot) {
             updateHistory(history => history.slice(1));
             if (currentPage) {
-                trackSingleLanding(currentPage, compositionRoot);
+                trackSingleLanding(currentPage, trackViews);
             }
         } else {
             setPageType("userLandings");
-            trackUserLanding(compositionRoot);
+            trackUserLanding(trackViews);
         }
-    }, [compositionRoot, currentPage, hasSingleInitLanding, history, isRoot, isRootPage]);
+    }, [trackViews, currentPage, hasSingleInitLanding, history, isRoot, isRootPage]);
 
     const allowBackNavigation = useMemo(() => {
         const isMultipleLandingSubPage = !isRoot && initLandings !== undefined && initLandings.length > 1;
@@ -95,12 +95,13 @@ export const HomePage: React.FC = React.memo(() => {
     }, [history, initLandings, isRoot, isSingleLanding]);
 
     const goHome = useCallback(() => {
-        if (initLandings?.length === 1) updateHistory([]);
-        else {
+        if (initLandings?.length === 1) {
+            updateHistory([]);
+        } else {
             setPageType("userLandings");
-            trackUserLanding(compositionRoot);
+            trackUserLanding(trackViews);
         }
-    }, [compositionRoot, initLandings?.length]);
+    }, [trackViews, initLandings?.length]);
 
     const logout = useCallback(() => {
         window.location.href = `${launchAppBaseUrl}/dhis-web-commons-security/logout.action`;

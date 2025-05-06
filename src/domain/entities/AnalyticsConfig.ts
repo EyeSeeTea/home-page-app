@@ -1,3 +1,3 @@
 import { Maybe } from "../../types/utils";
 
-export type AnalyticsConfig = { codeUrl: Maybe<string> };
+export type AnalyticsConfig = { googleAnalyticsCode: Maybe<string>; matomoUrl: Maybe<string> };

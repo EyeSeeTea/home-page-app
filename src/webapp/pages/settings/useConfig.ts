@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import compact from "lodash/compact";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { LandingPagePermission, Permission } from "../../../domain/entities/Permission";
 import { SharedUpdate } from "../../components/permissions-dialog/PermissionsDialog";
 import { useAppContext } from "../../contexts/app-context";
@@ -6,12 +7,14 @@ import { User } from "../../../domain/entities/User";
 import { Maybe } from "../../../types/utils";
 import { LandingNode, updateLandings } from "../../../domain/entities/LandingNode";
 import { AnalyticsConfig } from "../../../domain/entities/AnalyticsConfig";
+import { GoogleAnalytics } from "../../utils/GoogleAnalytics";
+import { MatomoAnalytics } from "../../utils/matomo";
+import { AnalyticsEvent, sendAnalyticsEvents, SendAnalyticsEventType } from "../../utils/analytics";
 
 export function useConfig(): useConfigPloc {
     const { compositionRoot, landings } = useAppContext();
     const [showAllActions, setShowAllActions] = useState(false);
     const [defaultApplication, setDefaultApplication] = useState<string>("");
-    const [googleAnalyticsCode, setGoogleAnalyticsCode] = useState<Maybe<string>>();
     const [analyticsConfig, setAnalyticsConfig] = useState<AnalyticsConfig>();
     const [settingsPermissions, setSettingsPermissions] = useState<Permission>();
     const [landingPagePermissions, setLandingPagePermissions] = useState<LandingPagePermission[]>();
@@ -25,7 +28,6 @@ export function useConfig(): useConfigPloc {
     useEffect(() => {
         compositionRoot.config.getShowAllActions().then(setShowAllActions);
         compositionRoot.config.getDefaultApplication().then(setDefaultApplication);
-        compositionRoot.config.getGoogleAnalyticsCode().then(setGoogleAnalyticsCode);
         compositionRoot.config.getSettingsPermissions().then(setSettingsPermissions);
         compositionRoot.config.getLandingPagePermissions().then(setLandingPagePermissions);
         compositionRoot.config.getAnalyticsConfig().then(setAnalyticsConfig);
@@ -40,17 +42,8 @@ export function useConfig(): useConfigPloc {
         [compositionRoot]
     );
 
-    const updateGoogleAnalyticsCode = useCallback(
-        async (code: string) => {
-            setGoogleAnalyticsCode(code);
-            await compositionRoot.config.updateGoogleAnalyticsCode(code);
-        },
-        [compositionRoot]
-    );
-
     const updateAnalyticsConfig = useCallback(
         async (config: AnalyticsConfig) => {
-            setAnalyticsConfig(config);
             await compositionRoot.config.saveAnalyticsConfig(config);
         },
         [compositionRoot]
@@ -94,21 +87,36 @@ export function useConfig(): useConfigPloc {
         [compositionRoot]
     );
 
+    const trackViews = useCallback(
+        (event: AnalyticsEvent) => {
+            const googleAnalytics = analyticsConfig?.googleAnalyticsCode
+                ? new GoogleAnalytics(analyticsConfig.googleAnalyticsCode)
+                : undefined;
+            const matomoAnalytics = analyticsConfig?.matomoUrl
+                ? new MatomoAnalytics(analyticsConfig.matomoUrl)
+                : undefined;
+
+            const analyticsTrackers = compact([googleAnalytics, matomoAnalytics]);
+            sendAnalyticsEvents({ analyticsTrackers, event });
+        },
+        [analyticsConfig]
+    );
+
     return {
         user,
         showAllActions,
         updateShowAllActions,
         defaultApplication,
         updateDefaultApplication,
-        updateGoogleAnalyticsCode,
         settingsPermissions,
         updateSettingsPermissions,
         landingPagePermissions,
         updateLandingPagePermissions,
-        googleAnalyticsCode,
         userLandings,
-        updateAnalyticsConfig: updateAnalyticsConfig,
+        updateAnalyticsConfig,
         analyticsConfig,
+        setAnalyticsConfig,
+        trackViews,
     };
 }
 
@@ -118,13 +126,13 @@ interface useConfigPloc {
     updateShowAllActions: (value: boolean) => void;
     defaultApplication: string;
     updateDefaultApplication: (value: string) => void;
-    updateGoogleAnalyticsCode: (code: string) => Promise<void>;
     settingsPermissions?: Permission;
     updateSettingsPermissions: (sharedUpdate: SharedUpdate) => Promise<void>;
     landingPagePermissions?: LandingPagePermission[];
     updateLandingPagePermissions: (sharedUpdate: SharedUpdate, id: string) => Promise<void>;
-    googleAnalyticsCode: Maybe<string>;
     userLandings: Maybe<LandingNode[]>;
     analyticsConfig: Maybe<AnalyticsConfig>;
     updateAnalyticsConfig: (config: AnalyticsConfig) => Promise<void>;
+    setAnalyticsConfig: React.Dispatch<React.SetStateAction<AnalyticsConfig | undefined>>;
+    trackViews: SendAnalyticsEventType;
 }

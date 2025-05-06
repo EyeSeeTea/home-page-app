@@ -60,7 +60,8 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
 };
 
 const Analytics: React.FC = () => {
-    const { googleAnalyticsCode } = useConfig();
+    const { analyticsConfig } = useConfig();
+    const googleAnalyticsCode = analyticsConfig?.googleAnalyticsCode;
 
     useEffect(() => {
         if (!googleAnalyticsCode) return;
@@ -81,7 +82,7 @@ const Analytics: React.FC = () => {
 
 export const MatomoScript = () => {
     const { analyticsConfig } = useConfig();
-    const url = analyticsConfig?.codeUrl;
+    const url = analyticsConfig?.matomoUrl;
 
     React.useEffect(() => {
         if (!url) return;

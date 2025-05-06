@@ -1,11 +1,12 @@
-import { AnalyticsEvent } from "../../domain/entities/AnalyticsEvent";
-import { AnalyticsRepository } from "../../domain/repositories/AnalyticsRepository";
+import { AnalyticsEvent, AnalyticsTrackerImp } from "./analytics";
 
-export class GoogleAnalyticsRepository implements AnalyticsRepository {
+export class GoogleAnalytics implements AnalyticsTrackerImp {
     private analytics?: Analytics;
 
-    send(event: AnalyticsEvent, code: string) {
-        if (!this.analytics) this.analytics = new Analytics(event, code);
+    constructor(private readonly code: string) {}
+
+    send(event: AnalyticsEvent) {
+        if (!this.analytics) this.analytics = new Analytics(event, this.code);
         this.analytics.sendAnalytics(event);
     }
 }
