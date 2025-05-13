@@ -31,7 +31,7 @@ export const HomePage: React.FC = React.memo(() => {
     const snackbar = useSnackbar();
     const [history, updateHistory] = useState<LandingNode[]>([]);
     const [isLoadingLong, setLoadingLong] = useState<boolean>(false);
-    const [pageType, setPageType] = useState<"userLandings" | "singleLanding">(
+    const [pageType, setPageType] = useState<PageType>(
         userLandings && userLandings?.length > 1 ? "userLandings" : "singleLanding"
     );
 
@@ -149,13 +149,15 @@ export const HomePage: React.FC = React.memo(() => {
     const redirect = useRedirectOnSinglePrimaryNode(currentPage, userLandings, initLandings);
     const pageToRender = redirect.currentPage || (currentPage && isSingleLanding ? currentPage : undefined);
 
+    const totalLandings = initLandings?.length ?? 0;
+
     return (
         <StyledLanding
             backgroundColor={currentPage?.backgroundColor}
             onSettings={hasSettingsAccess ? openSettings : undefined}
             onAbout={openAbout}
             onGoBack={allowBackNavigation ? goBack : undefined}
-            onGoHome={!isRoot && isSingleLanding ? goHome : undefined}
+            onGoHome={showHomeButton(pageType, totalLandings) ? goHome : undefined}
             onLogout={logout}
             centerChildren={true}
         >
@@ -200,6 +202,10 @@ export const HomePage: React.FC = React.memo(() => {
         </StyledLanding>
     );
 });
+
+function showHomeButton(pageType: PageType, totalLandings: number): boolean {
+    return pageType === "singleLanding" && totalLandings > 1;
+}
 
 const ProgressContainer = styled.div`
     display: flex;
@@ -257,3 +263,6 @@ function useRedirectOnSinglePrimaryNode(
 
     return { isActive: isActive, currentPage: currentPage };
 }
+
+const pageTypes = ["userLandings", "singleLanding"] as const;
+type PageType = typeof pageTypes[number];
