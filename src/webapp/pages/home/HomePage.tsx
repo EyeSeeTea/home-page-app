@@ -20,6 +20,7 @@ import { defaultIcon, defaultTitle } from "../../router/Router";
 import { Maybe } from "../../../types/utils";
 import i18n from "../../../utils/i18n";
 import { trackSingleLanding, trackUserLanding, useTrackAnalyticsOnLoad } from "../../hooks/useAnalytics";
+import { getNumberActionsToShowPerRow } from "../../utils/cards";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } = useAppContext();
@@ -151,6 +152,8 @@ export const HomePage: React.FC = React.memo(() => {
 
     const totalLandings = initLandings?.length ?? 0;
 
+    const rowSize = getNumberActionsToShowPerRow(totalLandings);
+
     return (
         <StyledLanding
             backgroundColor={currentPage?.backgroundColor}
@@ -174,7 +177,7 @@ export const HomePage: React.FC = React.memo(() => {
                 ) : initLandings && pageType === "userLandings" ? (
                     <>
                         <h1>{i18n.t("Available Home Pages")}</h1>
-                        <Cardboard rowSize={4}>
+                        <Cardboard rowSize={rowSize}>
                             {initLandings?.map(landing => {
                                 return (
                                     <BigCard

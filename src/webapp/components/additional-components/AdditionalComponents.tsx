@@ -9,6 +9,7 @@ import { Action, getPageActions } from "../../../domain/entities/Action";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import i18n from "../../../utils/i18n";
 import { AnalyticsEvent } from "../../utils/analytics";
+import { getNumberActionsToShowPerRow } from "../../utils/cards";
 
 export const AdditionalComponents: React.FC<{
     isRoot: boolean;
@@ -61,7 +62,7 @@ export const AdditionalComponents: React.FC<{
     const currentPageActions = actions.filter(action => currentPage.actions.includes(action.id));
     const pageActions = user && getPageActions(isRoot, showAllActions, actions, user, currentPageActions);
 
-    const rowSize = actions.length % 3 ? 3 : 4;
+    const rowSize = getNumberActionsToShowPerRow(actions.length);
 
     return (
         <React.Fragment>
