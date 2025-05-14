@@ -19,5 +19,5 @@ export const BigCardIcon = styled.span<BigCardIconProps>`
 const iconSizeValues: Record<string, string> = {
     small: "72px",
     medium: "96px",
-    large: "128px",
+    large: "136.5px",
 };
