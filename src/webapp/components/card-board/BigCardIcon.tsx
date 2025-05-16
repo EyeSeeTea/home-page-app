@@ -20,5 +20,5 @@ const iconSizeValues: Record<string, string> = {
     small: "72px",
     medium: "96px",
     large: "128px",
-    xlarge: "173px",
+    xlarge: "200px",
 };
