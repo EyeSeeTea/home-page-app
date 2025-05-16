@@ -6,6 +6,7 @@ import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
 import { LandingContent, LandingTitle } from "../landing-layout";
 import { AdditionalComponents } from "../additional-components/AdditionalComponents";
+import { getNumberActionsToShowPerRow } from "../../utils/cards";
 
 export const ItemRoot: React.FC<{
     isRoot: boolean;
@@ -14,6 +15,8 @@ export const ItemRoot: React.FC<{
     openPage(page: LandingNode): void;
 }> = ({ isRoot, currentPage, logoText, openPage }) => {
     const { translate } = useAppContext();
+
+    const rowSize = getNumberActionsToShowPerRow(currentPage.children.length);
 
     return (
         <React.Fragment>
@@ -35,7 +38,7 @@ export const ItemRoot: React.FC<{
                         <Item key={`node-${node.id}`} isRoot={isRoot} openPage={openPage} currentPage={node} />
                     ))
                 ) : (
-                    <Cardboard rowSize={4} key={`group-${currentPage.id}`}>
+                    <Cardboard rowSize={rowSize} key={`group-${currentPage.id}`}>
                         {currentPage.children.map((item, idx) => (
                             <BigCard
                                 key={`card-${idx}`}

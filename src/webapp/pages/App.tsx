@@ -39,6 +39,7 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
     return !isUserNotifsLoading && appContextProps ? (
         <AppContextProvider context={appContextProps}>
             <Analytics />
+            <MatomoScript />
             <StylesProvider injectFirst>
                 <MuiThemeProvider theme={muiTheme}>
                     <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
@@ -59,7 +60,8 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
 };
 
 const Analytics: React.FC = () => {
-    const { googleAnalyticsCode } = useConfig();
+    const { analyticsConfig } = useConfig();
+    const googleAnalyticsCode = analyticsConfig?.googleAnalyticsCode;
 
     useEffect(() => {
         if (!googleAnalyticsCode) return;
@@ -76,6 +78,26 @@ const Analytics: React.FC = () => {
     }, [googleAnalyticsCode]);
 
     return <></>; //return as <script/> seems GA doesn't like that :$
+};
+
+export const MatomoScript = () => {
+    const { analyticsConfig } = useConfig();
+    const url = analyticsConfig?.matomoUrl;
+
+    React.useEffect(() => {
+        if (!url) return;
+
+        const script = document.createElement("script");
+        script.src = url;
+        script.async = true;
+        document.head.appendChild(script);
+
+        return () => {
+            document.head.removeChild(script);
+        };
+    }, [url]);
+
+    return null;
 };
 
 export default React.memo(App);

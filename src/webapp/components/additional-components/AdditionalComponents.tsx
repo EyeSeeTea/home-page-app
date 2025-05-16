@@ -5,10 +5,11 @@ import { useAppContext } from "../../contexts/app-context";
 import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
 import { LandingParagraph } from "../landing-layout";
-import { useAnalytics } from "../../hooks/useAnalytics";
 import { Action, getPageActions } from "../../../domain/entities/Action";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import i18n from "../../../utils/i18n";
+import { AnalyticsEvent } from "../../utils/analytics";
+import { getNumberActionsToShowPerRow } from "../../utils/cards";
 
 export const AdditionalComponents: React.FC<{
     isRoot: boolean;
@@ -17,8 +18,7 @@ export const AdditionalComponents: React.FC<{
 }> = React.memo(props => {
     const { isRoot, currentPage, openPage } = props;
     const { actions, translate, launchAppBaseUrl, getLandingNodeById } = useAppContext();
-    const { showAllActions, user } = useConfig();
-    const analytics = useAnalytics();
+    const { showAllActions, user, trackViews } = useConfig();
     const snackbar = useSnackbar();
 
     const actionHandleClick = React.useCallback(
@@ -34,7 +34,9 @@ export const AdditionalComponents: React.FC<{
                             ? `${action.dhisLaunchUrl}`
                             : `${launchAppBaseUrl}${action.dhisLaunchUrl}`;
 
-                        analytics.sendPageView({ title: name, location: href });
+                        const viewOptions: AnalyticsEvent = { pageTitle: name, pageLocation: href, name: "page_view" };
+                        trackViews(viewOptions);
+
                         window.location.href = href;
                     }
                     break;
@@ -54,13 +56,13 @@ export const AdditionalComponents: React.FC<{
                     break;
             }
         },
-        [analytics, getLandingNodeById, launchAppBaseUrl, openPage, snackbar, translate, currentPage]
+        [trackViews, getLandingNodeById, launchAppBaseUrl, openPage, snackbar, translate, currentPage]
     );
 
     const currentPageActions = actions.filter(action => currentPage.actions.includes(action.id));
     const pageActions = user && getPageActions(isRoot, showAllActions, actions, user, currentPageActions);
 
-    const rowSize = actions.length % 3 ? 3 : 4;
+    const rowSize = getNumberActionsToShowPerRow(actions.length);
 
     return (
         <React.Fragment>
