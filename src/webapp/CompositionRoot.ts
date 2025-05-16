@@ -42,12 +42,11 @@ import { GetUserUseCase } from "../domain/usecases/GetUserUseCase";
 import { GetDefaultApplicationUseCase } from "../domain/usecases/GetDefaultApplicationUseCase";
 import { UpdateDefaultApplicationUseCase } from "../domain/usecases/UpdateDefaultApplicationUseCase";
 import { CreateLandingNodeUseCase } from "../domain/usecases/CreateLandingNodeUseCase";
-import { SendPageViewUseCase } from "../domain/usecases/SendPageViewUseCase";
-import { GoogleAnalyticsRepository } from "../data/repositories/GoogleAnalyticsRepository";
 import { ImportExportClient } from "../data/clients/importExport/ImportExportClient";
 import { GetConfigUseCase } from "../domain/usecases/GetConfigUseCase";
-import { UpdateGoogleAnalyticsCode } from "../domain/usecases/UpdateGoogleAnalyticsCode";
-import { GetGoogleAnalyticsCodeUseCase } from "../domain/usecases/GetGoogleAnalyticsCodeUseCase";
+import { AnalyticsConfigD2Repository } from "../data/repositories/AnalyticsConfigD2Repository";
+import { GetAnalyticsConfig } from "../domain/usecases/GetAnalyticsConfig";
+import { SaveAnalyticsConfigUseCase } from "../domain/usecases/SaveAnalyticsConfigUseCase";
 import { ListCurrentUserNotificationsUseCase } from "../domain/usecases/ListCurrentUserNotificationsUseCase";
 import { NotificationDefaultRepository } from "../data/repositories/NotificationDefaultRepository";
 import { ReadCurrentUserNotificationsUseCase } from "../domain/usecases/ReadCurrentUserNotificationsUseCase";
@@ -64,7 +63,7 @@ export async function getCompositionRoot(instance: Instance) {
 
     const actionRepository = new ActionDefaultRepository(config);
     const landingPageRepository = new LandingNodeDefaultRepository(config.storageClient);
-    const analyticsRepository = new GoogleAnalyticsRepository();
+    const analyticsConfigRepository = new AnalyticsConfigD2Repository(instance.url);
 
     return {
         actions: getExecute({
@@ -93,14 +92,14 @@ export async function getCompositionRoot(instance: Instance) {
             getUser: new GetUserUseCase(configRepository),
             getDefaultApplication: new GetDefaultApplicationUseCase(configRepository),
             updateDefaultApplication: new UpdateDefaultApplicationUseCase(configRepository),
-            getGoogleAnalyticsCode: new GetGoogleAnalyticsCodeUseCase(configRepository),
-            updateGoogleAnalyticsCode: new UpdateGoogleAnalyticsCode(configRepository),
             getSettingsPermissions: new GetSettingsPermissionsUseCase(configRepository),
             updateSettingsPermissions: new UpdateSettingsPermissionsUseCase(configRepository),
             getLandingPagePermissions: new GetLandingPagePermissionsUseCase(configRepository),
             updateLandingPagePermissions: new UpdateLandingPagePermissionsUseCase(configRepository),
             getShowAllActions: new GetShowAllActionsUseCase(configRepository),
             setShowAllActions: new SetShowAllActionsUseCase(configRepository),
+            getAnalyticsConfig: new GetAnalyticsConfig(analyticsConfigRepository),
+            saveAnalyticsConfig: new SaveAnalyticsConfigUseCase(analyticsConfigRepository),
         }),
         instance: getExecute({
             uploadFile: new UploadFileUseCase(instanceRepository),
@@ -116,9 +115,6 @@ export async function getCompositionRoot(instance: Instance) {
             getCurrent: new GetCurrentUserUseCase(userRepository),
             checkSettingsPermissions: new CheckSettingsPermissionsUseCase(configRepository),
             checkAdminAuthority: new CheckAdminAuthorityUseCase(configRepository),
-        }),
-        analytics: getExecute({
-            sendPageView: new SendPageViewUseCase(analyticsRepository, configRepository),
         }),
         notifications: getExecute({
             getUserNotifications: new ListCurrentUserNotificationsUseCase(notificationsRepository, userRepository),

@@ -17,18 +17,18 @@ import { Cardboard } from "../../components/card-board/Cardboard";
 import { BigCard } from "../../components/card-board/BigCard";
 import { goTo } from "../../utils/routes";
 import { defaultIcon, defaultTitle } from "../../router/Router";
-import { useAnalytics } from "../../hooks/useAnalytics";
 import { Maybe } from "../../../types/utils";
 import i18n from "../../../utils/i18n";
+import { trackSingleLanding, trackUserLanding, useTrackAnalyticsOnLoad } from "../../hooks/useAnalytics";
+import { getNumberActionsToShowPerRow } from "../../utils/cards";
 
 export const HomePage: React.FC = React.memo(() => {
     const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } = useAppContext();
-    const { defaultApplication, userLandings } = useConfig();
+    const { defaultApplication, userLandings, trackViews } = useConfig();
 
     const initLandings = useMemo(() => userLandings?.filter(landing => landing.executeOnInit), [userLandings]);
 
     const navigate = useNavigate();
-    const analytics = useAnalytics();
     const snackbar = useSnackbar();
     const [history, updateHistory] = useState<LandingNode[]>([]);
     const [isLoadingLong, setLoadingLong] = useState<boolean>(false);
@@ -46,7 +46,8 @@ export const HomePage: React.FC = React.memo(() => {
     const isRootPage = currentPage?.type === "root";
     const isSingleLanding = pageType === "singleLanding";
     const hasSingleInitLanding = initLandings?.length === 1;
-    const currentHistory = history[0];
+
+    useTrackAnalyticsOnLoad({ trackViews, userLandings });
 
     const openSettings = useCallback(() => {
         navigate("/settings");
@@ -60,13 +61,13 @@ export const HomePage: React.FC = React.memo(() => {
         (page: LandingNode) => {
             const nodes = userLandings && flattenLandingNodes(userLandings);
             if (nodes?.some(landing => landing.id === page.id)) {
-                compositionRoot.analytics.sendPageView({ title: page.name.referenceValue, location: undefined });
+                trackSingleLanding(page, trackViews);
                 updateHistory(history => [page, ...history]);
             } else {
                 snackbar.error(i18n.t("You do not have access to this page."));
             }
         },
-        [compositionRoot.analytics, userLandings, snackbar]
+        [trackViews, userLandings, snackbar]
     );
 
     const goBack = useCallback(() => {
@@ -75,12 +76,17 @@ export const HomePage: React.FC = React.memo(() => {
         if (isRootPage && allHistoryMatchesCurrentPage) {
             updateHistory([]);
             setPageType("userLandings");
+            trackUserLanding(trackViews);
         } else if (hasSingleInitLanding || !isRootPage || !isRoot) {
             updateHistory(history => history.slice(1));
+            if (currentPage) {
+                trackSingleLanding(currentPage, trackViews);
+            }
         } else {
             setPageType("userLandings");
+            trackUserLanding(trackViews);
         }
-    }, [currentPage, hasSingleInitLanding, history, isRoot, isRootPage]);
+    }, [trackViews, currentPage, hasSingleInitLanding, history, isRoot, isRootPage]);
 
     const allowBackNavigation = useMemo(() => {
         const isMultipleLandingSubPage = !isRoot && initLandings !== undefined && initLandings.length > 1;
@@ -90,9 +96,13 @@ export const HomePage: React.FC = React.memo(() => {
     }, [history, initLandings, isRoot, isSingleLanding]);
 
     const goHome = useCallback(() => {
-        if (initLandings?.length === 1) updateHistory([]);
-        else setPageType("userLandings");
-    }, [initLandings?.length]);
+        if (initLandings?.length === 1) {
+            updateHistory([]);
+        } else {
+            setPageType("userLandings");
+            trackUserLanding(trackViews);
+        }
+    }, [trackViews, initLandings?.length]);
 
     const logout = useCallback(() => {
         window.location.href = `${launchAppBaseUrl}/dhis-web-commons-security/logout.action`;
@@ -137,25 +147,12 @@ export const HomePage: React.FC = React.memo(() => {
         };
     }, [reload, currentPage, isSingleLanding, translate]);
 
-    useEffect(() => {
-        if (userLandings && userLandings?.length > 1 && pageType === "userLandings") {
-            analytics.sendPageView({
-                title: "Homepage - Available Home Pages",
-                location: `${window.location.hash.split("?")[0]}home-page-app/available-landings`,
-            });
-        } else if (currentPage && isSingleLanding && currentHistory) {
-            const type = isRootPage ? "landing" : currentPage.type;
-            analytics.sendPageView({
-                title: `Homepage - ${currentPage.name.referenceValue}`,
-                location: `${window.location.hash.split("?")[0]}home-page-app/${type}/${currentPage.id}`,
-            });
-        }
-    }, [analytics, currentHistory, currentPage, isRootPage, isSingleLanding, pageType, userLandings]);
-
     const redirect = useRedirectOnSinglePrimaryNode(currentPage, userLandings, initLandings);
     const pageToRender = redirect.currentPage || (currentPage && isSingleLanding ? currentPage : undefined);
 
     const totalLandings = initLandings?.length ?? 0;
+
+    const rowSize = getNumberActionsToShowPerRow(totalLandings);
 
     return (
         <StyledLanding
@@ -180,7 +177,7 @@ export const HomePage: React.FC = React.memo(() => {
                 ) : initLandings && pageType === "userLandings" ? (
                     <>
                         <h1>{i18n.t("Available Home Pages")}</h1>
-                        <Cardboard rowSize={4}>
+                        <Cardboard rowSize={rowSize}>
                             {initLandings?.map(landing => {
                                 return (
                                     <BigCard

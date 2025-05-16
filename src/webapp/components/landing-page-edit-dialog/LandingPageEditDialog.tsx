@@ -205,7 +205,7 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
 
                 <Label>{i18n.t("Icon Size")}</Label>
                 <OptionContainer>
-                    {["small", "medium", "large"].map((size, i) => (
+                    {["small", "medium", "large", "xlarge"].map((size, i) => (
                         <Button
                             key={i}
                             color={
