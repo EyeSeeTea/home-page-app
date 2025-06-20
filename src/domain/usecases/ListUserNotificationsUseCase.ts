@@ -2,22 +2,18 @@ import _ from "lodash";
 import { NotificationListOptions, NotificationRepository } from "../repositories/NotificationRepository";
 import { FutureData } from "../types/Future";
 import { Notification, NotificationWildcard } from "../entities/Notification";
-import { UserRepository } from "../repositories/UserRepository";
 import { User } from "../entities/User";
 
-export class ListCurrentUserNotificationsUseCase {
-    constructor(private notificationRepository: NotificationRepository, private userRepository: UserRepository) {}
+export class ListUserNotificationsUseCase {
+    constructor(private notificationRepository: NotificationRepository) {}
 
-    public execute(): FutureData<Notification[]> {
+    public execute(user: User): FutureData<Notification[]> {
         const notificationFilter: NotificationListOptions = {
-            wildcard: [NotificationWildcard.ALL, NotificationWildcard.WEB, NotificationWildcard.Both],
+            wildcard: [NotificationWildcard.ALL, NotificationWildcard.WEB, NotificationWildcard.BOTH],
         };
-        return this.userRepository
-            .getCurrentUser()
-            .flatMap(user =>
-                this.notificationRepository.list(notificationFilter).map(notifications => ({ user, notifications }))
-            )
-            .map(({ user, notifications }) => this.filterUserNotifications(notifications, user));
+        return this.notificationRepository
+            .list(notificationFilter)
+            .map(notifications => this.filterUserNotifications(notifications, user));
     }
 
     private filterUserNotifications(notifications: Notification[], user: User): Notification[] {
@@ -28,8 +24,7 @@ export class ListCurrentUserNotificationsUseCase {
     }
 
     private isForUser(notification: Notification, user: User): boolean {
-        const isRead = notification.readBy.some(({ id }) => id === user.id);
-        if (isRead) return false;
+        if (notification.isReadBy(user)) return false;
 
         if (!user || notification.recipients.wildcard === NotificationWildcard.ALL) return true;
 
@@ -37,8 +32,6 @@ export class ListCurrentUserNotificationsUseCase {
         const isForGroup = notification.recipients.userGroups.some(({ id }) =>
             user.userGroups.some(group => id === group.id)
         );
-        const notifForUser = isForUser || isForGroup;
-
-        return notifForUser;
+        return isForUser || isForGroup;
     }
 }

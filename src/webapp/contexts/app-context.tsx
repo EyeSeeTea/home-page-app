@@ -9,11 +9,13 @@ import { cacheImages } from "../utils/image-cache";
 import { Typography } from "@material-ui/core";
 import i18n from "../../utils/i18n";
 import { Maybe } from "../../types/utils";
+import { User } from "../../domain/entities/User";
 
 const AppContext = React.createContext<AppContextState | null>(null);
 
 export const AppContextProvider: React.FC<{ context: AppContextProviderProps }> = ({ children, context }) => {
-    const { locale, compositionRoot } = context || {};
+    const { locale, compositionRoot, currentUser } = context || {};
+    const [isInitialized, setIsInitialized] = useState(false);
     const [actions, setActions] = useState<Action[]>([]);
     const [landings, setLandings] = useState<LandingNode[] | undefined>();
     const [hasSettingsAccess, setHasSettingsAccess] = useState(false);
@@ -28,8 +30,10 @@ export const AppContextProvider: React.FC<{ context: AppContextProviderProps }> 
     const reload = useCallback(async () => {
         setIsLoading(true);
         if (!compositionRoot) return;
-        const actions = await compositionRoot.actions.list();
-        const landings = await compositionRoot.landings.list();
+        const [actions, landings] = await Promise.all([
+            compositionRoot.actions.list(),
+            compositionRoot.landings.list(),
+        ]);
 
         cacheImages(JSON.stringify(actions));
         cacheImages(JSON.stringify(landings));
@@ -37,6 +41,7 @@ export const AppContextProvider: React.FC<{ context: AppContextProviderProps }> 
         setActions(actions);
         setLandings(landings);
         setIsLoading(false);
+        setIsInitialized(true);
     }, [compositionRoot]);
 
     useEffect(() => {
@@ -52,12 +57,14 @@ export const AppContextProvider: React.FC<{ context: AppContextProviderProps }> 
     return compositionRoot ? (
         <AppContext.Provider
             value={{
+                currentUser,
                 compositionRoot,
                 actions,
                 landings,
                 translate,
                 reload,
                 isLoading,
+                isInitialized,
                 hasSettingsAccess,
                 isAdmin,
                 launchAppBaseUrl,
@@ -96,15 +103,18 @@ type ReloadMethod = () => Promise<void>;
 export interface AppContextProviderProps {
     compositionRoot: CompositionRoot;
     locale: string;
+    currentUser: User;
 }
 
 export interface AppContextState {
+    currentUser: User;
     actions: Action[];
     landings: LandingNode[] | undefined;
     compositionRoot: CompositionRoot;
     translate: TranslateMethod;
     reload: ReloadMethod;
     isLoading: boolean;
+    isInitialized: boolean;
     hasSettingsAccess: boolean;
     isAdmin: boolean;
     launchAppBaseUrl: string;

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-04-30T06:47:44.651Z\n"
-"PO-Revision-Date: 2025-04-30T06:47:44.651Z\n"
+"POT-Creation-Date: 2025-06-06T19:59:41.289Z\n"
+"PO-Revision-Date: 2025-06-06T19:59:41.289Z\n"
 
 msgid "There are pending migrations"
 msgstr ""
@@ -47,10 +47,19 @@ msgid ""
 "interrupted."
 msgstr ""
 
+msgid "An error has occurred fetching notification config"
+msgstr ""
+
+msgid "An error has occurred saving notification config"
+msgstr ""
+
 msgid "An error has occurred fetching notifications"
 msgstr ""
 
 msgid "An error has occurred while saving notifications"
+msgstr ""
+
+msgid "An error has occurred deleting notifications"
 msgstr ""
 
 msgid "Field {{field}} cannot be blank"
@@ -409,7 +418,43 @@ msgstr ""
 msgid "Uploading file..."
 msgstr ""
 
-msgid "Help"
+msgid "Edit Notification"
+msgstr ""
+
+msgid "Create new notification"
+msgstr ""
+
+msgid "Saving..."
+msgstr ""
+
+msgid "Recipients"
+msgstr ""
+
+msgid "Wildcard"
+msgstr ""
+
+msgid "Specifies which platform(s) will receive the notification"
+msgstr ""
+
+msgid "Recipient List"
+msgstr ""
+
+msgid "Delete notification"
+msgstr ""
+
+msgid "Are you sure you want to delete the selected notifications?"
+msgstr ""
+
+msgid "Export JSON translation"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Created"
+msgstr ""
+
+msgid "Read by"
 msgstr ""
 
 msgid "Notification"
@@ -418,7 +463,40 @@ msgstr ""
 msgid "Okay"
 msgstr ""
 
+msgid "Imported translations for {{total}} notification/s"
+msgstr ""
+
+msgid "Unable to import translations"
+msgstr ""
+
+msgid "Help"
+msgstr ""
+
 msgid "Composition root uninitialized"
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "Sent to all users, ignoring recipient list"
+msgstr ""
+
+msgid "Web"
+msgstr ""
+
+msgid "Sent to web users in the recipient list"
+msgstr ""
+
+msgid "Android"
+msgstr ""
+
+msgid "Sent to Android users in the recipient list"
+msgstr ""
+
+msgid "Both"
+msgstr ""
+
+msgid "Sent to web and Android users in the recipient list"
 msgstr ""
 
 msgid "About Home Page App"
@@ -497,18 +575,6 @@ msgstr ""
 msgid "Create new Landing Page"
 msgstr ""
 
-msgid "Accessible to {{users}} users and {{userGroups}} user groups"
-msgstr ""
-
-msgid "Accessible to {{users}} users"
-msgstr ""
-
-msgid "Accessible to {{userGroups}} user groups"
-msgstr ""
-
-msgid "Only accessible to system administrators"
-msgstr ""
-
 msgid "Clean-up unused documents"
 msgstr ""
 
@@ -542,6 +608,9 @@ msgstr ""
 msgid "There are {{total}} documents available to clean"
 msgstr ""
 
+msgid "Access to Notifications"
+msgstr ""
+
 msgid "Default application"
 msgstr ""
 
@@ -561,4 +630,28 @@ msgid "Url"
 msgstr ""
 
 msgid "Landing pages"
+msgstr ""
+
+msgid "Notifications"
+msgstr ""
+
+msgid "Accessible to {{usersCount}} users and {{userGroupsCount}} user groups"
+msgstr ""
+
+msgid "Accessible to {{usersCount}} users"
+msgstr ""
+
+msgid "Accessible to {{userGroupsCount}} user groups"
+msgstr ""
+
+msgid "Only accessible to system administrators"
+msgstr ""
+
+msgid "Access to settings"
+msgstr ""
+
+msgid "Access to notifications"
+msgstr ""
+
+msgid "Successfully deleted notifications"
 msgstr ""

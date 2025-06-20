@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 
 import { AppContextProviderProps } from "../contexts/app-context";
-import { UserNotificationDialogProps } from "../components/user-notification/UserNotificationDialog";
+import { UserNotificationDialogProps } from "../components/notifications/UserNotificationDialog";
 import { Notification } from "../../domain/entities/Notification";
+import { SetMethod } from "../models/helpers";
 
-export function useUserNotifications(props: useUserNotificationProps) {
+type UseUserNotificationProps = {
+    appContextProps: AppContextProviderProps | null;
+};
+
+export function useUserNotifications(props: UseUserNotificationProps) {
     const { appContextProps } = props;
     const [isUserNotifsLoading, setIsUserNotifsLoading] = useState(true);
     const [userNotificationDialogProps, setUserNotificationDialogProps] = useState<UserNotificationDialogProps[]>();
@@ -14,37 +19,13 @@ export function useUserNotifications(props: useUserNotificationProps) {
         setIsUserNotifsLoading(false);
     };
 
-    const closeNotificationDialog = (notification: Notification) => {
-        setUserNotificationDialogProps(prevDialogProps => {
-            if (!prevDialogProps) return;
-            return prevDialogProps.filter(dialog => dialog.notification.id !== notification.id);
-        });
-    };
-
     useEffect(() => {
-        if (!appContextProps) return;
-
-        const { compositionRoot } = appContextProps;
-        async function setupUserNotifs() {
-            const notifications = await compositionRoot.notifications.getUserNotifications().toPromise();
-            if (notifications.length > 0) {
-                setUserNotificationDialogProps(
-                    notifications.map(notification => ({
-                        notification,
-                        onClose: () => {
-                            closeNotificationDialog(notification);
-                        },
-                        onConfirm: async () => {
-                            await compositionRoot.notifications.readUserNotifications([notification]).toPromise();
-                            closeNotificationDialog(notification);
-                        },
-                    }))
-                );
-            } else {
-                continueLoading();
-            }
-        }
-        setupUserNotifs();
+        initializeUserNotifications({
+            appContextProps,
+            setUserNotificationDialogProps,
+            setIsUserNotifsLoading,
+            continueLoading,
+        });
     }, [appContextProps]);
 
     useEffect(() => {
@@ -59,6 +40,51 @@ export function useUserNotifications(props: useUserNotificationProps) {
     };
 }
 
-type useUserNotificationProps = {
-    appContextProps: AppContextProviderProps | null;
+type InitializeUserNotificationsProps = Pick<UseUserNotificationProps, "appContextProps"> & {
+    setUserNotificationDialogProps: SetMethod<UserNotificationDialogProps[] | undefined>;
+    setIsUserNotifsLoading: SetMethod<boolean>;
+    continueLoading: () => void;
 };
+async function initializeUserNotifications(props: InitializeUserNotificationsProps) {
+    const { appContextProps, setUserNotificationDialogProps, continueLoading, setIsUserNotifsLoading } = props;
+
+    if (!appContextProps) return;
+
+    const { compositionRoot, currentUser } = appContextProps;
+
+    const closeNotificationDialog = (notification: Notification) => {
+        setUserNotificationDialogProps(prevDialogProps => {
+            if (!prevDialogProps) return;
+            return prevDialogProps.filter(dialog => dialog.notification.id !== notification.id);
+        });
+    };
+
+    try {
+        const notifications = await compositionRoot.notification.listUserNotifications(currentUser).toPromise();
+        setIsUserNotifsLoading(false);
+
+        if (notifications.length > 0) {
+            setUserNotificationDialogProps(
+                notifications.map(notification => ({
+                    notification,
+                    onClose: () => {
+                        closeNotificationDialog(notification);
+                    },
+                    onConfirm: async () => {
+                        try {
+                            await compositionRoot.notification.save([notification], currentUser).toPromise();
+                        } catch (error) {
+                            console.error(`Error saving notification: ${error}`);
+                        } finally {
+                            closeNotificationDialog(notification);
+                        }
+                    },
+                }))
+            );
+        } else {
+            continueLoading();
+        }
+    } catch {
+        continueLoading();
+    }
+}

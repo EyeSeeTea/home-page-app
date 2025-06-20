@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { BaseMetadata, NamedRef } from "../../domain/entities/Ref";
+import { BaseMetadata, NamedRef } from "./Ref";
 
 export interface User {
     id: string;

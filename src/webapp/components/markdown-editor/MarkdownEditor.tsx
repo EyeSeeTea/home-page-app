@@ -13,6 +13,7 @@ export interface MarkdownEditorProps {
     onChange: (value: string) => void;
     onUpload?: (data: ArrayBuffer, file: File) => Promise<string | undefined>;
     markdownPreview?: (markdown: string) => React.ReactNode;
+    minEditorHeight?: number;
 }
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
@@ -20,6 +21,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     onChange,
     onUpload,
     markdownPreview = defaultPreviewMarkdown,
+    minEditorHeight = 500,
 }) => {
     const saveImage = async function* (data: ArrayBuffer, file: File) {
         if (!onUpload) return false;
@@ -42,7 +44,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
                     paste={onUpload ? pasteOptions : undefined}
                     commands={{ "add-note": addNoteCommand, "save-file": saveFileCommand }}
                     toolbarCommands={[...getDefaultToolbarCommands(), ["add-note"]]}
-                    minEditorHeight={500}
+                    minEditorHeight={minEditorHeight}
                     disablePreview={true}
                 />
             </Children>
@@ -67,7 +69,6 @@ const Container = styled.div`
 `;
 
 const Children = styled.div`
-    height: 100%;
     max-height: 100%;
     min-height: 100%;
     width: 49%;

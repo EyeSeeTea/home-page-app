@@ -2,7 +2,7 @@ import FileSaver from "file-saver";
 import JSZip from "jszip";
 import _ from "lodash";
 import { defaultAction, isValidActionType, Action, defaultTranslatableModel } from "../../domain/entities/Action";
-import { TranslatableText } from "../../domain/entities/TranslatableText";
+import { setTranslationValue } from "../../domain/entities/TranslatableText";
 import { validateUserPermission } from "../../domain/entities/User";
 import { ActionRepository } from "../../domain/repositories/ActionRepository";
 import { swapById } from "../../utils/array";
@@ -98,19 +98,9 @@ export class ActionDefaultRepository implements ActionRepository {
         const model = await this.config.storageClient.getObjectInCollection<PersistedAction>(Namespaces.ACTIONS, key);
         if (!model) throw new Error(`Module ${key} not found`);
 
-        const translate = <T extends TranslatableText>(item: T, language: string, term: string | undefined): T => {
-            if (term === undefined) {
-                return item;
-            } else if (language === "en") {
-                return { ...item, referenceValue: term };
-            } else {
-                return { ...item, translations: { ...item.translations, [language]: term } };
-            }
-        };
-
         const translatedModel: PersistedAction = {
             ...model,
-            name: translate(model.name, language, terms[model.name.key]),
+            name: setTranslationValue({ item: model.name, language, term: terms[model.name.key] }),
         };
 
         await this.saveDataStore(translatedModel);

@@ -20,6 +20,15 @@ export type RecursivePartial<T> = {
         : T[P];
 };
 
+/* Like RecursivePartial but up to one level only
+        type Config = { permissions: { users: {name: string; id: string}[] } }
+        RecursivePartial<Config> //{ permissions?: { users?: {name?: string; id?: string}[] } }
+        ShallowPartial<Config> //{ permissions?: { users?: {name: string; id: string}[] } }
+*/
+export type ShallowPartial<T> = {
+    [K in keyof T]?: T[K] extends object ? { [P in keyof T[K]]?: T[K][P] } : T[K];
+};
+
 /*
 Extract properties from an object of a certain type:
     type Person = {name: string, age: number, address: string},
@@ -63,8 +72,4 @@ export function recordOf<T>() {
     return function <Obj>(obj: { [K in keyof Obj]: T }) {
         return obj;
     };
-}
-
-export function isBoolean(value: unknown): value is boolean {
-    return typeof value === "boolean";
 }

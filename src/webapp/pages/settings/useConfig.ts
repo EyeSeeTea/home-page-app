@@ -1,7 +1,7 @@
 import compact from "lodash/compact";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { LandingPagePermission, Permission } from "../../../domain/entities/Permission";
-import { SharedUpdate } from "../../components/permissions-dialog/PermissionsDialog";
+import { PermissionHandlerProps, SharedUpdate } from "../../components/permissions-dialog/PermissionsDialog";
 import { useAppContext } from "../../contexts/app-context";
 import { User } from "../../../domain/entities/User";
 import { Maybe } from "../../../types/utils";
@@ -10,8 +10,27 @@ import { AnalyticsConfig } from "../../../domain/entities/AnalyticsConfig";
 import { GoogleAnalytics } from "../../utils/GoogleAnalytics";
 import { MatomoAnalytics } from "../../utils/matomo";
 import { AnalyticsEvent, sendAnalyticsEvents, SendAnalyticsEventType } from "../../utils/analytics";
+import i18n from "../../../utils/i18n";
+import { useAccessPermissionsDialog } from "./useAccessPermissionsDialog";
 
-export function useConfig(): useConfigPloc {
+type UseConfigPloc = {
+    user?: User;
+    showAllActions: boolean;
+    updateShowAllActions: (value: boolean) => void;
+    defaultApplication: string;
+    updateDefaultApplication: (value: string) => void;
+    settingsPermissions?: Permission;
+    landingPagePermissions?: LandingPagePermission[];
+    updateLandingPagePermissions: (sharedUpdate: SharedUpdate, id: string) => Promise<void>;
+    userLandings: Maybe<LandingNode[]>;
+    analyticsConfig: Maybe<AnalyticsConfig>;
+    updateAnalyticsConfig: (config: AnalyticsConfig) => Promise<void>;
+    setAnalyticsConfig: React.Dispatch<React.SetStateAction<AnalyticsConfig | undefined>>;
+    trackViews: SendAnalyticsEventType;
+    settingPermissionsDialogProps: PermissionHandlerProps;
+};
+
+export function useConfig(): UseConfigPloc {
     const { compositionRoot, landings } = useAppContext();
     const [showAllActions, setShowAllActions] = useState(false);
     const [defaultApplication, setDefaultApplication] = useState<string>("");
@@ -102,6 +121,12 @@ export function useConfig(): useConfigPloc {
         [analyticsConfig]
     );
 
+    const permissionDialogProps: PermissionHandlerProps = useAccessPermissionsDialog({
+        permissions: settingsPermissions,
+        updatePermissions: updateSettingsPermissions,
+        name: i18n.t("Access to settings"),
+    });
+
     return {
         user,
         showAllActions,
@@ -109,7 +134,6 @@ export function useConfig(): useConfigPloc {
         defaultApplication,
         updateDefaultApplication,
         settingsPermissions,
-        updateSettingsPermissions,
         landingPagePermissions,
         updateLandingPagePermissions,
         userLandings,
@@ -117,22 +141,6 @@ export function useConfig(): useConfigPloc {
         analyticsConfig,
         setAnalyticsConfig,
         trackViews,
+        settingPermissionsDialogProps: permissionDialogProps,
     };
-}
-
-interface useConfigPloc {
-    user?: User;
-    showAllActions: boolean;
-    updateShowAllActions: (value: boolean) => void;
-    defaultApplication: string;
-    updateDefaultApplication: (value: string) => void;
-    settingsPermissions?: Permission;
-    updateSettingsPermissions: (sharedUpdate: SharedUpdate) => Promise<void>;
-    landingPagePermissions?: LandingPagePermission[];
-    updateLandingPagePermissions: (sharedUpdate: SharedUpdate, id: string) => Promise<void>;
-    userLandings: Maybe<LandingNode[]>;
-    analyticsConfig: Maybe<AnalyticsConfig>;
-    updateAnalyticsConfig: (config: AnalyticsConfig) => Promise<void>;
-    setAnalyticsConfig: React.Dispatch<React.SetStateAction<AnalyticsConfig | undefined>>;
-    trackViews: SendAnalyticsEventType;
 }
