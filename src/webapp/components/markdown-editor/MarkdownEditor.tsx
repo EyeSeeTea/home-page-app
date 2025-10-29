@@ -7,6 +7,7 @@ import { allFilesMimeType } from "../../../utils/files";
 import { SimpleMarkdownViewer } from "../markdown-viewer/MarkdownViewer";
 import { addNoteCommand } from "./AddNoteCommand";
 import { saveFileCommand } from "./SaveFileCommand";
+import { useInsertVariableCommand } from "./InsertVariableCommand";
 
 export interface MarkdownEditorProps {
     value: string;
@@ -35,6 +36,8 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 
     const pasteOptions = { saveImage, command: "save-file", accept: allFilesMimeType } as PasteOptions;
 
+    const insertVariableCommand = useInsertVariableCommand();
+
     return (
         <Container>
             <Children>
@@ -42,8 +45,12 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
                     value={value}
                     onChange={onChange}
                     paste={onUpload ? pasteOptions : undefined}
-                    commands={{ "add-note": addNoteCommand, "save-file": saveFileCommand }}
-                    toolbarCommands={[...getDefaultToolbarCommands(), ["add-note"]]}
+                    commands={{
+                        "add-note": addNoteCommand,
+                        "save-file": saveFileCommand,
+                        "insert-variable": insertVariableCommand,
+                    }}
+                    toolbarCommands={[...getDefaultToolbarCommands(), ["add-note", "insert-variable"]]}
                     minEditorHeight={minEditorHeight}
                     disablePreview={true}
                 />
@@ -74,4 +81,6 @@ const Children = styled.div`
     width: 49%;
 `;
 
-const defaultPreviewMarkdown = (markdown: string) => <SimpleMarkdownViewer source={markdown} />;
+const defaultPreviewMarkdown = (markdown: string) => (
+    <SimpleMarkdownViewer source={markdown} replaceVariables={false} />
+);

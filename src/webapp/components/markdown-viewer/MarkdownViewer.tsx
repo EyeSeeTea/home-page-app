@@ -1,9 +1,11 @@
 import _ from "lodash";
-import React from "react";
+import React, { useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import styled from "styled-components";
+import { useAppContext } from "../../contexts/app-context";
+import { generateVariables, replaceContentVariables } from "../../utils/contentVariables";
 
 const components = {
     blockquote: ({ children, ...props }: any) => (
@@ -23,21 +25,28 @@ const components = {
     a: (props: any) => <a target="_blank" {...props} />,
 };
 
-export const SimpleMarkdownViewer: React.FC<{ className?: string; source: string; center?: boolean }> = ({
-    className,
-    source,
-}) => (
-    <ReactMarkdown
-        className={className}
-        rehypePlugins={[rehypeRaw, [rehypeSanitize, validHtml]]}
-        components={components}
-    >
-        {source}
-    </ReactMarkdown>
-);
+export const SimpleMarkdownViewer: React.FC<{
+    className?: string;
+    source: string;
+    center?: boolean;
+    replaceVariables?: boolean;
+}> = ({ className, source, replaceVariables = true }) => {
+    const { currentUser } = useAppContext();
+    const variables = useMemo(() => generateVariables({ user: currentUser }), [currentUser]);
+    const filledContent = replaceVariables ? replaceContentVariables(source, variables) : source;
+    return (
+        <ReactMarkdown
+            className={className}
+            rehypePlugins={[rehypeRaw, [rehypeSanitize, validHtml]]}
+            components={components}
+        >
+            {filledContent}
+        </ReactMarkdown>
+    );
+};
 
-export const MarkdownViewer = styled(SimpleMarkdownViewer)`
-    color: white;
+export const MarkdownViewer = styled(SimpleMarkdownViewer)<{ color?: string }>`
+    color: ${({ color }) => color || "white"};
     padding: 5px 20px 0 20px;
     text-align-last: ${props => (props.center ? "center" : "unset")};
 
@@ -272,6 +281,7 @@ export const validHtml = {
             "size",
             "span",
             "start",
+            "style",
             "summary",
             "tabIndex",
             "target",
@@ -284,6 +294,9 @@ export const validHtml = {
             "width",
             "itemProp",
         ],
+    },
+    properties: {
+        style: ["color"],
     },
     required: {
         input: {

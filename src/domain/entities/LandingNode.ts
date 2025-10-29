@@ -35,6 +35,7 @@ export interface LandingNode {
     actions: string[];
     children: LandingNode[];
     backgroundColor: string;
+    fontColor: string;
     secondary: boolean | undefined;
     executeOnInit: boolean;
 }
@@ -55,6 +56,7 @@ export const LandingNodeModel: Codec<LandingNode> = Schema.object({
     actions: Schema.optionalSafe(Schema.array(Schema.string), []),
     children: Schema.lazy(() => Schema.array(LandingNodeModel)),
     backgroundColor: Schema.optionalSafe(Schema.string, ""),
+    fontColor: Schema.optionalSafe(Schema.string, ""),
     secondary: Schema.optional(Schema.boolean),
     executeOnInit: Schema.optionalSafe(Schema.boolean, true),
 });

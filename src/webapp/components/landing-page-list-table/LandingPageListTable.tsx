@@ -20,14 +20,13 @@ import {
     buildOrderedLandingNodes,
 } from "../../../domain/entities/LandingNode";
 import i18n from "../../../utils/i18n";
-import { MarkdownViewer } from "../markdown-viewer/MarkdownViewer";
 import { useAppContext } from "../../contexts/app-context";
 import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { ImportTranslationDialog, ImportTranslationRef } from "../import-translation-dialog/ImportTranslationDialog";
 import { LandingPageEditDialog, LandingPageEditDialogProps } from "../landing-page-edit-dialog/LandingPageEditDialog";
-import { LandingBody } from "../landing-layout";
 import { useConfig } from "../../pages/settings/useConfig";
 import { LandingPagePermissionsDialog } from "../landing-page-permissions-dialog/LandingPagePermissionsDialog";
+import { StepPreview } from "../markdown-viewer/StepPreview";
 
 export const LandingPageListTable: React.FC<{ nodes: LandingNode[]; isLoading?: boolean }> = ({ nodes, isLoading }) => {
     const { compositionRoot, reload } = useAppContext();
@@ -145,7 +144,16 @@ export const LandingPageListTable: React.FC<{ nodes: LandingNode[]; isLoading?: 
             {
                 name: "content",
                 text: "Content",
-                getValue: item => (item.content ? <StepPreview value={item.content.referenceValue} /> : "-"),
+                getValue: item =>
+                    item.content ? (
+                        <StyledStepPreview
+                            value={item.content.referenceValue}
+                            bgColor={item.backgroundColor}
+                            color={item.fontColor}
+                        />
+                    ) : (
+                        "-"
+                    ),
             },
             {
                 name: "icon",
@@ -423,23 +431,7 @@ const ItemIcon = styled.img`
     width: 100px;
 `;
 
-const StepPreview: React.FC<{
-    className?: string;
-    value?: string;
-}> = ({ className, value }) => {
-    if (!value) return null;
-
-    return (
-        <StyleLandingBody className={className}>
-            <MarkdownViewer source={value} />
-        </StyleLandingBody>
-    );
-};
-
-const StyleLandingBody = styled(LandingBody)`
-    max-width: 600px;
-    border-radius: 18px;
+const StyledStepPreview = styled(StepPreview)`
     box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12),
         0 5px 5px -3px rgba(0, 0, 0, 0.2);
-    background-color: #276696;
 `;

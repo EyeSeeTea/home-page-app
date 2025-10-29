@@ -5,6 +5,7 @@ import { AdditionalComponents } from "../additional-components/AdditionalCompone
 import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
 import { LandingTitle, LandingContent } from "../landing-layout";
+import { useHeaderInfo } from "../../hooks/useHeaderInfo";
 
 export const ItemCategory: React.FC<{
     isRoot: boolean;
@@ -14,20 +15,26 @@ export const ItemCategory: React.FC<{
 }> = ({ isRoot, currentPage, openPage, showAdditionalComponents }) => {
     const { translate } = useAppContext();
 
+    const { title, showHeader } = useHeaderInfo(currentPage);
+
     return (
         <GroupContainer>
-            <Header>
-                {currentPage.icon ? (
-                    <IconContainer>
-                        <img src={currentPage.icon} alt={`Page icon`} />
-                    </IconContainer>
-                ) : null}
+            {showHeader && (
+                <Header>
+                    {currentPage.icon ? (
+                        <IconContainer>
+                            <img src={currentPage.icon} alt={`Page icon`} />
+                        </IconContainer>
+                    ) : null}
 
-                <LandingTitle>{translate(currentPage.title ?? currentPage.name)}</LandingTitle>
-            </Header>
+                    {title && <LandingTitle color={currentPage.fontColor}>{title}</LandingTitle>}
+                </Header>
+            )}
 
             <LandingContent>
-                {currentPage.content ? <MarkdownContents source={translate(currentPage.content)} /> : null}
+                {currentPage.content ? (
+                    <MarkdownContents color={currentPage.fontColor} source={translate(currentPage.content)} />
+                ) : null}
                 <Cardboard rowSize={5} key={`group-${currentPage.id}`}>
                     {currentPage.children.map((item, idx) => {
                         return (

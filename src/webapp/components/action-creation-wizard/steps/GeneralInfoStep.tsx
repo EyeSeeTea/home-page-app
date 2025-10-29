@@ -13,6 +13,7 @@ import TextFieldOnBlur from "../../form/TextFieldOnBlur";
 import { ActionCreationWizardStepProps } from "./index";
 import { Button, Switch } from "@material-ui/core";
 import { ColorPicker } from "../../color-picker/ColorPicker";
+import { IconSelector } from "../../icon-selector/IconSelector";
 
 export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ action, onChange, isEdit }) => {
     const { compositionRoot, landings } = useAppContext();
@@ -126,15 +127,13 @@ export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ actio
             <Row style={{ marginBottom: 40 }}>
                 <h3>{i18n.t("Icon")}</h3>
 
-                <IconUpload>
-                    {action.icon ? (
-                        <IconContainer>
-                            <img src={action.icon} alt={`Action icon`} />
-                        </IconContainer>
-                    ) : null}
-
-                    <FileInput type="file" onChange={handleFileUpload} accept={imagesMimeType} />
-                </IconUpload>
+                <IconSelector
+                    icon={action.icon}
+                    alt={`Action icon`}
+                    onUpload={handleFileUpload}
+                    accept={imagesMimeType}
+                    onClear={() => onChange(action => ({ ...action, icon: "" }))}
+                />
 
                 <div>
                     <Label>Icon Location</Label>
@@ -253,29 +252,6 @@ const actionTypes = {
 
 const Row = styled.div`
     margin-bottom: 25px;
-`;
-
-const IconContainer = styled.div`
-    margin-right: 60px;
-    flex-shrink: 0;
-    height: 12vh;
-    width: 12vh;
-
-    img {
-        width: 100%;
-        height: auto;
-        padding: 10px;
-        user-drag: none;
-    }
-`;
-
-const IconUpload = styled.div`
-    display: flex;
-    align-items: center;
-`;
-
-const FileInput = styled.input`
-    outline: none;
 `;
 
 const Label = styled.p`

@@ -103,14 +103,6 @@ export const GroupContainer = styled.div`
     margin-bottom: 20px;
 `;
 
-export const GroupTitle = styled.span`
-    display: block;
-    text-align: left;
-    font-size: 32px;
-    line-height: 47px;
-    font-weight: 700;
-`;
-
 export const MarkdownContents = styled(MarkdownViewer)`
     padding: 0;
 

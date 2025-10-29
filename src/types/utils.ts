@@ -48,6 +48,8 @@ export type ComponentParameter<
     Prop extends keyof ComponentProps<ObjectType>
 > = ComponentProps<ObjectType>[Prop];
 
+export type StringRecord<T extends Record<string, string>> = T;
+
 export function isValueInUnionType<S, T extends S>(value: S, values: readonly T[]): value is T {
     return (values as readonly S[]).indexOf(value) >= 0;
 }

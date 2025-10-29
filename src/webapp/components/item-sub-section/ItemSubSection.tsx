@@ -1,9 +1,11 @@
 import { LandingNode } from "../../../domain/entities/LandingNode";
 import { useAppContext } from "../../contexts/app-context";
-import { GroupContainer, GroupTitle, MarkdownContents } from "../item/Item";
+import { GroupContainer, MarkdownContents } from "../item/Item";
 import { AdditionalComponents } from "../additional-components/AdditionalComponents";
 import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
+import styled from "styled-components";
+import { useHeaderInfo } from "../../hooks/useHeaderInfo";
 
 export const ItemSubSection: React.FC<{
     isRoot: boolean;
@@ -13,11 +15,15 @@ export const ItemSubSection: React.FC<{
 }> = ({ isRoot, currentPage, openPage, showAdditionalComponents }) => {
     const { translate } = useAppContext();
 
+    const { title } = useHeaderInfo(currentPage);
+
     return (
         <GroupContainer>
-            <GroupTitle>{translate(currentPage.title ?? currentPage.name)}</GroupTitle>
+            <GroupTitle color={currentPage.fontColor}>{title}</GroupTitle>
 
-            {currentPage.content ? <MarkdownContents source={translate(currentPage.content)} /> : null}
+            {currentPage.content ? (
+                <MarkdownContents color={currentPage.fontColor} source={translate(currentPage.content)} />
+            ) : null}
 
             <Cardboard rowSize={5} key={`group-${currentPage.id}`}>
                 {currentPage.children.map((item, idx) => {
@@ -40,3 +46,12 @@ export const ItemSubSection: React.FC<{
         </GroupContainer>
     );
 };
+
+const GroupTitle = styled.span`
+    display: block;
+    text-align: left;
+    font-size: 32px;
+    line-height: 47px;
+    font-weight: 700;
+    color: ${props => (props.color ? props.color : "#FFFFFF")};
+`;
