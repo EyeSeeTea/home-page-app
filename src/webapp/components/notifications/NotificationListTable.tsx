@@ -12,7 +12,7 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import i18n from "../../../utils/i18n";
 import { NotificationContent } from "./NotificationContent";
-import { NotificationViewModel, wildCardOptions } from "../../models/Notification";
+import { allWildCardOptionInfo, NotificationViewModel } from "../../models/Notification";
 import { PermissionsDialog, PermissionsDialogProps } from "../permissions-dialog/PermissionsDialog";
 import moment from "moment/moment";
 import { NotificationWildcard } from "../../../domain/entities/Notification";
@@ -235,7 +235,7 @@ const columns: TableColumn<NotificationViewModel>[] = [
                         </p>
                     )}
                     <p>
-                        {wildCardOptions().find(wildCard => wildCard.value === item.recipients.wildcard)?.text ||
+                        {allWildCardOptionInfo().find(wildCard => wildCard.value === item.recipients.wildcard)?.text ||
                             item.recipients.wildcard}
                     </p>
                 </>

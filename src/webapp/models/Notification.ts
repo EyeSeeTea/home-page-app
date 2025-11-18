@@ -1,5 +1,5 @@
 import { Notification, NotificationAttrs, NotificationWildcard } from "../../domain/entities/Notification";
-import { User } from "../../domain/entities/User";
+import { isSuperAdmin, User } from "../../domain/entities/User";
 import { DropdownDescItem } from "../components/dropdown-with-desc/DropdownDesc";
 import i18n from "../../utils/i18n";
 
@@ -21,12 +21,17 @@ export function getNotificationViewModel(notifications: Notification[], user: Us
     }));
 }
 
-export function wildCardOptions(): DropdownDescItem[] {
+export function wildCardOptions(user: User): DropdownDescItem[] {
+    return allWildCardOptionInfo().filter(option => !option.hide || !option.hide(user));
+}
+
+export function allWildCardOptionInfo() {
     return [
         {
             value: NotificationWildcard.ALL,
             text: i18n.t("All"),
             desc: i18n.t("Sent to all users, ignoring recipient list"),
+            hide: (user: User) => !isSuperAdmin(user),
         },
         {
             value: NotificationWildcard.WEB,

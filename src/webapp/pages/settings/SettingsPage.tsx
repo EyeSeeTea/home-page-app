@@ -52,7 +52,7 @@ export const SettingsPage: React.FC = () => {
         fetchNotifications,
     } = useNotifications();
     const { notificationConfigLoading, notificationConfig, notificationPermissionsDialogProps, hasNotificationAccess } =
-        useNotificationConfig();
+        useNotificationConfig({ isAdmin });
 
     const navigate = useNavigate();
     const snackbar = useSnackbar();
@@ -292,7 +292,7 @@ export const SettingsPage: React.FC = () => {
                     isLoading={isLoading}
                 />
 
-                {(isAdmin || hasNotificationAccess) && (
+                {hasNotificationAccess && (
                     <>
                         <Title>{i18n.t("Notifications")}</Title>
                         <NotificationListTable
@@ -306,7 +306,11 @@ export const SettingsPage: React.FC = () => {
                     </>
                 )}
 
-                <CreateButton landings={landings} onNewNotification={onNewNotification} />
+                <CreateButton
+                    landings={landings}
+                    onNewNotification={onNewNotification}
+                    hasNotificationAccess={hasNotificationAccess}
+                />
             </Container>
         </DhisLayout>
     );

@@ -14,6 +14,7 @@ import { Description, Message, OpenInBrowser } from "@material-ui/icons";
 export interface CreateButtonProps {
     landings: Maybe<LandingNode[]>;
     onNewNotification: () => void;
+    hasNotificationAccess: Maybe<boolean>;
 }
 
 export const CreateButton: React.FC<CreateButtonProps> = props => {
@@ -31,12 +32,14 @@ export const CreateButton: React.FC<CreateButtonProps> = props => {
                 ariaLabel={i18n.t("Create")}
                 icon={<SpeedDialIcon />}
             >
-                <SpeedDialAction
-                    onClick={props.onNewNotification}
-                    tooltipOpen
-                    icon={<Message />}
-                    tooltipTitle={i18n.t("Notification")}
-                />
+                {props.hasNotificationAccess && (
+                    <SpeedDialAction
+                        onClick={props.onNewNotification}
+                        tooltipOpen
+                        icon={<Message />}
+                        tooltipTitle={i18n.t("Notification")}
+                    />
+                )}
 
                 <SpeedDialAction
                     onClick={openAddAction}

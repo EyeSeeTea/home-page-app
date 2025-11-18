@@ -21,8 +21,10 @@ import { Maybe } from "../../../types/utils";
 import i18n from "../../../utils/i18n";
 import { trackSingleLanding, trackUserLanding, useTrackAnalyticsOnLoad } from "../../hooks/useAnalytics";
 import { getNumberActionsToShowPerRow } from "../../utils/cards";
+import { useDisplayGlobalShellHeader } from "../../hooks/useDisplayGlobalShellHeader";
 
 export const HomePage: React.FC = React.memo(() => {
+    useDisplayGlobalShellHeader("none");
     const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } = useAppContext();
     const { defaultApplication, userLandings, trackViews } = useConfig();
 

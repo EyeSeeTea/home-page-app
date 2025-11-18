@@ -10,6 +10,7 @@ import { Box, Typography } from "@material-ui/core";
 import { NotificationViewModel, wildCardOptions } from "../../models/Notification";
 import { MarkdownEditor } from "../markdown-editor/MarkdownEditor";
 import { NotificationContent } from "./NotificationContent";
+import { useAppContext } from "../../contexts/app-context";
 
 export type NotificationDetailsDialogProps = {
     onClose: () => void;
@@ -19,6 +20,7 @@ export type NotificationDetailsDialogProps = {
 };
 
 export const NotificationDetailsDialog: React.FC<NotificationDetailsDialogProps> = props => {
+    const { currentUser } = useAppContext();
     const { onClose, initialNotification, isLoading } = props;
     const title = initialNotification ? i18n.t("Edit Notification") : i18n.t("Create new notification");
 
@@ -56,7 +58,7 @@ export const NotificationDetailsDialog: React.FC<NotificationDetailsDialogProps>
             <Row>
                 <DropdownDesc
                     label={i18n.t("Wildcard")}
-                    options={wildCardOptions()}
+                    options={wildCardOptions(currentUser)}
                     onChange={onWildcardChange}
                     value={notification.recipients.wildcard}
                     tooltip={i18n.t("Specifies which platform(s) will receive the notification")}

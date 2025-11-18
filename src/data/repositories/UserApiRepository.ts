@@ -1,4 +1,3 @@
-import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { FutureData } from "../../domain/types/Future";
 import { User } from "../../domain/entities/User";
 import { cache } from "../../utils/cache";
@@ -6,7 +5,7 @@ import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../api-futures";
 import { Instance } from "../entities/Instance";
 import { UserRepository } from "../../domain/repositories/UserRepository";
-
+import { D2Api } from "../../types/d2-api";
 export class UserApiRepository implements UserRepository {
     private api: D2Api;
 
@@ -21,6 +20,9 @@ export class UserApiRepository implements UserRepository {
                 fields: {
                     id: true,
                     displayName: true,
+                    // v42+: authorities and username may be top-level on /me
+                    authorities: true,
+                    username: true,
                     userGroups: { id: true, name: true },
                     userCredentials: {
                         username: true,
@@ -31,8 +33,11 @@ export class UserApiRepository implements UserRepository {
         ).map(user => ({
             id: user.id,
             name: user.displayName,
+            username: user.username ?? user.userCredentials?.username ?? "",
             userGroups: user.userGroups,
-            ...user.userCredentials,
+            userRoles:
+                user.userCredentials?.userRoles ??
+                (user.authorities ? [{ id: "authorities", name: "authorities", authorities: user.authorities }] : []),
         }));
     }
 }

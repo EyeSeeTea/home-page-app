@@ -3,6 +3,8 @@ import { Struct } from "./generic/Struct";
 import { isSuperAdmin, User } from "./User";
 import { Either } from "../types/Either";
 import { TranslatableText } from "./TranslatableText";
+import _ from "lodash";
+import i18n from "../../utils/i18n";
 
 export type NotificationAttrs = {
     id: string;
@@ -47,6 +49,8 @@ export class Notification extends Struct<NotificationAttrs>() {
     private checkPermissionAccess(user: User, accessType: "r" | "rw"): boolean {
         if (isSuperAdmin(user) || this.createdBy.id === user.id) return true;
 
+        if (!this.isAllWildcardValid(user)) return false;
+
         const userPermission = this.permissions.userAccesses.find(permission => permission.id === user.id);
 
         const groupPermissions = this.permissions.userGroupAccesses.filter(group =>
@@ -70,10 +74,27 @@ export class Notification extends Struct<NotificationAttrs>() {
         // old notifs are only accessible by super admin
         return Either.success(
             this._update({
-                createdBy: this.createdBy || {},
+                createdBy: this.createdBy || { name: "", id: "" },
                 permissions: this.permissions || { userAccesses: [], userGroupAccesses: [], publicAccess: "--------" },
             })
         );
+    }
+
+    validate(context: { user: User }): Error[] {
+        return _([
+            !this.isAllWildcardValid(context.user)
+                ? new Error(i18n.t("Only super admins can send notifications to all users."))
+                : undefined,
+            !this.canEdit(context.user)
+                ? new Error(i18n.t("User does not have permission to edit this notification."))
+                : undefined,
+        ])
+            .compact()
+            .value();
+    }
+
+    private isAllWildcardValid(user: User): boolean {
+        return this.recipients.wildcard !== NotificationWildcard.ALL || isSuperAdmin(user);
     }
 
     static generateTranslatableContent(
@@ -86,6 +107,10 @@ export class Notification extends Struct<NotificationAttrs>() {
             referenceValue: content,
             translations: translations || {},
         };
+    }
+
+    static readAllNotifications(notifications: Notification[], user: User): Notification[] {
+        return notifications.map(notification => notification.markAsRead(user));
     }
 }
 type NotificationRecipients = {

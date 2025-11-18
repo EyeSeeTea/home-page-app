@@ -41,6 +41,9 @@ export class Dhis2ConfigRepository implements ConfigRepository {
                 fields: {
                     id: true,
                     displayName: true,
+                    // v42+: authorities and username may be top-level on /me
+                    authorities: true,
+                    username: true,
                     userGroups: { id: true, name: true },
                     userCredentials: {
                         username: true,
@@ -51,11 +54,17 @@ export class Dhis2ConfigRepository implements ConfigRepository {
             })
             .getData();
 
+        const username = d2User.username ?? d2User.userCredentials?.username ?? "";
+        const userRoles =
+            d2User.userCredentials?.userRoles ??
+            (d2User.authorities ? [{ id: "authorities", name: "authorities", authorities: d2User.authorities }] : []);
+
         return {
             id: d2User.id,
             name: d2User.displayName,
+            username,
             userGroups: d2User.userGroups,
-            ...d2User.userCredentials,
+            userRoles,
         };
     }
 

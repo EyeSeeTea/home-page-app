@@ -70,7 +70,7 @@ function newNotification(): NotificationViewModel {
     return {
         id,
         content: Notification.generateTranslatableContent(id, ""),
-        recipients: { users: [], userGroups: [], wildcard: NotificationWildcard.ALL },
+        recipients: { users: [], userGroups: [], wildcard: NotificationWildcard.BOTH },
         readBy: [],
         createdAt: new Date(),
         permissions: { userAccesses: [], userGroupAccesses: [], publicAccess: "rw------" },

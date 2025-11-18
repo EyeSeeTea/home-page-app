@@ -7,7 +7,12 @@ import { useAppContext } from "../../contexts/app-context";
 import i18n from "../../../utils/i18n";
 import { useAccessPermissionsDialog } from "./useAccessPermissionsDialog";
 
-export const useNotificationConfig = () => {
+type UseNotificationConfigProps = {
+    isAdmin: boolean;
+};
+
+export const useNotificationConfig = (props: UseNotificationConfigProps) => {
+    const { isAdmin } = props;
     const { compositionRoot, currentUser } = useAppContext();
     const snackbar = useSnackbar();
 
@@ -66,6 +71,6 @@ export const useNotificationConfig = () => {
         notificationConfigLoading: isLoading,
         notificationConfig: notificationConfig,
         notificationPermissionsDialogProps: permissionDialogProps,
-        hasNotificationAccess: hasNotificationAccess,
+        hasNotificationAccess: isAdmin || hasNotificationAccess,
     };
 };
