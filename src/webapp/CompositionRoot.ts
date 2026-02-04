@@ -1,6 +1,5 @@
 import { Instance } from "../data/entities/Instance";
 import { ActionDefaultRepository } from "../data/repositories/ActionDefaultRepository";
-import { Dhis2ConfigRepository } from "../data/repositories/Dhis2ConfigRepository";
 import { InstanceDhisRepository } from "../data/repositories/InstanceDhisRepository";
 import { LandingNodeDefaultRepository } from "../data/repositories/LandingNodeDefaultRepository";
 import { UserApiRepository } from "../data/repositories/UserApiRepository";
@@ -24,9 +23,6 @@ import { ImportLandingNodesUseCase } from "../domain/usecases/ImportLandingNodes
 import { ExportLandingNodesTranslationsUseCase } from "../domain/usecases/ExportLandingNodesTranslationsUseCase";
 import { ImportLandingNodesTranslationsUseCase } from "../domain/usecases/ImportLandingNodesTranslationsUseCase";
 import { SwapLandingChildOrderUseCase } from "../domain/usecases/SwapLandingChildOrderUseCase";
-import { UpdateSettingsPermissionsUseCase } from "../domain/usecases/UpdateSettingsPermissionsUseCase";
-import { SetShowAllActionsUseCase } from "../domain/usecases/SetShowAllActionsUseCase";
-import { GetShowAllActionsUseCase } from "../domain/usecases/GetShowAllActionsUseCase";
 import { CheckSettingsPermissionsUseCase } from "../domain/usecases/CheckSettingsPermissionsUseCase";
 import { CheckAdminAuthorityUseCase } from "../domain/usecases/CheckAdminAuthorityUseCase";
 import { UploadFileUseCase } from "../domain/usecases/UploadFileUseCase";
@@ -35,41 +31,41 @@ import { SearchUsersUseCase } from "../domain/usecases/SearchUsersUseCase";
 import { ListInstalledAppsUseCase } from "../domain/usecases/ListInstalledAppsUseCase";
 import { ListDanglingDocumentsUseCase } from "../domain/usecases/ListDanglingDocumentsUseCase";
 import { DeleteDocumentsUseCase } from "../domain/usecases/DeleteDocumentsUseCase";
-import { GetSettingsPermissionsUseCase } from "../domain/usecases/GetSettingsPermissionsUseCase";
-import { GetLandingPagePermissionsUseCase } from "../domain/usecases/GetLandingPagePermissions";
-import { UpdateLandingPagePermissionsUseCase } from "../domain/usecases/UpdateLandingPagePermissions";
-import { GetUserUseCase } from "../domain/usecases/GetUserUseCase";
-import { GetDefaultApplicationUseCase } from "../domain/usecases/GetDefaultApplicationUseCase";
-import { UpdateDefaultApplicationUseCase } from "../domain/usecases/UpdateDefaultApplicationUseCase";
 import { CreateLandingNodeUseCase } from "../domain/usecases/CreateLandingNodeUseCase";
-import { SendPageViewUseCase } from "../domain/usecases/SendPageViewUseCase";
-import { GoogleAnalyticsRepository } from "../data/repositories/GoogleAnalyticsRepository";
 import { ImportExportClient } from "../data/clients/importExport/ImportExportClient";
-import { GetConfigUseCase } from "../domain/usecases/GetConfigUseCase";
-import { UpdateGoogleAnalyticsCode } from "../domain/usecases/UpdateGoogleAnalyticsCode";
-import { GetGoogleAnalyticsCodeUseCase } from "../domain/usecases/GetGoogleAnalyticsCodeUseCase";
-import { ListCurrentUserNotificationsUseCase } from "../domain/usecases/ListCurrentUserNotificationsUseCase";
+import { ListUserNotificationsUseCase } from "../domain/usecases/ListUserNotificationsUseCase";
 import { NotificationDefaultRepository } from "../data/repositories/NotificationDefaultRepository";
-import { ReadCurrentUserNotificationsUseCase } from "../domain/usecases/ReadCurrentUserNotificationsUseCase";
+import { ListNotificationsUseCase } from "../domain/usecases/ListNotificationsUseCase";
+import { SaveNotificationsUseCase } from "../domain/usecases/SaveNotificationsUseCase";
+import { DeleteNotificationsUseCase } from "../domain/usecases/DeleteNotificationsUseCase";
+import { GetNotificationConfigUseCase } from "../domain/usecases/GetNotificationConfigUseCase";
+import { SaveNotificationConfigUseCase } from "../domain/usecases/SaveNotificationConfigUseCase";
+import { NotificationConfigDefaultRepository } from "../data/repositories/NotificationConfigDefaultRepository";
+import { ImportNotificationsTranslationsUseCase } from "../domain/usecases/ImportNotificationsTranslationsUseCase";
+import { ExportNotificationsTranslationsUseCase } from "../domain/usecases/ExportNotificationsTranslationsUseCase";
+import { ReadUserNotificationUseCase } from "../domain/usecases/ReadUserNotificationUseCase";
+import { GetSettingsUseCase } from "../domain/usecases/GetSettingsUseCase";
+import { SettingsDatastoreRepository } from "../data/repositories/SettingsDatastoreRepository";
+import { UpdateSettingsUseCase } from "../domain/usecases/SaveSettingsUseCase";
 
 export async function getCompositionRoot(instance: Instance) {
-    const configRepository = new Dhis2ConfigRepository(instance.url);
-    const config = await new GetConfigUseCase(configRepository).execute();
     const userRepository = new UserApiRepository(instance);
     const instanceRepository = new InstanceDhisRepository(instance);
     const notificationsRepository = new NotificationDefaultRepository(instance);
+    const notificationConfigRepository = new NotificationConfigDefaultRepository(instance);
+
+    const settingsRepository = new SettingsDatastoreRepository(instance.url);
 
     const importExportClientLandings = new ImportExportClient(instanceRepository, "landing-pages");
     const importExportClientActions = new ImportExportClient(instanceRepository, "actions");
 
-    const actionRepository = new ActionDefaultRepository(config);
-    const landingPageRepository = new LandingNodeDefaultRepository(config.storageClient);
-    const analyticsRepository = new GoogleAnalyticsRepository();
+    const actionRepository = new ActionDefaultRepository(instance);
+    const landingPageRepository = new LandingNodeDefaultRepository(instance);
 
     return {
         actions: getExecute({
-            get: new GetActionByIdUseCase(actionRepository),
-            list: new ListActionsUseCase(config, actionRepository),
+            get: new GetActionByIdUseCase(actionRepository, instanceRepository),
+            list: new ListActionsUseCase(actionRepository, instanceRepository),
             update: new UpdateActionUseCase(actionRepository, landingPageRepository),
             delete: new DeleteActionsUseCase(actionRepository),
             swapOrder: new SwapActionOrderUseCase(actionRepository),
@@ -89,18 +85,9 @@ export async function getCompositionRoot(instance: Instance) {
             importTranslations: new ImportLandingNodesTranslationsUseCase(landingPageRepository),
             swapOrder: new SwapLandingChildOrderUseCase(landingPageRepository),
         }),
-        config: getExecute({
-            getUser: new GetUserUseCase(configRepository),
-            getDefaultApplication: new GetDefaultApplicationUseCase(configRepository),
-            updateDefaultApplication: new UpdateDefaultApplicationUseCase(configRepository),
-            getGoogleAnalyticsCode: new GetGoogleAnalyticsCodeUseCase(configRepository),
-            updateGoogleAnalyticsCode: new UpdateGoogleAnalyticsCode(configRepository),
-            getSettingsPermissions: new GetSettingsPermissionsUseCase(configRepository),
-            updateSettingsPermissions: new UpdateSettingsPermissionsUseCase(configRepository),
-            getLandingPagePermissions: new GetLandingPagePermissionsUseCase(configRepository),
-            updateLandingPagePermissions: new UpdateLandingPagePermissionsUseCase(configRepository),
-            getShowAllActions: new GetShowAllActionsUseCase(configRepository),
-            setShowAllActions: new SetShowAllActionsUseCase(configRepository),
+        settings: getExecute({
+            get: new GetSettingsUseCase(settingsRepository),
+            save: new UpdateSettingsUseCase(settingsRepository),
         }),
         instance: getExecute({
             uploadFile: new UploadFileUseCase(instanceRepository),
@@ -114,15 +101,19 @@ export async function getCompositionRoot(instance: Instance) {
         }),
         user: getExecute({
             getCurrent: new GetCurrentUserUseCase(userRepository),
-            checkSettingsPermissions: new CheckSettingsPermissionsUseCase(configRepository),
-            checkAdminAuthority: new CheckAdminAuthorityUseCase(configRepository),
+            checkSettingsPermissions: new CheckSettingsPermissionsUseCase(settingsRepository),
+            checkAdminAuthority: new CheckAdminAuthorityUseCase(userRepository),
         }),
-        analytics: getExecute({
-            sendPageView: new SendPageViewUseCase(analyticsRepository, configRepository),
-        }),
-        notifications: getExecute({
-            getUserNotifications: new ListCurrentUserNotificationsUseCase(notificationsRepository, userRepository),
-            readUserNotifications: new ReadCurrentUserNotificationsUseCase(notificationsRepository, userRepository),
+        notification: getExecute({
+            list: new ListNotificationsUseCase(notificationsRepository),
+            save: new SaveNotificationsUseCase(notificationsRepository),
+            delete: new DeleteNotificationsUseCase(notificationsRepository),
+            readUserNotifications: new ReadUserNotificationUseCase(notificationsRepository),
+            listUserNotifications: new ListUserNotificationsUseCase(notificationsRepository),
+            getConfig: new GetNotificationConfigUseCase(notificationConfigRepository),
+            saveConfig: new SaveNotificationConfigUseCase(notificationConfigRepository),
+            importTranslations: new ImportNotificationsTranslationsUseCase(notificationsRepository),
+            exportTranslations: new ExportNotificationsTranslationsUseCase(notificationsRepository),
         }),
     };
 }

@@ -1,5 +1,6 @@
 import _ from "lodash";
-import { BaseMetadata, NamedRef } from "../../domain/entities/Ref";
+import { BaseMetadata, NamedRef } from "./Ref";
+import { Settings } from "./Settings";
 
 export interface User {
     id: string;
@@ -42,3 +43,19 @@ export const validateUserPermission = (
 export const isSuperAdmin = (user: User): boolean => {
     return _.flatMap(user.userRoles, ({ authorities }) => authorities).includes("ALL");
 };
+
+export const hasSettingsAccess = (settings: Settings, user: User): boolean => {
+    const { settingsPermissions } = settings;
+    const isAdmin = isSuperAdmin(user);
+
+    const sharedByUser = findCurrentUser(user, settingsPermissions.users ?? []);
+    const sharedByGroup = findCurrentUser(user, settingsPermissions.userGroups ?? []);
+
+    return isAdmin || sharedByUser || sharedByGroup;
+};
+
+function findCurrentUser(user: User, collection: NamedRef[]): boolean {
+    return !_([user, ...user.userGroups])
+        .intersectionBy(collection, userGroup => userGroup.id)
+        .isEmpty();
+}

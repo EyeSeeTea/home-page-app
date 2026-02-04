@@ -1,4 +1,4 @@
-import { UserNotificationDialog } from "../components/user-notification/UserNotificationDialog";
+import { UserNotificationDialog } from "../components/notifications/UserNotificationDialog";
 import { MuiThemeProvider, StylesProvider } from "@material-ui/core/styles";
 import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import React, { useEffect } from "react";
@@ -21,32 +21,30 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
     useEffect(() => {
         async function setup() {
             const compositionRoot = await getCompositionRoot(new Instance({ url: baseUrl }));
-            setAppContextProps({ locale, compositionRoot });
+            const currentUser = await compositionRoot.user.getCurrent().toPromise();
+            setAppContextProps({ locale, compositionRoot, currentUser });
         }
         setup();
     }, [baseUrl, locale]);
 
-    if (userNotificationDialogProps && userNotificationDialogProps.length) {
-        return (
-            <StylesProvider injectFirst>
-                {userNotificationDialogProps.map(notifProps => (
-                    <UserNotificationDialog key={notifProps.notification.id} {...notifProps} />
-                ))}
-            </StylesProvider>
-        );
-    }
-
     return !isUserNotifsLoading && appContextProps ? (
         <AppContextProvider context={appContextProps}>
             <Analytics />
+            <MatomoScript />
             <StylesProvider injectFirst>
                 <MuiThemeProvider theme={muiTheme}>
                     <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
                         <SnackbarProvider>
                             <LoadingProvider>
-                                <div id="app" className="content">
-                                    <Router />
-                                </div>
+                                {userNotificationDialogProps && userNotificationDialogProps.length ? (
+                                    userNotificationDialogProps.map(notifProps => (
+                                        <UserNotificationDialog key={notifProps.notification.id} {...notifProps} />
+                                    ))
+                                ) : (
+                                    <div id="app" className="content">
+                                        <Router />
+                                    </div>
+                                )}
                             </LoadingProvider>
                         </SnackbarProvider>
                     </OldMuiThemeProvider>
@@ -59,7 +57,10 @@ const App: React.FC<{ locale: string; baseUrl: string }> = ({ locale, baseUrl })
 };
 
 const Analytics: React.FC = () => {
-    const { googleAnalyticsCode } = useConfig();
+    const {
+        settings: { analyticsConfig },
+    } = useConfig();
+    const googleAnalyticsCode = analyticsConfig?.googleAnalyticsCode;
 
     useEffect(() => {
         if (!googleAnalyticsCode) return;
@@ -76,6 +77,28 @@ const Analytics: React.FC = () => {
     }, [googleAnalyticsCode]);
 
     return <></>; //return as <script/> seems GA doesn't like that :$
+};
+
+export const MatomoScript = () => {
+    const {
+        settings: { analyticsConfig },
+    } = useConfig();
+    const url = analyticsConfig?.matomoUrl;
+
+    React.useEffect(() => {
+        if (!url) return;
+
+        const script = document.createElement("script");
+        script.src = url;
+        script.async = true;
+        document.head.appendChild(script);
+
+        return () => {
+            document.head.removeChild(script);
+        };
+    }, [url]);
+
+    return null;
 };
 
 export default React.memo(App);

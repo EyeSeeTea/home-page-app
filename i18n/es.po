@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2025-04-30T06:47:44.651Z\n"
+"POT-Creation-Date: 2025-12-15T12:49:42.172Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -47,10 +47,31 @@ msgid ""
 "interrupted."
 msgstr ""
 
+msgid "An error has occurred fetching notification config"
+msgstr ""
+
+msgid "An error has occurred saving notification config"
+msgstr ""
+
 msgid "An error has occurred fetching notifications"
 msgstr ""
 
 msgid "An error has occurred while saving notifications"
+msgstr ""
+
+msgid "An error has occurred deleting notifications"
+msgstr ""
+
+msgid "Error encountered while fetching settings"
+msgstr ""
+
+msgid "Error encountered while saving settings"
+msgstr ""
+
+msgid "Only super admins can send notifications to all users."
+msgstr ""
+
+msgid "User does not have permission to edit this notification."
 msgstr ""
 
 msgid "Field {{field}} cannot be blank"
@@ -401,7 +422,7 @@ msgid "Category"
 msgstr ""
 
 msgid "Close"
-msgstr ""
+msgstr "Cerrar"
 
 msgid "Edit markdown"
 msgstr ""
@@ -409,16 +430,85 @@ msgstr ""
 msgid "Uploading file..."
 msgstr ""
 
-msgid "Help"
-msgstr "Ayuda"
+msgid "Edit Notification"
+msgstr ""
+
+msgid "Create new notification"
+msgstr ""
+
+msgid "Saving..."
+msgstr ""
+
+msgid "Recipients"
+msgstr ""
+
+msgid "Wildcard"
+msgstr ""
+
+msgid "Specifies which platform(s) will receive the notification"
+msgstr ""
+
+msgid "Recipient List"
+msgstr ""
+
+msgid "Delete notification"
+msgstr ""
+
+msgid "Are you sure you want to delete the selected notifications?"
+msgstr ""
+
+msgid "Export JSON translation"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Created"
+msgstr ""
+
+msgid "Read by"
+msgstr ""
 
 msgid "Notification"
 msgstr ""
 
 msgid "Okay"
+msgstr "Aceptar"
+
+msgid "Imported translations for {{total}} notification/s"
 msgstr ""
 
+msgid "Unable to import translations"
+msgstr ""
+
+msgid "Help"
+msgstr "Ayuda"
+
 msgid "Composition root uninitialized"
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "Sent to all users, ignoring recipient list"
+msgstr ""
+
+msgid "Web"
+msgstr ""
+
+msgid "Sent to web users in the recipient list"
+msgstr ""
+
+msgid "Android"
+msgstr ""
+
+msgid "Sent to Android users in the recipient list"
+msgstr ""
+
+msgid "Both"
+msgstr ""
+
+msgid "Sent to web and Android users in the recipient list"
 msgstr ""
 
 msgid "About Home Page App"
@@ -496,18 +586,6 @@ msgstr ""
 msgid "Create new Landing Page"
 msgstr ""
 
-msgid "Accessible to {{users}} users and {{userGroups}} user groups"
-msgstr ""
-
-msgid "Accessible to {{users}} users"
-msgstr ""
-
-msgid "Accessible to {{userGroups}} user groups"
-msgstr ""
-
-msgid "Only accessible to system administrators"
-msgstr ""
-
 msgid "Clean-up unused documents"
 msgstr ""
 
@@ -541,6 +619,9 @@ msgstr ""
 msgid "There are {{total}} documents available to clean"
 msgstr ""
 
+msgid "Access to Notifications"
+msgstr ""
+
 msgid "Default application"
 msgstr ""
 
@@ -553,14 +634,35 @@ msgstr ""
 msgid "GA4 Code"
 msgstr ""
 
+msgid "Matomo Container Tag URL"
+msgstr ""
+
+msgid "Url"
+msgstr ""
+
 msgid "Landing pages"
 msgstr ""
 
-#~ msgid "Add"
-#~ msgstr "Añadir"
+msgid "Notifications"
+msgstr ""
 
-#~ msgid "List"
-#~ msgstr "Listar"
+msgid "Accessible to {{usersCount}} users and {{userGroupsCount}} user groups"
+msgstr ""
 
-#~ msgid "Hello {{name}}"
-#~ msgstr "Hola {{name}}"
+msgid "Accessible to {{usersCount}} users"
+msgstr ""
+
+msgid "Accessible to {{userGroupsCount}} user groups"
+msgstr ""
+
+msgid "Only accessible to system administrators"
+msgstr ""
+
+msgid "Access to settings"
+msgstr ""
+
+msgid "Access to notifications"
+msgstr ""
+
+msgid "Successfully deleted notifications"
+msgstr ""

@@ -9,10 +9,12 @@ import {
     LandingPageEditDialog,
     LandingPageEditDialogProps,
 } from "../../components/landing-page-edit-dialog/LandingPageEditDialog";
-import { Description, OpenInBrowser } from "@material-ui/icons";
+import { Description, Message, OpenInBrowser } from "@material-ui/icons";
 
 export interface CreateButtonProps {
     landings: Maybe<LandingNode[]>;
+    onNewNotification: () => void;
+    hasNotificationAccess: Maybe<boolean>;
 }
 
 export const CreateButton: React.FC<CreateButtonProps> = props => {
@@ -30,6 +32,15 @@ export const CreateButton: React.FC<CreateButtonProps> = props => {
                 ariaLabel={i18n.t("Create")}
                 icon={<SpeedDialIcon />}
             >
+                {props.hasNotificationAccess && (
+                    <SpeedDialAction
+                        onClick={props.onNewNotification}
+                        tooltipOpen
+                        icon={<Message />}
+                        tooltipTitle={i18n.t("Notification")}
+                    />
+                )}
+
                 <SpeedDialAction
                     onClick={openAddAction}
                     tooltipOpen

@@ -4,62 +4,74 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { NamedRef } from "../../../domain/entities/Ref";
 import i18n from "../../../utils/i18n";
-import { ComponentParameter } from "../../../types/utils";
+import { ComponentParameter, Maybe } from "../../../types/utils";
 import { LandingPageListTable } from "../../components/landing-page-list-table/LandingPageListTable";
 import { ActionListTable, buildListActions } from "../../components/action-list-table/ActionListTable";
 import { PageHeader } from "../../components/page-header/PageHeader";
-import { PermissionsDialog } from "../../components/permissions-dialog/PermissionsDialog";
+import { PermissionHandlerProps, PermissionsDialog } from "../../components/permissions-dialog/PermissionsDialog";
 import { useAppContext } from "../../contexts/app-context";
 import { DhisLayout } from "../../components/dhis-layout/DhisLayout";
 import { useNavigate } from "react-router-dom";
 import { useConfig } from "./useConfig";
 import TextFieldOnBlur from "../../components/form/TextFieldOnBlur";
 import { CreateButton } from "./CreateButton";
+import { InlineInputSave } from "../../components/inline-input-save/InlineInputSave";
+import { NotificationListTable } from "../../components/notifications/NotificationListTable";
+import { NotificationDetailsDialog } from "../../components/notifications/NotificationDetailsDialog";
+import { useNotifications } from "./useNotifications";
+import { useNotificationConfig } from "./useNotificationConfig";
+import { AnalyticsConfig } from "../../../domain/entities/AnalyticsConfig";
 
 export const SettingsPage: React.FC = () => {
     const { actions, landings, reload, compositionRoot, isLoading, isAdmin } = useAppContext();
     const {
-        showAllActions,
+        settings: { showAllActions, settingsPermissions, defaultApplication, analyticsConfig },
         updateShowAllActions,
-        settingsPermissions,
-        updateSettingsPermissions,
-        defaultApplication,
-        googleAnalyticsCode,
         updateDefaultApplication,
-        updateGoogleAnalyticsCode,
+        updateAnalyticsConfig,
+        settingPermissionsDialogProps,
     } = useConfig();
+
+    const [permissionsType, setPermissionsType] = useState<"settings" | "notifications" | null>(null);
+    const [danglingDocuments, setDanglingDocuments] = useState<NamedRef[]>([]);
+    const [application, setDefaultApplication] = useState<string>("");
+    const [analyticsState, setAnalyticsState] = useState<AnalyticsConfig>({
+        googleAnalyticsCode: analyticsConfig.googleAnalyticsCode,
+        matomoUrl: analyticsConfig.matomoUrl,
+    });
+    const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
+
+    const {
+        isNotificationLoading,
+        notifications,
+        notifDetailsDialog,
+        onEditNotification,
+        onNewNotification,
+        deleteNotifications,
+        saveNotifications,
+        fetchNotifications,
+    } = useNotifications();
+    const { notificationConfigLoading, notificationConfig, notificationPermissionsDialogProps, hasNotificationAccess } =
+        useNotificationConfig({ isAdmin });
 
     const navigate = useNavigate();
     const snackbar = useSnackbar();
     const loading = useLoading();
 
-    const [permissionsType, setPermissionsType] = useState<string | null>(null);
-    const [danglingDocuments, setDanglingDocuments] = useState<NamedRef[]>([]);
-    const [application, setDefaultApplication] = useState<string>("");
-    const [gaCode, setGaCode] = useState<string>("");
-    const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
+    const permissionsDialogProps: PermissionHandlerProps | undefined = useMemo(() => {
+        switch (permissionsType) {
+            case "settings":
+                return settingPermissionsDialogProps;
+            case "notifications":
+                return notificationPermissionsDialogProps;
+            default:
+                return undefined;
+        }
+    }, [permissionsType, settingPermissionsDialogProps, notificationPermissionsDialogProps]);
 
     const backHome = useCallback(() => {
         navigate("/", { replace: true });
     }, [navigate]);
-
-    const buildSharingDescription = useCallback(() => {
-        const users = settingsPermissions?.users?.length ?? 0;
-        const userGroups = settingsPermissions?.userGroups?.length ?? 0;
-
-        if (users > 0 && userGroups > 0) {
-            return i18n.t("Accessible to {{users}} users and {{userGroups}} user groups", {
-                users,
-                userGroups,
-            });
-        } else if (users > 0) {
-            return i18n.t("Accessible to {{users}} users", { users });
-        } else if (userGroups > 0) {
-            return i18n.t("Accessible to {{userGroups}} user groups", { userGroups });
-        } else {
-            return i18n.t("Only accessible to system administrators");
-        }
-    }, [settingsPermissions]);
 
     const cleanUpDanglingDocuments = useCallback(async () => {
         updateDialog({
@@ -120,29 +132,30 @@ export const SettingsPage: React.FC = () => {
         reload();
     }, [reload]);
 
+    const updateAnalyticsState = useCallback((value: string, attributeName: keyof AnalyticsConfig) => {
+        setAnalyticsState(prev => ({
+            ...prev,
+            [attributeName]: value,
+        }));
+    }, []);
+
+    const updateAnalyticsConfigAndReload = useCallback(
+        (field: keyof AnalyticsConfig) => {
+            updateAnalyticsConfig({
+                googleAnalyticsCode: field === "googleAnalyticsCode" ? analyticsState.googleAnalyticsCode : undefined,
+                matomoUrl: field === "matomoUrl" ? analyticsState.matomoUrl : undefined,
+            }).then(() => window.location.reload());
+        },
+        [analyticsState, updateAnalyticsConfig]
+    );
+
     return (
         <DhisLayout>
             {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"lg"} fullWidth={true} {...dialogProps} />}
+            {notifDetailsDialog && <NotificationDetailsDialog {...notifDetailsDialog} />}
 
-            {!!permissionsType && (
-                <PermissionsDialog
-                    object={{
-                        name: "Access to settings",
-                        publicAccess: "--------",
-                        userAccesses:
-                            settingsPermissions?.users?.map(ref => ({
-                                ...ref,
-                                access: "rw----",
-                            })) ?? [],
-                        userGroupAccesses:
-                            settingsPermissions?.userGroups?.map(ref => ({
-                                ...ref,
-                                access: "rw----",
-                            })) ?? [],
-                    }}
-                    onChange={updateSettingsPermissions}
-                    onClose={() => setPermissionsType(null)}
-                />
+            {permissionsType && !!permissionsDialogProps && (
+                <PermissionsDialog {...permissionsDialogProps} onClose={() => setPermissionsType(null)} />
             )}
 
             <Header title={i18n.t("Settings")} onBackClick={backHome} />
@@ -155,7 +168,10 @@ export const SettingsPage: React.FC = () => {
                         <ListItemIcon>
                             <Icon>settings</Icon>
                         </ListItemIcon>
-                        <ListItemText primary={i18n.t("Access to Settings")} secondary={buildSharingDescription()} />
+                        <ListItemText
+                            primary={i18n.t("Access to Settings")}
+                            secondary={buildSharingDescription(settingsPermissions)}
+                        />
                     </ListItem>
 
                     <ListItem button onClick={toggleShowAllActions}>
@@ -191,6 +207,22 @@ export const SettingsPage: React.FC = () => {
                     )}
 
                     {isAdmin && (
+                        <ListItem
+                            button
+                            onClick={() => setPermissionsType("notifications")}
+                            disabled={notificationConfigLoading}
+                        >
+                            <ListItemIcon>
+                                <Icon>settings</Icon>
+                            </ListItemIcon>
+                            <ListItemText
+                                primary={i18n.t("Access to Notifications")}
+                                secondary={buildSharingDescription(notificationConfig?.permissions)}
+                            />
+                        </ListItem>
+                    )}
+
+                    {isAdmin && (
                         <div>
                             <SubContainer>
                                 <h4>{i18n.t("Default application")}</h4>
@@ -217,20 +249,31 @@ export const SettingsPage: React.FC = () => {
                                     <TextFieldOnBlur
                                         fullWidth={true}
                                         label={i18n.t("GA4 Code")}
-                                        value={googleAnalyticsCode ?? ""}
-                                        onChange={event => setGaCode(event.target.value)}
+                                        value={analyticsConfig.googleAnalyticsCode ?? ""}
+                                        onChange={event =>
+                                            updateAnalyticsState(event.target.value, "googleAnalyticsCode")
+                                        }
                                         placeholder={"G-XXXXXXX"}
                                     />
                                     <Button
-                                        onClick={() => {
-                                            updateGoogleAnalyticsCode(gaCode).then(() => window.location.reload()); // Force reload in order to remove previous GA code initiated script
-                                        }}
+                                        onClick={() => updateAnalyticsConfigAndReload("googleAnalyticsCode")}
                                         color="primary"
                                         variant="contained"
                                     >
                                         {i18n.t("Save")}
                                     </Button>
                                 </GridForm>
+                            </SubContainer>
+                            <SubContainer>
+                                <InlineInputSave
+                                    title={i18n.t("Matomo Container Tag URL")}
+                                    label={i18n.t("Url")}
+                                    value={analyticsConfig?.matomoUrl ?? ""}
+                                    onChange={value => updateAnalyticsState(value, "matomoUrl")}
+                                    onUpdate={() => updateAnalyticsConfigAndReload("matomoUrl")}
+                                    placeholder="https://cdn.matomo.cloud/{{website}}/{{container_xxxxxx.js}}"
+                                    saveText={i18n.t("Save")}
+                                />
                             </SubContainer>
                         </div>
                     )}
@@ -250,11 +293,48 @@ export const SettingsPage: React.FC = () => {
                     isLoading={isLoading}
                 />
 
-                <CreateButton landings={landings} />
+                {hasNotificationAccess && (
+                    <>
+                        <Title>{i18n.t("Notifications")}</Title>
+                        <NotificationListTable
+                            isLoading={isNotificationLoading}
+                            notifications={notifications}
+                            onEditNotification={onEditNotification}
+                            deleteNotifications={deleteNotifications}
+                            saveNotifications={saveNotifications}
+                            fetchNotifications={fetchNotifications}
+                        />
+                    </>
+                )}
+
+                <CreateButton
+                    landings={landings}
+                    onNewNotification={onNewNotification}
+                    hasNotificationAccess={hasNotificationAccess}
+                />
             </Container>
         </DhisLayout>
     );
 };
+
+function buildSharingDescription(props: Maybe<{ users?: NamedRef[]; userGroups?: NamedRef[] }>) {
+    const { users, userGroups } = { users: [], userGroups: [], ...(props || {}) };
+    const usersCount = users?.length ?? 0;
+    const userGroupsCount = userGroups?.length ?? 0;
+
+    if (usersCount > 0 && userGroupsCount > 0) {
+        return i18n.t("Accessible to {{usersCount}} users and {{userGroupsCount}} user groups", {
+            usersCount,
+            userGroupsCount,
+        });
+    } else if (usersCount > 0) {
+        return i18n.t("Accessible to {{usersCount}} users", { usersCount });
+    } else if (userGroupsCount > 0) {
+        return i18n.t("Accessible to {{userGroupsCount}} user groups", { userGroupsCount });
+    } else {
+        return i18n.t("Only accessible to system administrators");
+    }
+}
 
 const Title = styled.h3`
     margin-top: 25px;
@@ -269,7 +349,7 @@ const Container = styled.div`
     margin: 1.5rem;
 `;
 
-const SubContainer = styled.div`
+export const SubContainer = styled.div`
     margin-bottom: 2rem;
 `;
 
@@ -277,7 +357,7 @@ const Header = styled(PageHeader)`
     margin-top: 1rem;
 `;
 
-const GridForm = styled.div`
+export const GridForm = styled.div`
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 20px;

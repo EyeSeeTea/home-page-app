@@ -24,6 +24,7 @@ export function childrenOutOfPlace() {
 export const sectionNode: LandingNode = {
     actions: [],
     backgroundColor: "",
+    fontColor: "",
     content: {
         key: "XusobLebMel-content",
         referenceValue: "This is my first section",
@@ -54,6 +55,7 @@ export const sectionNode: LandingNode = {
         {
             actions: [],
             backgroundColor: "",
+            fontColor: "",
             executeOnInit: true,
             icon: "",
             iconLocation: "",
@@ -86,6 +88,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
         {
             actions: ["google-action", "dhis-2-academy", "github"],
             backgroundColor: "#276696",
+            fontColor: "",
             content: {
                 key: "pAfyLmQmCU6-content",
                 referenceValue: "This is a template for developing and testing purposes",
@@ -116,6 +119,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
         {
             actions: [],
             backgroundColor: "",
+            fontColor: "",
             content: {
                 key: "XusobLebMel-content",
                 referenceValue: "This is my first section",
@@ -146,6 +150,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
         {
             actions: [],
             backgroundColor: "",
+            fontColor: "",
             executeOnInit: true,
             icon: "",
             iconLocation: "",
@@ -174,6 +179,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
         {
             actions: [],
             backgroundColor: "#0008FF",
+            fontColor: "",
             content: {
                 key: "SEuEePxkvE7-content",
                 referenceValue:
@@ -205,6 +211,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
         {
             actions: ["dhis-2", "dhis-2-community"],
             backgroundColor: "",
+            fontColor: "",
             content: {
                 key: "MmG1BCLXE1Q-content",
                 referenceValue: "This is a section with general actions",
@@ -235,6 +242,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
         {
             actions: ["dhis-2-ui", "dhis-2-documentation"],
             backgroundColor: "",
+            fontColor: "",
             content: {
                 key: "Jqdtr2lTgNP-content",
                 referenceValue: "Frontend, Backend",
@@ -265,6 +273,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
         {
             actions: ["dhis-2-api"],
             backgroundColor: "",
+            fontColor: "",
             content: {
                 key: "jFYOc9eUhVd-content",
                 referenceValue: "API DOCS",

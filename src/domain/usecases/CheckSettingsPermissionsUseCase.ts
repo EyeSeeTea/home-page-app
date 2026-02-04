@@ -1,15 +1,15 @@
 import _ from "lodash";
 import { NamedRef } from "../entities/Ref";
 import { User } from "../entities/User";
-import { ConfigRepository } from "../repositories/ConfigRepository";
 import { UseCase } from "./UseCase";
+import { SettingsRepository } from "../repositories/SettingsRepository";
 
 export class CheckSettingsPermissionsUseCase implements UseCase {
-    constructor(private configRepository: ConfigRepository) {}
+    constructor(private settingsRepository: SettingsRepository) {}
 
-    public async execute(): Promise<boolean> {
-        const user = await this.configRepository.getUser();
-        const permissions = await this.configRepository.getSettingsPermissions();
+    public async execute(user: User): Promise<boolean> {
+        const settings = await this.settingsRepository.get().toPromise();
+        const permissions = settings.settingsPermissions;
 
         const isAdmin = !!user.userRoles.find(role => role.authorities.find(authority => authority === "ALL"));
 

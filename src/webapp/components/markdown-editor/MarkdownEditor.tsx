@@ -7,12 +7,14 @@ import { allFilesMimeType } from "../../../utils/files";
 import { SimpleMarkdownViewer } from "../markdown-viewer/MarkdownViewer";
 import { addNoteCommand } from "./AddNoteCommand";
 import { saveFileCommand } from "./SaveFileCommand";
+import { useInsertVariableCommand } from "./InsertVariableCommand";
 
 export interface MarkdownEditorProps {
     value: string;
     onChange: (value: string) => void;
     onUpload?: (data: ArrayBuffer, file: File) => Promise<string | undefined>;
     markdownPreview?: (markdown: string) => React.ReactNode;
+    minEditorHeight?: number;
 }
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
@@ -20,6 +22,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     onChange,
     onUpload,
     markdownPreview = defaultPreviewMarkdown,
+    minEditorHeight = 500,
 }) => {
     const saveImage = async function* (data: ArrayBuffer, file: File) {
         if (!onUpload) return false;
@@ -33,6 +36,8 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 
     const pasteOptions = { saveImage, command: "save-file", accept: allFilesMimeType } as PasteOptions;
 
+    const insertVariableCommand = useInsertVariableCommand();
+
     return (
         <Container>
             <Children>
@@ -40,9 +45,13 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
                     value={value}
                     onChange={onChange}
                     paste={onUpload ? pasteOptions : undefined}
-                    commands={{ "add-note": addNoteCommand, "save-file": saveFileCommand }}
-                    toolbarCommands={[...getDefaultToolbarCommands(), ["add-note"]]}
-                    minEditorHeight={500}
+                    commands={{
+                        "add-note": addNoteCommand,
+                        "save-file": saveFileCommand,
+                        "insert-variable": insertVariableCommand,
+                    }}
+                    toolbarCommands={[...getDefaultToolbarCommands(), ["add-note", "insert-variable"]]}
+                    minEditorHeight={minEditorHeight}
                     disablePreview={true}
                 />
             </Children>
@@ -67,10 +76,11 @@ const Container = styled.div`
 `;
 
 const Children = styled.div`
-    height: 100%;
     max-height: 100%;
     min-height: 100%;
     width: 49%;
 `;
 
-const defaultPreviewMarkdown = (markdown: string) => <SimpleMarkdownViewer source={markdown} />;
+const defaultPreviewMarkdown = (markdown: string) => (
+    <SimpleMarkdownViewer source={markdown} replaceVariables={false} />
+);

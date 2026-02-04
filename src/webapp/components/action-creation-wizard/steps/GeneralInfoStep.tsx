@@ -13,6 +13,7 @@ import TextFieldOnBlur from "../../form/TextFieldOnBlur";
 import { ActionCreationWizardStepProps } from "./index";
 import { Button, Switch } from "@material-ui/core";
 import { ColorPicker } from "../../color-picker/ColorPicker";
+import { IconSelector } from "../../icon-selector/IconSelector";
 
 export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ action, onChange, isEdit }) => {
     const { compositionRoot, landings } = useAppContext();
@@ -126,15 +127,13 @@ export const GeneralInfoStep: React.FC<ActionCreationWizardStepProps> = ({ actio
             <Row style={{ marginBottom: 40 }}>
                 <h3>{i18n.t("Icon")}</h3>
 
-                <IconUpload>
-                    {action.icon ? (
-                        <IconContainer>
-                            <img src={action.icon} alt={`Action icon`} />
-                        </IconContainer>
-                    ) : null}
-
-                    <FileInput type="file" onChange={handleFileUpload} accept={imagesMimeType} />
-                </IconUpload>
+                <IconSelector
+                    icon={action.icon}
+                    alt={`Action icon`}
+                    onUpload={handleFileUpload}
+                    accept={imagesMimeType}
+                    onClear={() => onChange(action => ({ ...action, icon: "" }))}
+                />
 
                 <div>
                     <Label>Icon Location</Label>
@@ -255,29 +254,6 @@ const Row = styled.div`
     margin-bottom: 25px;
 `;
 
-const IconContainer = styled.div`
-    margin-right: 60px;
-    flex-shrink: 0;
-    height: 12vh;
-    width: 12vh;
-
-    img {
-        width: 100%;
-        height: auto;
-        padding: 10px;
-        user-drag: none;
-    }
-`;
-
-const IconUpload = styled.div`
-    display: flex;
-    align-items: center;
-`;
-
-const FileInput = styled.input`
-    outline: none;
-`;
-
 const Label = styled.p`
     margin: 48px 0 0 0;
     font-weight: 300;
@@ -337,4 +313,5 @@ const dhisVersions = [
     { value: "2.38", text: "2.38" },
     { value: "2.39", text: "2.39" },
     { value: "2.40", text: "2.40" },
+    { value: "2.41", text: "2.41" },
 ];

@@ -1,3 +1,4 @@
+import { AnalyticsConfig } from "../../domain/entities/AnalyticsConfig";
 import { LandingPagePermission, Permission } from "../../domain/entities/Permission";
 
 export interface PersistedSettings {
@@ -6,5 +7,5 @@ export interface PersistedSettings {
     settingsPermissions?: Permission;
     landingPagePermissions?: LandingPagePermission[];
     showAllActions?: boolean;
-    googleAnalyticsCode?: string;
+    analyticsConfig?: AnalyticsConfig;
 }

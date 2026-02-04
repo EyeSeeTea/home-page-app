@@ -1,9 +1,11 @@
 import { PersistedAction } from "../../data/entities/PersistedAction";
+import { Maybe } from "../../types/utils";
 import { Action } from "../entities/Action";
+import { InstalledApp } from "../entities/InstalledApp";
 
 export interface ActionRepository {
-    getAll(): Promise<Action[]>;
-    get(actionKey: string): Promise<Action | undefined>;
+    getAll(installedApps: InstalledApp[]): Promise<Action[]>;
+    get(actionKey: string, installedApps: InstalledApp[]): Promise<Maybe<Action>>;
     getPersistedActions(): Promise<PersistedAction[]>;
     update(action: Pick<Action, "id" | "name"> & Partial<Action>): Promise<void>;
     delete(ids: string[]): Promise<void>;

@@ -111,7 +111,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             name: app.name,
             version: app.name,
             fullLaunchUrl: app.launchUrl,
-            launchUrl: app.launchUrl.replace(this.api.baseUrl, ""),
+            launchUrl: app.launchUrl?.replace(this.api.baseUrl, ""),
         }));
     }
 

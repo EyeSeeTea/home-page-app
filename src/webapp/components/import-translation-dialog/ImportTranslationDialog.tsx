@@ -119,7 +119,7 @@ export interface ImportTranslationRef {
 }
 
 export interface ImportTranslationDialogProps {
-    type: "action" | "landing-page";
+    type: "action" | "landing-page" | "notification";
     onSave: (key: string | undefined, lang: string, terms: Record<string, string>) => void | Promise<void>;
 }
 

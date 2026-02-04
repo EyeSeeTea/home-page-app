@@ -1,4 +1,3 @@
-export const notificationsDataStore = "notifications";
 export const dataStoreNamespace = "home-page-app";
 export const constantPrefix = "Home Page App Storage";
 
@@ -14,4 +13,11 @@ export const NamespaceProperties: Record<Namespace, string[]> = {
     [Namespaces.ACTIONS]: [],
     [Namespaces.LANDING_PAGES]: [],
     [Namespaces.CONFIG]: [],
+};
+
+export const notificationsNamespace = "notifications";
+
+export const notificationNamespaceKeys = {
+    NOTIFICATIONS: "notifications",
+    CONFIG: "config",
 };

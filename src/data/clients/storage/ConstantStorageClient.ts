@@ -52,12 +52,12 @@ export class ConstantStorageClient extends StorageClient {
     public async saveObject<T extends object>(key: string, value: T): Promise<void> {
         const { id = generateUid(), name = `${constantPrefix} - ${key}` } = await this.getConstant(key);
 
-        const response = await this.api.models.constants
-            .put({ id, name, code: key, description: JSON.stringify(value, null, 4) })
-            .getData();
-
-        if (response.status !== "OK") {
-            throw new Error(JSON.stringify(response.message, null, 2));
+        try {
+            await this.api.models.constants
+                .put({ id, name, code: key, description: JSON.stringify(value, null, 4) })
+                .getData();
+        } catch (error: any) {
+            throw new Error(`Error saving constant: ${error.message || JSON.stringify(error, null, 2)}`);
         }
     }
 

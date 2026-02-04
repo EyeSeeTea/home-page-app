@@ -1,115 +1,172 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { LandingPagePermission, Permission } from "../../../domain/entities/Permission";
-import { SharedUpdate } from "../../components/permissions-dialog/PermissionsDialog";
+import compact from "lodash/compact";
+import { useCallback, useMemo } from "react";
+import { PermissionHandlerProps, SharedUpdate } from "../../components/permissions-dialog/PermissionsDialog";
 import { useAppContext } from "../../contexts/app-context";
 import { User } from "../../../domain/entities/User";
 import { Maybe } from "../../../types/utils";
 import { LandingNode, updateLandings } from "../../../domain/entities/LandingNode";
+import { AnalyticsConfig } from "../../../domain/entities/AnalyticsConfig";
+import { GoogleAnalytics } from "../../utils/GoogleAnalytics";
+import { MatomoAnalytics } from "../../utils/matomo";
+import { AnalyticsEvent, sendAnalyticsEvents, SendAnalyticsEventType } from "../../utils/analytics";
+import i18n from "../../../utils/i18n";
+import { useAccessPermissionsDialog } from "./useAccessPermissionsDialog";
+import { Settings } from "../../../domain/entities/Settings";
+import { LandingPagePermission } from "../../../domain/entities/Permission";
 
-export function useConfig(): useConfigPloc {
-    const { compositionRoot, landings } = useAppContext();
-    const [showAllActions, setShowAllActions] = useState(false);
-    const [defaultApplication, setDefaultApplication] = useState<string>("");
-    const [googleAnalyticsCode, setGoogleAnalyticsCode] = useState<Maybe<string>>();
-    const [settingsPermissions, setSettingsPermissions] = useState<Permission>();
-    const [landingPagePermissions, setLandingPagePermissions] = useState<LandingPagePermission[]>();
-    const [user, setUser] = useState<User>();
+type UseConfigPloc = {
+    settingPermissionsDialogProps: PermissionHandlerProps;
+    settings: Settings;
+    user?: User;
+    userLandings: Maybe<LandingNode[]>;
+    updateAnalyticsConfig: (config: AnalyticsConfig) => Promise<void>;
+    updateDefaultApplication: (value: string) => void;
+    updateLandingPagePermissions: (sharedUpdate: SharedUpdate, id: string) => Promise<void>;
+    updateShowAllActions: (value: boolean) => void;
+    trackViews: SendAnalyticsEventType;
+};
+
+export function useConfig(): UseConfigPloc {
+    const { compositionRoot, currentUser, landings, settings, updateSettings } = useAppContext();
 
     const userLandings = useMemo<LandingNode[] | undefined>(() => {
-        if (!(landings && landingPagePermissions && user)) return undefined;
-        return updateLandings(landings, landingPagePermissions, user);
-    }, [landingPagePermissions, landings, user]);
+        if (!landings || settings.landingPagePermissions.length === 0 || !currentUser) return undefined;
+        return updateLandings(landings, settings.landingPagePermissions, currentUser);
+    }, [settings, landings, currentUser]);
 
-    useEffect(() => {
-        compositionRoot.config.getShowAllActions().then(setShowAllActions);
-        compositionRoot.config.getDefaultApplication().then(setDefaultApplication);
-        compositionRoot.config.getGoogleAnalyticsCode().then(setGoogleAnalyticsCode);
-        compositionRoot.config.getSettingsPermissions().then(setSettingsPermissions);
-        compositionRoot.config.getLandingPagePermissions().then(setLandingPagePermissions);
-        compositionRoot.config.getUser().then(setUser);
-    }, [compositionRoot]);
-
-    const updateDefaultApplication = useCallback(
-        async (value: string) => {
-            setDefaultApplication(value);
-            await compositionRoot.config.updateDefaultApplication(value);
+    const saveSettings = useCallback(
+        (updatedSettings: Settings) => {
+            compositionRoot.settings.save(updatedSettings).run(
+                () => updateSettings(updatedSettings),
+                error => console.error(error)
+            );
         },
-        [compositionRoot]
+        [compositionRoot.settings, updateSettings]
     );
 
-    const updateGoogleAnalyticsCode = useCallback(
-        async (code: string) => {
-            setGoogleAnalyticsCode(code);
-            await compositionRoot.config.updateGoogleAnalyticsCode(code);
+    const updateDefaultApplication = useCallback(
+        (value: string) => {
+            const updatedSettings = settings.updateDefaultApplication(value);
+            return saveSettings(updatedSettings);
         },
-        [compositionRoot]
+        [settings, saveSettings]
+    );
+
+    const updateAnalyticsConfig = useCallback(
+        async (config: AnalyticsConfig) => {
+            const { googleAnalyticsCode, matomoUrl } = settings.analyticsConfig;
+            const updatedSettings = settings.updateAnalyticsConfig({
+                googleAnalyticsCode:
+                    config.googleAnalyticsCode !== undefined ? config.googleAnalyticsCode : googleAnalyticsCode,
+                matomoUrl: config.matomoUrl !== undefined ? config.matomoUrl : matomoUrl,
+            });
+
+            await compositionRoot.settings
+                .save(updatedSettings)
+                .runAsync()
+                .then(() => updateSettings(updatedSettings));
+        },
+        [compositionRoot.settings, settings, updateSettings]
     );
 
     const updateLandingPagePermissions = useCallback(
-        async ({ userAccesses, userGroupAccesses, publicAccess }: SharedUpdate, id: string) => {
-            await compositionRoot.config.updateLandingPagePermissions(
-                {
-                    users: userAccesses?.map(({ id, name }) => ({ id, name })),
-                    userGroups: userGroupAccesses?.map(({ id, name }) => ({ id, name })),
-                    publicAccess,
-                },
-                id
-            );
+        async ({ userAccesses, userGroupAccesses, publicAccess: publicAccessValue }: SharedUpdate, id: string) => {
+            const existingPermission = settings.landingPagePermissions.find(landing => landing.id === id);
 
-            const newLandingPagePermissions = await compositionRoot.config.getLandingPagePermissions();
-            setLandingPagePermissions(newLandingPagePermissions);
+            const hasUsers = Array.isArray(userAccesses);
+            const hasUserGroups = Array.isArray(userGroupAccesses);
+            const hasPublicAccess = publicAccessValue !== undefined;
+            if (!hasUsers && !hasUserGroups && !hasPublicAccess) {
+                console.warn("No user, user group, or public access provided.");
+                return;
+            }
+
+            const mappedUsers = hasUsers ? userAccesses.map(({ id, name }) => ({ id, name })) : undefined;
+            const mappedUserGroups = hasUserGroups
+                ? userGroupAccesses.map(({ id, name }) => ({ id, name }))
+                : undefined;
+
+            const { users = [], userGroups = [], publicAccess = "r-------" } = existingPermission ?? {};
+            const updatedPermission: LandingPagePermission = {
+                id,
+                userGroups: mappedUserGroups ?? userGroups,
+                users: mappedUsers ?? users,
+                publicAccess: hasPublicAccess ? publicAccessValue : publicAccess,
+            };
+
+            const updatedLandingPagePermissions = existingPermission
+                ? settings.landingPagePermissions.map(landing => (landing.id === id ? updatedPermission : landing))
+                : [...settings.landingPagePermissions, updatedPermission];
+
+            const updatedSettings = settings.updateLandingPagePermissions(updatedLandingPagePermissions);
+            return saveSettings(updatedSettings);
         },
-        [compositionRoot]
+        [settings, saveSettings]
     );
 
     const updateSettingsPermissions = useCallback(
-        async ({ userAccesses, userGroupAccesses }: SharedUpdate) => {
-            await compositionRoot.config.updateSettingsPermissions({
-                users: userAccesses?.map(({ id, name }) => ({ id, name })),
-                userGroups: userGroupAccesses?.map(({ id, name }) => ({ id, name })),
+        ({ userAccesses, userGroupAccesses }: SharedUpdate) => {
+            const hasUsers = Array.isArray(userAccesses);
+            const hasUserGroups = Array.isArray(userGroupAccesses);
+            if (!hasUsers && !hasUserGroups) {
+                console.warn("No user or user group accesses provided.");
+                return;
+            }
+
+            const mappedUsers = hasUsers ? userAccesses.map(({ id, name }) => ({ id, name })) : undefined;
+            const mappedUserGroups = hasUserGroups
+                ? userGroupAccesses.map(({ id, name }) => ({ id, name }))
+                : undefined;
+
+            const { users = [], userGroups = [] } = settings.settingsPermissions;
+            const updatedSettings = settings.updateSettingsPermissions({
+                users: mappedUsers ?? users,
+                userGroups: mappedUserGroups ?? userGroups,
             });
 
-            const newSettings = await compositionRoot.config.getSettingsPermissions();
-            setSettingsPermissions(newSettings);
+            return saveSettings(updatedSettings);
         },
-        [compositionRoot]
+        [settings, saveSettings]
     );
 
     const updateShowAllActions = useCallback(
-        async (value: boolean) => {
-            setShowAllActions(value);
-            await compositionRoot.config.setShowAllActions(value);
+        (value: boolean) => {
+            const updatedSettings = settings.updateShowAllActions(value);
+            return saveSettings(updatedSettings);
         },
-        [compositionRoot]
+        [settings, saveSettings]
     );
 
-    return {
-        user,
-        showAllActions,
-        updateShowAllActions,
-        defaultApplication,
-        updateDefaultApplication,
-        updateGoogleAnalyticsCode,
-        settingsPermissions,
-        updateSettingsPermissions,
-        landingPagePermissions,
-        updateLandingPagePermissions,
-        googleAnalyticsCode,
-        userLandings,
-    };
-}
+    const trackViews = useCallback(
+        (event: AnalyticsEvent) => {
+            const googleAnalytics = settings.analyticsConfig?.googleAnalyticsCode
+                ? new GoogleAnalytics(settings.analyticsConfig.googleAnalyticsCode)
+                : undefined;
+            const matomoAnalytics = settings.analyticsConfig?.matomoUrl
+                ? new MatomoAnalytics(settings.analyticsConfig.matomoUrl)
+                : undefined;
 
-interface useConfigPloc {
-    user?: User;
-    showAllActions: boolean;
-    updateShowAllActions: (value: boolean) => void;
-    defaultApplication: string;
-    updateDefaultApplication: (value: string) => void;
-    updateGoogleAnalyticsCode: (code: string) => Promise<void>;
-    settingsPermissions?: Permission;
-    updateSettingsPermissions: (sharedUpdate: SharedUpdate) => Promise<void>;
-    landingPagePermissions?: LandingPagePermission[];
-    updateLandingPagePermissions: (sharedUpdate: SharedUpdate, id: string) => Promise<void>;
-    googleAnalyticsCode: Maybe<string>;
-    userLandings: Maybe<LandingNode[]>;
+            const analyticsTrackers = compact([googleAnalytics, matomoAnalytics]);
+            sendAnalyticsEvents({ analyticsTrackers, event });
+        },
+        [settings]
+    );
+
+    const permissionDialogProps: PermissionHandlerProps = useAccessPermissionsDialog({
+        permissions: settings.settingsPermissions,
+        updatePermissions: updateSettingsPermissions,
+        name: i18n.t("Access to settings"),
+    });
+
+    return {
+        settingPermissionsDialogProps: permissionDialogProps,
+        settings: settings,
+        user: currentUser,
+        userLandings: userLandings,
+        trackViews,
+        updateAnalyticsConfig,
+        updateDefaultApplication,
+        updateLandingPagePermissions,
+        updateShowAllActions,
+    };
 }
