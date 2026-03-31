@@ -12,6 +12,7 @@ export const Item: React.FC<{
     currentPage: LandingNode;
     isRoot: boolean;
     openPage: (page: LandingNode) => void;
+    landingNodeSize?: number;
 }> = props => {
     const { currentPage, isRoot, openPage } = props;
     const logoText = React.useMemo(() => getLogoText(currentPage.icon), [currentPage.icon]);
@@ -34,6 +35,7 @@ export const Item: React.FC<{
                 currentPage={currentPage}
                 isRoot={isRoot}
                 openPage={openPage}
+                landingRowSize={props.landingNodeSize}
             />
         );
     }

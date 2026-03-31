@@ -39,7 +39,7 @@ export const Router: React.FC = React.memo(() => {
     );
 });
 
-export const defaultIcon = process.env.PUBLIC_URL + "/icon-small.png";
+export const defaultIcon = import.meta.env.BASE_URL + "icon-small.png";
 export const defaultTitle = "Homepage App";
 
 function ProtectedRoute({ isAuthorized }: { isAuthorized: boolean }) {

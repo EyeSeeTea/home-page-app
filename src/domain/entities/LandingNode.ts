@@ -3,8 +3,9 @@ import { Codec, GetSchemaType, Schema } from "../../utils/codec";
 import { TranslatableText, TranslatableTextModel } from "./TranslatableText";
 import { LandingPagePermission } from "./Permission";
 import { User } from "./User";
-import { Action, getPageActions } from "./Action";
-import { Maybe } from "../../types/utils";
+import { Action } from "./Action";
+import { getPageActions } from "../helpers/ActionHelpers";
+import { Maybe, Optional } from "../../types/utils";
 
 export const LandingPageNodeTypeModel = Schema.oneOf([
     Schema.exact("root"),
@@ -38,6 +39,7 @@ export interface LandingNode {
     fontColor: string;
     secondary: boolean | undefined;
     executeOnInit: boolean;
+    landingRowSize: Optional<number>;
 }
 
 export const LandingNodeModel: Codec<LandingNode> = Schema.object({
@@ -59,6 +61,7 @@ export const LandingNodeModel: Codec<LandingNode> = Schema.object({
     fontColor: Schema.optionalSafe(Schema.string, ""),
     secondary: Schema.optional(Schema.boolean),
     executeOnInit: Schema.optionalSafe(Schema.boolean, true),
+    landingRowSize: Schema.optional(Schema.integer),
 });
 
 export interface OrderedLandingNode extends LandingNode {

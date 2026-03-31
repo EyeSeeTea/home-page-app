@@ -79,10 +79,10 @@ export const AppContextProvider: React.FC<{ context: AppContextProviderProps }> 
 };
 
 async function getLaunchAppBaseUrl() {
-    const isDev = process.env.NODE_ENV === "development";
+    const isDev = import.meta.env.DEV;
 
     if (isDev) {
-        return process.env.REACT_APP_DHIS2_BASE_URL;
+        return import.meta.env.VITE_DHIS2_BASE_URL;
     } else {
         const { data: manifest } = await axios.get<any>("manifest.webapp");
         return manifest.activities.dhis.href;

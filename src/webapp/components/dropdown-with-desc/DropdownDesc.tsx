@@ -61,7 +61,7 @@ const renderValue =
         const option = options.find(opt => opt.value === value);
         return option ? (
             <>
-                {option.text} - <ItemDescription>{option.desc}</ItemDescription>
+                {option.text} {option.desc && <ItemDescription>- {option.desc}</ItemDescription>}
             </>
         ) : (
             ""

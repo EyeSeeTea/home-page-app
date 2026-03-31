@@ -10,7 +10,8 @@ export const ItemSection: React.FC<{
     currentPage: LandingNode;
     openPage(page: LandingNode): void;
     showAdditionalComponents?: boolean;
-}> = ({ isRoot, currentPage, openPage, showAdditionalComponents }) => {
+    landingRowSize?: number;
+}> = ({ isRoot, currentPage, openPage, showAdditionalComponents, landingRowSize }) => {
     const { translate } = useAppContext();
 
     const { title, showHeader } = useHeaderInfo(currentPage);
@@ -36,7 +37,12 @@ export const ItemSection: React.FC<{
                     <Item key={`node-${node.id}`} isRoot={isRoot} openPage={() => openPage(node)} currentPage={node} />
                 ))}
                 {showAdditionalComponents && (
-                    <AdditionalComponents currentPage={currentPage} isRoot={isRoot} openPage={openPage} />
+                    <AdditionalComponents
+                        currentPage={currentPage}
+                        isRoot={isRoot}
+                        openPage={openPage}
+                        rowSize={landingRowSize}
+                    />
                 )}
             </LandingContent>
         </GroupContainer>

@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
-import FileType from "file-type/browser";
+import { fileTypeFromBuffer } from "file-type";
 import Resizer from "react-image-file-resizer";
 import { InstalledApp } from "../../domain/entities/InstalledApp";
 import { NamedRef } from "../../domain/entities/Ref";
@@ -37,7 +37,7 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     public async uploadFile(data: ArrayBuffer, options: UploadFileOptions = {}): Promise<string> {
-        const type = await FileType.fromBuffer(data);
+        const type = await fileTypeFromBuffer(data);
         const { mime = "application/unknown", ext } = type ?? {};
         const blob = new Blob([data], { type: mime });
         const name = options.name ?? `Uploaded file${ext ? `.${ext}` : ""}`;
@@ -130,7 +130,7 @@ async function transformFile(blob: Blob, mime: string): Promise<Blob> {
         return new Promise(resolve => {
             Resizer.imageFileResizer(blob, 600, 600, "PNG", 100, 0, blob => resolve(blob as Blob), "blob");
         });
-    } else if (process.env.NODE_ENV === "development" && mime === "image/gif") {
+    } else if (import.meta.env.DEV && mime === "image/gif") {
         try {
             const ffmpeg = createFFmpeg({ corePath: "https://unpkg.com/@ffmpeg/core@0.12.6" });
 

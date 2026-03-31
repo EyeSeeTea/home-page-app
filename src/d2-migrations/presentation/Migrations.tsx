@@ -8,7 +8,7 @@ import { RunMigrations } from "../domain/usecases/RunMigrations";
 import { useMigrations } from "./useMigrations";
 import { CircularProgress } from "@material-ui/core";
 
-const isDebug = process.env.NODE_ENV === "development";
+const isDebug = import.meta.env.DEV;
 
 export interface MigrationsProps {
     storage: MigrationsStorage;

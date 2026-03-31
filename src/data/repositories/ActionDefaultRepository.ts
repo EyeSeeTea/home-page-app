@@ -169,7 +169,10 @@ export class ActionDefaultRepository implements ActionRepository {
             publicAccess: model.publicAccess,
             userAccesses: model.userAccesses,
             userGroupAccesses: model.userGroupAccesses,
-            lastUpdatedBy: currentUser,
+            lastUpdatedBy: {
+                id: currentUser.id,
+                name: currentUser.name,
+            },
             lastUpdated: date,
             user: options?.recreate ? currentUser : model.user,
             created: options?.recreate ? date : model.created,

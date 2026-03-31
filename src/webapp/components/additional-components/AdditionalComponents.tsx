@@ -5,7 +5,8 @@ import { useAppContext } from "../../contexts/app-context";
 import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
 import { LandingParagraph } from "../landing-layout";
-import { Action, getPageActions } from "../../../domain/entities/Action";
+import { Action } from "../../../domain/entities/Action";
+import { getPageActions } from "../../../domain/helpers/ActionHelpers";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import i18n from "../../../utils/i18n";
 import { AnalyticsEvent } from "../../utils/analytics";
@@ -15,8 +16,9 @@ export const AdditionalComponents: React.FC<{
     isRoot: boolean;
     currentPage: LandingNode;
     openPage(page: LandingNode): void;
+    rowSize?: number;
 }> = React.memo(props => {
-    const { isRoot, currentPage, openPage } = props;
+    const { isRoot, currentPage, openPage, rowSize: rowSizeConfig } = props;
     const { actions, translate, launchAppBaseUrl, getLandingNodeById } = useAppContext();
     const {
         settings: { showAllActions },
@@ -66,7 +68,7 @@ export const AdditionalComponents: React.FC<{
     const currentPageActions = actions.filter(action => currentPage.actions.includes(action.id));
     const pageActions = user && getPageActions(isRoot, showAllActions, actions, user, currentPageActions);
 
-    const rowSize = getNumberActionsToShowPerRow(actions.length);
+    const rowSize = rowSizeConfig || getNumberActionsToShowPerRow(actions.length);
 
     return (
         <React.Fragment>

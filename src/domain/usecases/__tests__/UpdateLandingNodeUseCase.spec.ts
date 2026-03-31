@@ -37,14 +37,17 @@ export class DummyLandingNodeTestRepository implements LandingNodeRepository {
 
 describe("UpdateLandingNodeUseCase", () => {
     const landingNodesRepository = new DummyLandingNodeTestRepository();
-    const _updateLandingNodeUseCase = new UpdateLandingNodeUseCase(landingNodesRepository);
+    const updateLandingNodeUseCase = new UpdateLandingNodeUseCase(landingNodesRepository);
 
-    // Testing use case
-    /* it("should throw an error if there are duplicated LandingNodes", async () => {
-         const promise = updateLandingNodeUseCase.execute(sectionNode);
+    it("can be instantiated with a repository", () => {
+        expect(updateLandingNodeUseCase).toBeDefined();
+    });
 
-         await expect(promise).rejects.toThrowError();
-     }); */
+    // TODO: uncomment when execute() test is implemented
+    // it("should throw an error if there are duplicated LandingNodes", async () => {
+    //     const promise = updateLandingNodeUseCase.execute(sectionNode);
+    //     await expect(promise).rejects.toThrow();
+    // });
 });
 
 describe("validateNoDuplicatedNode", () => {
@@ -57,7 +60,7 @@ describe("validateNoDuplicatedNode", () => {
     it("should throw an error if there are duplicated LandingNodes", async () => {
         const landingPages = duplicatedNodes();
 
-        expect(() => validateNoDuplicatedNode(landingPages)).toThrowError();
+        expect(() => validateNoDuplicatedNode(landingPages)).toThrow();
     });
 });
 
@@ -71,6 +74,6 @@ describe("validateParentsInSameLandingTree", () => {
     it("should throw an error if a child node does not have its parent in the children tree", async () => {
         const landingPages = childrenOutOfPlace();
 
-        expect(() => validateParentsInSameLandingTree(landingPages)).toThrowError();
+        expect(() => validateParentsInSameLandingTree(landingPages)).toThrow();
     });
 });

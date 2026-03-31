@@ -1,9 +1,7 @@
-import _ from "lodash";
 import { PartialBy } from "../../types/utils";
 import { GetSchemaType, Schema } from "../../utils/codec";
 import { BaseMetadataModel } from "./Ref";
 import { TranslatableTextModel } from "./TranslatableText";
-import { User } from "./User";
 import { ModelValidation } from "./Validation";
 
 export const ActionTypeModel = Schema.oneOf([Schema.exact("app"), Schema.exact("page")]);
@@ -98,32 +96,4 @@ export const defaultAction: PartialAction = {
     launchPageId: "",
     dhisAuthorities: [],
     disabled: false,
-};
-
-export const getPageActions = (
-    isRoot: boolean,
-    showAllActions: boolean,
-    actions: Action[],
-    user: User,
-    currentPageActions: Action[]
-) => {
-    if (isRoot && showAllActions) {
-        return actions.map(({ id }) => id);
-    } else if (user) {
-        return currentPageActions
-            .filter(action => {
-                const actionUsers = action.userAccesses?.map(userAccess => userAccess.id) ?? [];
-                const actionUserGroups = action.userGroupAccesses?.map(userGroupAccess => userGroupAccess.id) ?? [];
-                const userGroupIds = user.userGroups.map(userGroup => userGroup.id);
-
-                const hasUserAccess = actionUsers.includes(user.id);
-                const hasUserGroupAccess = _.intersection(actionUserGroups, userGroupIds).length > 0;
-                const hasPublicAccess = Boolean(action.publicAccess) && action.publicAccess !== "--------";
-
-                return hasUserAccess || hasUserGroupAccess || hasPublicAccess;
-            })
-            .map(({ id }) => id);
-    } else {
-        return [];
-    }
 };

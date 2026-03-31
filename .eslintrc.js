@@ -1,16 +1,16 @@
 /** @format */
 
 module.exports = {
-    extends: [
-        "react-app",
-        "eslint:recommended",
-        "plugin:react/recommended",
-        "plugin:cypress/recommended",
-        "plugin:@typescript-eslint/recommended",
-    ],
+    extends: ["eslint:recommended", "plugin:react/recommended", "plugin:@typescript-eslint/recommended"],
     parser: "@typescript-eslint/parser",
     parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: "module",
         warnOnUnsupportedTypeScriptVersion: false,
+    },
+    env: {
+        browser: true,
+        es2020: true,
     },
     rules: {
         "no-console": ["warn", { allow: ["debug", "warn", "error"] }],
@@ -46,8 +46,7 @@ module.exports = {
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
     },
-    plugins: ["cypress", "@typescript-eslint", "react-hooks", "unused-imports"],
-    env: { "cypress/globals": true },
+    plugins: ["@typescript-eslint", "react-hooks", "unused-imports", "jsx-a11y"],
     settings: {
         react: {
             pragma: "React",

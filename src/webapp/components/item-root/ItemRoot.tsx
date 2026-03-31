@@ -6,8 +6,8 @@ import { BigCard } from "../card-board/BigCard";
 import { Cardboard } from "../card-board/Cardboard";
 import { LandingContent, LandingTitle } from "../landing-layout";
 import { AdditionalComponents } from "../additional-components/AdditionalComponents";
-import { getNumberActionsToShowPerRow } from "../../utils/cards";
 import { useHeaderInfo } from "../../hooks/useHeaderInfo";
+import { useItemRoot } from "./useItemRoot";
 
 export const ItemRoot: React.FC<{
     isRoot: boolean;
@@ -16,10 +16,8 @@ export const ItemRoot: React.FC<{
     openPage(page: LandingNode): void;
 }> = ({ isRoot, currentPage, logoText, openPage }) => {
     const { translate } = useAppContext();
-
-    const rowSize = getNumberActionsToShowPerRow(currentPage.children.length);
-
     const { title, showHeader } = useHeaderInfo(currentPage);
+    const { isSinglePage, landingRowSize, childrenRowSize } = useItemRoot(currentPage);
 
     return (
         <React.Fragment>
@@ -42,12 +40,18 @@ export const ItemRoot: React.FC<{
                     <MarkdownContents source={translate(currentPage.content)} color={currentPage.fontColor} />
                 ) : null}
 
-                {currentPage.pageRendering === "single" ? (
+                {isSinglePage ? (
                     currentPage.children.map(node => (
-                        <Item key={`node-${node.id}`} isRoot={isRoot} openPage={openPage} currentPage={node} />
+                        <Item
+                            key={`node-${node.id}`}
+                            isRoot={isRoot}
+                            openPage={openPage}
+                            currentPage={node}
+                            landingNodeSize={landingRowSize}
+                        />
                     ))
                 ) : (
-                    <Cardboard rowSize={rowSize} key={`group-${currentPage.id}`}>
+                    <Cardboard rowSize={childrenRowSize} key={`group-${currentPage.id}`}>
                         {currentPage.children.map((item, idx) => (
                             <BigCard
                                 key={`card-${idx}`}
@@ -64,7 +68,12 @@ export const ItemRoot: React.FC<{
                     </Cardboard>
                 )}
 
-                <AdditionalComponents currentPage={currentPage} isRoot={isRoot} openPage={openPage} />
+                <AdditionalComponents
+                    currentPage={currentPage}
+                    isRoot={isRoot}
+                    openPage={openPage}
+                    rowSize={landingRowSize}
+                />
             </LandingContent>
 
             {currentPage.icon && currentPage.iconLocation === "bottom" && (

@@ -7,6 +7,25 @@ HomePage app is a DHIS2 Web Application part of [EyeSeeTea's DHIS2 Suite](https:
 
 ![homepage_app_dhis2_suite_eyeseetea](https://github.com/EyeSeeTea/home-page-app/assets/108925044/f2169127-7faf-4644-82b5-a4b177c537ed)
 
+This project uses **Yarn 4** managed by **Corepack** and declares:
+
+```json
+"packageManager": "yarn@4.12.0"
+```
+
+If your machine still defaults to Yarn 1 globally, enable Corepack once:
+
+```bash
+corepack enable
+corepack prepare yarn@1.22.22 --activate
+```
+
+Then inside this repo:
+
+```bash
+yarn install
+```
+
 ### Google analytics
 
 In order to send home page views to Google Analytics, the GA4 code must be provided in the settings page under `Google Analytics 4` option.

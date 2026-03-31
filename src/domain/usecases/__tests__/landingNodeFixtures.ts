@@ -51,6 +51,7 @@ export const sectionNode: LandingNode = {
         translations: {},
     },
     type: "section",
+    landingRowSize: undefined,
     children: [
         {
             actions: [],
@@ -79,6 +80,7 @@ export const sectionNode: LandingNode = {
             type: "sub-section",
             content: undefined,
             children: [],
+            landingRowSize: undefined,
         },
     ],
 };
@@ -115,6 +117,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
                 translations: {},
             },
             type: "root",
+            landingRowSize: undefined,
         },
         {
             actions: [],
@@ -146,6 +149,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
                 translations: {},
             },
             type: "section",
+            landingRowSize: undefined,
         },
         {
             actions: [],
@@ -173,6 +177,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
             },
             type: "sub-section",
             content: undefined,
+            landingRowSize: undefined,
         },
     ],
     [
@@ -207,6 +212,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
                 translations: {},
             },
             type: "root",
+            landingRowSize: undefined,
         },
         {
             actions: ["dhis-2", "dhis-2-community"],
@@ -238,6 +244,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
                 translations: {},
             },
             type: "section",
+            landingRowSize: undefined,
         },
         {
             actions: ["dhis-2-ui", "dhis-2-documentation"],
@@ -269,6 +276,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
                 translations: {},
             },
             type: "section",
+            landingRowSize: undefined,
         },
         {
             actions: ["dhis-2-api"],
@@ -300,6 +308,7 @@ export const validLandingPagesTree: PersistedLandingPage[] = [
                 translations: {},
             },
             type: "sub-section",
+            landingRowSize: undefined,
         },
     ],
 ];

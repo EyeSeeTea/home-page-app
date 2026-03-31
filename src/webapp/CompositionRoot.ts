@@ -78,9 +78,17 @@ export async function getCompositionRoot(instance: Instance) {
             list: new ListLandingChildrenUseCase(landingPageRepository),
             update: new UpdateLandingNodeUseCase(landingPageRepository),
             create: new CreateLandingNodeUseCase(landingPageRepository),
-            delete: new DeleteLandingNodesUseCase(landingPageRepository),
-            export: new ExportLandingNodesUseCase(landingPageRepository, importExportClientLandings),
-            import: new ImportLandingNodesUseCase(landingPageRepository, importExportClientLandings),
+            delete: new DeleteLandingNodesUseCase(landingPageRepository, settingsRepository),
+            export: new ExportLandingNodesUseCase(
+                landingPageRepository,
+                importExportClientLandings,
+                settingsRepository
+            ),
+            import: new ImportLandingNodesUseCase(
+                landingPageRepository,
+                importExportClientLandings,
+                settingsRepository
+            ),
             exportTranslations: new ExportLandingNodesTranslationsUseCase(landingPageRepository),
             importTranslations: new ImportLandingNodesTranslationsUseCase(landingPageRepository),
             swapOrder: new SwapLandingChildOrderUseCase(landingPageRepository),

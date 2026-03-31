@@ -25,7 +25,7 @@ import { useDisplayGlobalShellHeader } from "../../hooks/useDisplayGlobalShellHe
 
 export const HomePage: React.FC = React.memo(() => {
     useDisplayGlobalShellHeader("none");
-    const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate, compositionRoot } = useAppContext();
+    const { hasSettingsAccess, reload, isLoading, launchAppBaseUrl, translate } = useAppContext();
     const {
         settings: { defaultApplication },
         userLandings,
@@ -37,7 +37,6 @@ export const HomePage: React.FC = React.memo(() => {
     const navigate = useNavigate();
     const snackbar = useSnackbar();
     const [history, updateHistory] = useState<LandingNode[]>([]);
-    const [isLoadingLong, setLoadingLong] = useState<boolean>(false);
     const [pageType, setPageType] = useState<PageType>(
         userLandings && userLandings?.length > 1 ? "userLandings" : "singleLanding"
     );
@@ -119,12 +118,6 @@ export const HomePage: React.FC = React.memo(() => {
     }, [reload]);
 
     useEffect(() => {
-        setTimeout(function () {
-            setLoadingLong(true);
-        }, 8000);
-    }, [compositionRoot]);
-
-    useEffect(() => {
         if (isSingleLanding && hasSingleInitLanding && isRootPage && isRoot) {
             updateHistory(history => [currentPage, ...history]);
         }
@@ -139,7 +132,7 @@ export const HomePage: React.FC = React.memo(() => {
         if (initLandings && initLandings?.length > 1) {
             setPageType("userLandings");
         }
-    }, [defaultApplication, isLoadingLong, launchAppBaseUrl, initLandings]);
+    }, [defaultApplication, launchAppBaseUrl, initLandings]);
 
     useEffect(() => {
         const icon = favicon.current;
@@ -174,11 +167,7 @@ export const HomePage: React.FC = React.memo(() => {
                 {isLoading || redirect.isActive ? (
                     <ProgressContainer>
                         <CircularProgress color={"white"} size={65} />
-                        {isLoadingLong ? (
-                            <p>{i18n.t("First load can take a couple of minutes, please wait...")}</p>
-                        ) : (
-                            <p>{i18n.t("Loading the user configuration...")}</p>
-                        )}
+                        <p>{i18n.t("Loading the user configuration...")}</p>
                     </ProgressContainer>
                 ) : initLandings && pageType === "userLandings" ? (
                     <>

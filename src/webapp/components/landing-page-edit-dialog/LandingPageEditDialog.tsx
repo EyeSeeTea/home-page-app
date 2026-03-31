@@ -17,6 +17,7 @@ import _ from "lodash";
 import useImageFileUpload from "./useImageFileUpload";
 import { StepPreview } from "../markdown-viewer/StepPreview";
 import { IconSelector } from "../icon-selector/IconSelector";
+import { DropdownDesc } from "../dropdown-with-desc/DropdownDesc";
 
 function buildDefaultNode(
     type: LandingNodeType,
@@ -44,6 +45,7 @@ function buildDefaultNode(
         fontColor: "#ffffff",
         secondary: false,
         executeOnInit,
+        landingRowSize: undefined,
     };
 }
 
@@ -282,6 +284,22 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
                                 />
                                 <p>{i18n.t("Single page")}</p>
                             </IconLocationSwitch>
+                            {pageRendering && (
+                                <>
+                                    <Label>{i18n.t("Actions per row")}</Label>
+                                    <DropdownDesc
+                                        value={String(value.landingRowSize ?? 0)}
+                                        options={landingRowSizeOptions(3, 4)}
+                                        label={""}
+                                        onChange={landingRowSize => {
+                                            setValue(landing => ({
+                                                ...landing,
+                                                landingRowSize: Number(landingRowSize) || undefined,
+                                            }));
+                                        }}
+                                    />
+                                </>
+                            )}
                         </div>
 
                         <div>
@@ -332,6 +350,13 @@ export const LandingPageEditDialog: React.FC<LandingPageEditDialogProps> = props
         </ConfirmationDialog>
     );
 };
+
+function landingRowSizeOptions(min: number, max: number) {
+    return [
+        { text: "Default", value: "0" },
+        ..._.range(min, max + 1).map(i => ({ value: String(i), text: String(i) })),
+    ];
+}
 
 export interface LandingPageEditDialogProps extends Omit<ConfirmationDialogProps, "onSave"> {
     initialNode?: LandingNode;
