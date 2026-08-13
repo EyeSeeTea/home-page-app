@@ -70,7 +70,7 @@ export const NotificationListTable: React.FC<NotificationListTableProps> = props
         <PageWrapper>
             {confirmDeleteProps && <ConfirmationDialog {...confirmDeleteProps} />}
             {permissionsDialogProps && <PermissionsDialog {...permissionsDialogProps} />}
-            <ImportTranslationDialog type="notification" ref={translationImportRef} onSave={handleTranslationUpload} />
+            <ImportTranslationDialog ref={translationImportRef} onSave={handleTranslationUpload} />
             <ObjectsTable<NotificationViewModel>
                 rows={notifications}
                 columns={columns}

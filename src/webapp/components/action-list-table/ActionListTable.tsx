@@ -44,6 +44,7 @@ export const ActionListTable: React.FC<ActionListTableProps> = props => {
     const translationImportRef = useRef<ImportTranslationRef>(null);
 
     const [selection, setSelection] = useState<TableSelection[]>([]);
+    const [actionIdForImport, setActionIdForImport] = useState<string>();
 
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
@@ -70,16 +71,16 @@ export const ActionListTable: React.FC<ActionListTableProps> = props => {
     );
 
     const handleTranslationUpload = useCallback(
-        async (key: string | undefined, lang: string, terms: Record<string, string>) => {
-            if (!key) return;
-            const total = await compositionRoot.actions.importTranslations(key, lang, terms);
+        async (lang: string, terms: Record<string, string>) => {
+            if (!actionIdForImport) return;
+            const total = await compositionRoot.actions.importTranslations(actionIdForImport, lang, terms);
             if (total > 0) {
                 snackbar.success(i18n.t("Imported {{total}} translation terms", { total }));
             } else {
                 snackbar.warning(i18n.t("Unable to import translation terms"));
             }
         },
-        [compositionRoot, snackbar]
+        [actionIdForImport, compositionRoot, snackbar]
     );
 
     const deleteActions = useCallback(
@@ -202,6 +203,13 @@ export const ActionListTable: React.FC<ActionListTableProps> = props => {
         },
         [loading, compositionRoot]
     );
+
+    const importTranslations = useCallback((ids: string[]) => {
+        const id = ids[0];
+        if (!id) return;
+        setActionIdForImport(id);
+        translationImportRef.current?.startImport();
+    }, []);
 
     const onTableChange = useCallback(({ selection }: TableState<ListItem>) => {
         setSelection(selection);
@@ -338,6 +346,13 @@ export const ActionListTable: React.FC<ActionListTableProps> = props => {
                 onClick: exportTranslations,
                 multiple: false,
             },
+            {
+                name: "import-translations",
+                text: i18n.t("Import JSON translations"),
+                icon: <Icon>translate</Icon>,
+                onClick: importTranslations,
+                multiple: false,
+            },
         ],
         [
             tableActions,
@@ -350,6 +365,7 @@ export const ActionListTable: React.FC<ActionListTableProps> = props => {
             addAction,
             exportAction,
             exportTranslations,
+            importTranslations,
         ]
     );
 
@@ -361,23 +377,15 @@ export const ActionListTable: React.FC<ActionListTableProps> = props => {
                 icon: <Icon>arrow_upward</Icon>,
                 onClick: openImportDialog,
             },
-            {
-                name: "import-translations",
-                text: i18n.t("Import JSON translations"),
-                icon: <Icon>translate</Icon>,
-                onClick: () => {
-                    translationImportRef.current?.startImport();
-                },
-            },
         ],
-        [openImportDialog, translationImportRef]
+        [openImportDialog]
     );
 
     return (
         <PageWrapper>
             {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
 
-            <ImportTranslationDialog type="action" ref={translationImportRef} onSave={handleTranslationUpload} />
+            <ImportTranslationDialog ref={translationImportRef} onSave={handleTranslationUpload} />
 
             <Dropzone ref={actionImportRef} accept={zipMimeType} onDrop={handleFileUpload}>
                 <ObjectsTable<ListItem>

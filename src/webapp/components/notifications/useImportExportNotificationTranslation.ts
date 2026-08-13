@@ -9,7 +9,7 @@ export function useImportExportNotificationTranslation(fetchNotifications: () =>
     const loading = useLoading();
 
     const handleTranslationUpload = useCallback(
-        async (_key: string | undefined, lang: string, terms: Record<string, string>) => {
+        async (lang: string, terms: Record<string, string>) => {
             const total = await compositionRoot.notification.importTranslations(lang, terms).toPromise();
             if (total > 0) {
                 snackbar.success(i18n.t("Imported translations for {{total}} notification/s", { total }));

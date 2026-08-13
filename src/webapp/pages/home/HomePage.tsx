@@ -38,7 +38,7 @@ export const HomePage: React.FC = React.memo(() => {
     const snackbar = useSnackbar();
     const [history, updateHistory] = useState<LandingNode[]>([]);
     const [pageType, setPageType] = useState<PageType>(
-        userLandings && userLandings?.length > 1 ? "userLandings" : "singleLanding"
+        initLandings && initLandings.length > 1 ? "userLandings" : "singleLanding"
     );
 
     const favicon = useRef<HTMLLinkElement>(document.head.querySelector('link[rel="shortcut icon"]'));

@@ -97,7 +97,7 @@ export const LandingPageListTable: React.FC<{ nodes: LandingNode[]; isLoading?: 
     );
 
     const handleTranslationUpload = useCallback(
-        async (_key: string | undefined, lang: string, terms: Record<string, string>) => {
+        async (lang: string, terms: Record<string, string>) => {
             const total = await compositionRoot.landings.importTranslations(lang, terms, landingPageId);
             if (total > 0) {
                 snackbar.success(i18n.t("Imported {{total}} translation terms", { total }));
@@ -396,7 +396,7 @@ export const LandingPageListTable: React.FC<{ nodes: LandingNode[]; isLoading?: 
                     onClose={closeSettings}
                 />
             )}
-            <ImportTranslationDialog type="landing-page" ref={translationImportRef} onSave={handleTranslationUpload} />
+            <ImportTranslationDialog ref={translationImportRef} onSave={handleTranslationUpload} />
 
             <Dropzone
                 ref={landingImportRef}

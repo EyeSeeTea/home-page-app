@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2026-02-05T16:47:42.188Z\n"
+"POT-Creation-Date: 2026-05-06T08:40:59.606Z\n"
 "PO-Revision-Date: 2025-06-06T19:59:41.289Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -246,10 +246,10 @@ msgstr ""
 msgid "Export JSON translations"
 msgstr ""
 
-msgid "Import actions"
+msgid "Import JSON translations"
 msgstr ""
 
-msgid "Import JSON translations"
+msgid "Import actions"
 msgstr ""
 
 msgid "App/Link"

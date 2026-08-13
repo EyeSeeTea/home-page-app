@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2026-02-05T16:47:42.188Z\n"
-"PO-Revision-Date: 2026-02-05T16:47:42.188Z\n"
+"POT-Creation-Date: 2026-05-06T08:40:59.606Z\n"
+"PO-Revision-Date: 2026-05-06T08:40:59.606Z\n"
 
 msgid "There are pending migrations"
 msgstr ""
@@ -245,10 +245,10 @@ msgstr ""
 msgid "Export JSON translations"
 msgstr ""
 
-msgid "Import actions"
+msgid "Import JSON translations"
 msgstr ""
 
-msgid "Import JSON translations"
+msgid "Import actions"
 msgstr ""
 
 msgid "App/Link"
